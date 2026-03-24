@@ -50,22 +50,22 @@ const RightNav = ({ setMode, setOpenSearchBar }) => {
 
   return (
     <Col className="nav-right pull-right right-header p-0">
-      <div className="header-btns d-none d-lg-flex">
+      {/* <div className="header-btns d-none d-lg-flex">
         <QuickLinks  isComponentVisible={isComponentVisible} setIsComponentVisible={setIsComponentVisible}/>
         {isOrderCreate && <Link href={"/order/create"} className="btn btn-animation">{t("Pos")}</Link>}
-      </div>
+      </div> */}
       <ul className="nav-menus" ref={ref}>
         <li>
           <span className="header-search" onClick={() => setOpenSearchBar(true)}>
             <RiSearchLine />
           </span>
         </li>
-        <li>
+        {/* <li>
           <a className="global-box" href={settingObj?.general?.site_url} target="_blank">
             <RiGlobalLine />
           </a>
-        </li>
-        <li>
+        </li> */}
+        {/* <li>
           <div className="full-screen-box">
           {isFullScreen?
             <RiFullscreenExitLine className="header-fullscreen" onClick={toggleFullScreen} />
@@ -73,14 +73,14 @@ const RightNav = ({ setMode, setOpenSearchBar }) => {
             <RiFullscreenFill className="header-fullscreen" onClick={toggleFullScreen} />
           }
           </div>
-        </li>
-        <Language isComponentVisible={isComponentVisible} setIsComponentVisible={setIsComponentVisible} />
-        <NotificationBox isComponentVisible={isComponentVisible} setIsComponentVisible={setIsComponentVisible} />
-        <li>
+        </li> */}
+        {/* <Language isComponentVisible={isComponentVisible} setIsComponentVisible={setIsComponentVisible} /> */}
+        {/* <NotificationBox isComponentVisible={isComponentVisible} setIsComponentVisible={setIsComponentVisible} /> */}
+        {/* <li>
           <div className="mode">
             <RiMoonLine className="ri-moon-line" onClick={() => setMode((prev) => !prev)} />
           </div>
-        </li>
+        </li> */}
         <ProfileNav isComponentVisible={isComponentVisible} setIsComponentVisible={setIsComponentVisible} />
       </ul>
     </Col>
