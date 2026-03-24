@@ -25,7 +25,7 @@ const VendorRegister = () => {
                     <Col xl={7}>
                         <div className="log-in-box">
                             <div className="log-in-title">
-                                <h3>{"Welcome To Fastkart"}</h3>
+                                <h3>{"Welcome To mStore"}</h3>
                                 <h4>{"Setup Your Store Information"}</h4>
                             </div>
                             <div className="input-box">

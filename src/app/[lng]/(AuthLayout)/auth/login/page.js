@@ -27,7 +27,7 @@ const Login = () => {
       <ShowBox showBoxMessage={showBoxMessage} />
       <LoginBoxWrapper>
         <div className="log-in-title">
-          <h3>{t("WelcomeToFastkart")}</h3>
+          <h3>{t("WelcomeTomStore")}</h3>
           <h4>{t("LogInYourAccount")}</h4>
         </div>
         <div className="input-box">

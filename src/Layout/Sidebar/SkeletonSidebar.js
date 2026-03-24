@@ -6,7 +6,7 @@ const SkeletonSidebar = ({ modifiedSidebar }) => {
     return (
         <div className="skeleton-loader">
             <div className="logo-wrapper logo-wrapper-center">
-                <h2 className="text-white">Fastkart.</h2>
+                <h2 className="text-white">mStore.</h2>
                 <div className="back-btn">
                     <FaAngleLeft />
                 </div>

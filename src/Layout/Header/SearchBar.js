@@ -52,7 +52,7 @@ const SearchBar = ({ openSearchBar, setOpenSearchBar }) => {
         </div>
         <div className="Typeahead Typeahead--twitterUsers">
           <div className="u-posRelative" ref={ref}>
-            <Input value={input} className="demo-input Typeahead-input form-control-plaintext w-100" type="text" placeholder={t("SearchFastkart") + ".."} name="search-bar" title="searchbar" onChange={handleChange} />
+            <Input value={input} className="demo-input Typeahead-input form-control-plaintext w-100" type="text" placeholder={t("SearchmStore") + ".."} name="search-bar" title="searchbar" onChange={handleChange} />
             <FiX className="close-search" onClick={() => setOpenSearchBar(false)} />
             <div className="spinner-border Typeahead-spinner" role="status">
               <span className="sr-only">{t("Loading")}...</span>
