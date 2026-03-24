@@ -10,7 +10,7 @@ export async function generateMetadata() {
     title: settingData?.values?.general?.site_title,
     description: settingData?.values?.general?.site_tagline,
     icons: {
-      icon: settingData?.values?.general?.favicon_image?.original_url,
+      icon: "/assets/images/logo/logo.png",
       link: {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Public+Sans&display=swap"
