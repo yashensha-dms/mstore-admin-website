@@ -20,22 +20,39 @@ const Layout = (props) => {
   const [ltr, setLtr] = useState(true);
   const router = useRouter();
   const path = usePathname();
-  let data1 = {};
-  const ISSERVER = typeof window === "undefined";
-  if (!ISSERVER) data1 = localStorage.getItem("account") && JSON.parse(localStorage.getItem("account"));
+  const [accountData, setAccountData] = useState(null);
   const [mounted, setMounted] = useState(false);
+  
   useEffect(() => {
     setMounted(true);
+    const storedAccount = localStorage.getItem("account");
+    if (storedAccount) {
+      try {
+        setAccountData(JSON.parse(storedAccount));
+      } catch (e) {
+        console.error("Error parsing account data", e);
+      }
+    }
   }, []);
+
   useEffect(() => {
     mode ? document.body.classList.add("dark-only") : document.body.classList.remove("dark-only");
-  }, [mode, ltr]);
+  }, [mode]);
+
   useEffect(() => {
-    const securePaths = mounted && ConvertPermissionArr(data1?.permissions);
-    if (mounted && !securePaths.find((item) => item?.name == replacePath(path?.split("/")[2]))) {
-      router.push("/403");
+    if (mounted && accountData && path.includes("/dashboard")) {
+      const securePaths = ConvertPermissionArr(accountData?.permissions);
+      const currentModule = replacePath(path?.split("/")[2]);
+      
+      // Only check permissions for non-core modules if needed
+      if (currentModule && !["dashboard", "403"].includes(currentModule)) {
+        const hasPermission = securePaths.find((item) => item?.name == currentModule);
+        if (!hasPermission) {
+          router.push(`/${props.lng}/403`);
+        }
+      }
     }
-  }, [data1]);
+  }, [mounted, accountData, path, props.lng]);
   return (
     <>
       <div className="page-wrapper compact-wrapper" id="pageWrapper">

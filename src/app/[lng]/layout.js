@@ -4,11 +4,14 @@ import TanstackWrapper from "@/Layout/TanstackWrapper"
 
 export async function generateMetadata() {
   // fetch data
-  const settingData = await fetch(`${process.env.API_PROD_URL}settings`).then((res) => res.json()).catch((err) => console.log("err", err))
+  const settingData = await fetch(`${process.env.API_PROD_URL}settings`, { next: { revalidate: 3600 } }).then((res) => res.json()).catch((err) => {
+    console.log("Metadata fetch error:", err);
+    return null;
+  })
   return {
-    metadataBase: new URL(process.env.API_PROD_URL),
-    title: settingData?.values?.general?.site_title,
-    description: settingData?.values?.general?.site_tagline,
+    metadataBase: new URL(process.env.API_PROD_URL || 'http://localhost:3000'),
+    title: settingData?.values?.general?.site_title || "Fastkart Admin",
+    description: settingData?.values?.general?.site_tagline || "Fastkart Admin Panel",
     icons: {
       icon: "/assets/images/logo/logo.png",
       link: {

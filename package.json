@@ -38,6 +38,7 @@
     "reactstrap": "^9.2.1",
     "remixicon": "^3.5.0",
     "sass": "^1.69.5",
+    "sharp": "^0.34.5",
     "slick-carousel": "^1.8.1",
     "yup": "^0.32.11"
   },

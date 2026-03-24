@@ -10,17 +10,10 @@ import SearchBar from "./SearchBar";
 
 const Header = ({ setMode, setLtr, settingData }) => {
   const { state, sidebarOpen, setSidebarOpen } = useContext(SettingContext);
-  const [mounted, setMounted] = useState(true);
   const [openSearchBar, setOpenSearchBar] = useState(false)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(false);
-    }, 700);
-    return () => clearTimeout(timer);
-  }, [])
   return (
     <div className={`page-header ${sidebarOpen ? "close_icon" : ""}`}>
-      <div className={`header-wrapper m-0 ${mounted ? 'skeleton-header' : ""}`}>
+      <div className={`header-wrapper m-0`}>
         <div className="header-logo-wrapper p-0">
           <div className="logo-wrapper">
             <Logo settingData={settingData} />
