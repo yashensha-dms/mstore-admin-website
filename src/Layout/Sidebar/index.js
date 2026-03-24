@@ -16,13 +16,6 @@ const Sidebar = () => {
   let storePermission = {};
   const ISSERVER = typeof window === "undefined";
   if (!ISSERVER) storePermission = localStorage.getItem("account") && JSON.parse(localStorage.getItem("account"));
-  const [mounted, setMounted] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(false);
-    }, 700);
-    return () => clearTimeout(timer);
-  }, []);
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
     if (storedRole) {
@@ -61,7 +54,7 @@ const Sidebar = () => {
   return (
     <div className={`sidebar-wrapper ${sidebarOpen ? "close_icon" : ""}`}>
       <div id="sidebarEffect" />
-      <div className={`${mounted ? 'skeleton-loader' : ""}`}>
+      <div>
         <LogoWrapper setSidebarOpen={setSidebarOpen} />
         <nav className="sidebar-main">
           <div id="sidebar-menu">

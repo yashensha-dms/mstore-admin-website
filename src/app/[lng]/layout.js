@@ -1,13 +1,20 @@
 import '../../../public/assets/scss/app.scss'
+import 'react-toastify/dist/ReactToastify.css'
+import { ToastContainer } from 'react-toastify'
 import I18NextProvider from "@/Helper/I18NextContext/I18NextProvider"
 import TanstackWrapper from "@/Layout/TanstackWrapper"
+import { cache } from 'react'
 
-export async function generateMetadata() {
-  // fetch data
-  const settingData = await fetch(`${process.env.API_PROD_URL}settings`, { next: { revalidate: 3600 } }).then((res) => res.json()).catch((err) => {
+const getSettings = cache(async () => {
+  return await fetch(`${process.env.API_PROD_URL}settings`, { next: { revalidate: 3600 } }).then((res) => res.json()).catch((err) => {
     console.log("Metadata fetch error:", err);
     return null;
   })
+})
+
+export async function generateMetadata() {
+  // fetch data
+  const settingData = await getSettings();
   return {
     metadataBase: new URL(process.env.API_PROD_URL || 'http://localhost:3000'),
     title: settingData?.values?.general?.site_title || "Fastkart Admin",
@@ -26,7 +33,11 @@ export default function RootLayout({ children, params: { lng } }) {
   return (
     <html lang={lng}>
       <body suppressHydrationWarning={true}>
-        <I18NextProvider><TanstackWrapper>{children}</TanstackWrapper></I18NextProvider></body>
+        <I18NextProvider>
+          <TanstackWrapper>{children}</TanstackWrapper>
+        </I18NextProvider>
+        <ToastContainer theme="colored" />
+      </body>
     </html>
   )
 }
