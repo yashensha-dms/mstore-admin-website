@@ -47,7 +47,7 @@ const ProductStockReportTable = () => {
             </Col >
             <Col xl={5} md={6}>
                 <ReviewCard />
-                <LatestBlogs />
+                {/* <LatestBlogs /> */}
             </Col>
         </Row >
     )
