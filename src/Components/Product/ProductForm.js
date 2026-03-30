@@ -20,7 +20,7 @@ const ProductForm = ({ mutate, loading, updateId, title }) => {
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
   const [activeTab, setActiveTab] = useState("1");
-  const { state } = useContext(SettingContext)
+  // const { state } = useContext(SettingContext) // not needed until multi-store is supported
   const { data: oldData, isLoading: oldDataLoading, refetch, status } = useQuery([updateId], () => request({ url: `${product}/${updateId}` }), { refetchOnWindowFocus: false, enabled: false, select: (data) => data.data });
   useEffect(() => {
     if (updateId) {
@@ -37,7 +37,7 @@ const ProductForm = ({ mutate, loading, updateId, title }) => {
       initialValues={{ ...watchEvent(oldData, updateId) }}
       validationSchema={YupObject({
         ...ProductValidationSchema,
-        store_id: state?.isMultiVendor && nameSchema
+        // store_id: state?.isMultiVendor && nameSchema // TODO: enable when multi-store is supported
       })}
       onSubmit={(values) => {
         if (updateId) {

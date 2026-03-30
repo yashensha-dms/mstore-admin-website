@@ -16,15 +16,11 @@ export async function generateMetadata() {
   // fetch data
   const settingData = await getSettings();
   return {
-    metadataBase: new URL(process.env.API_PROD_URL || 'http://localhost:3000'),
+    metadataBase: new URL('http://localhost:3000'),
     title: settingData?.values?.general?.site_title || "Fastkart Admin",
     description: settingData?.values?.general?.site_tagline || "Fastkart Admin Panel",
     icons: {
       icon: "/assets/images/logo/logo.png",
-      link: {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Public+Sans&display=swap"
-      },
     }
   }
 }
@@ -32,6 +28,15 @@ export async function generateMetadata() {
 export default function RootLayout({ children, params: { lng } }) {
   return (
     <html lang={lng}>
+      <head>
+        {/* Preconnect for faster Google Fonts resolution */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap"
+        />
+      </head>
       <body suppressHydrationWarning={true}>
         <I18NextProvider>
           <TanstackWrapper>{children}</TanstackWrapper>

@@ -15,6 +15,8 @@ const ReviewCard = () => {
     const { i18Lang } = useContext(I18NextContext);
     const { data: reviewData } = useQuery([ReviewAPI], () => request({ url: ReviewAPI, params: { paginate: 5 } }), {
         refetchOnWindowFocus: false, select: (data) => data?.data?.data,
+        staleTime: 2 * 60 * 1000,
+        cacheTime: 5 * 60 * 1000,
     });
     return (
         <DashboardWrapper classes={{ title: "LatestReviews", colProps: { sm: 12 }, headerRight: <Link href={`/${i18Lang}/review`} className='txt-primary'>View All</Link> }}>

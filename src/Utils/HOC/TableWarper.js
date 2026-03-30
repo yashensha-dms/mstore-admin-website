@@ -23,7 +23,7 @@ const TableWarper = (WrappedComponent) => {
       let ifParamsData = paramsProps ? Object.keys(paramsProps)[0] : '';
       const { data, isLoading, refetch, fetchStatus } = useQuery([url], () => request({
         url, method: 'get', params: { paginate, page, search, sort: sortBy?.sort, field: sortBy?.field, type: type, start_date: date[0]?.startDate ?? null, end_date: date[0]?.endDate ?? null, ...paramsProps }
-      }, router), { refetchOnWindowFocus: false, refetchOnMount: false, cacheTime: 0 });
+      }, router), { refetchOnWindowFocus: false, refetchOnMount: false, staleTime: 30 * 1000, cacheTime: 2 * 60 * 1000 });
 
       // To use this function in parent
       useImperativeHandle(ref, () => ({ call() { refetch(); } }));

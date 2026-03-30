@@ -16,7 +16,11 @@ import { useTranslation } from '@/app/i18n/client'
 const TopSellingProduct = ({ setFieldValue, values }) => {
     const { i18Lang } = useContext(I18NextContext);
     const { t } = useTranslation(i18Lang, "common");
-    const { data, refetch, isLoading } = useQuery([product, values['filter_by']], () => request({ url: product, params: { status: 1, top_selling: 1, filter_by: values['filter_by']?.value, paginate: 5 } }), { enabled: false, refetchOnWindowFocus: false, select: (data) => data.data.data });
+    const { data, refetch, isLoading } = useQuery([product, values['filter_by']], () => request({ url: product, params: { status: 1, top_selling: 1, filter_by: values['filter_by']?.value, paginate: 5 } }), {
+        enabled: false, refetchOnWindowFocus: false, select: (data) => data.data.data,
+        staleTime: 2 * 60 * 1000,
+        cacheTime: 5 * 60 * 1000,
+    });
     const onFilterChange = (name, value) => {
         setFieldValue("filter_by", value)
     }

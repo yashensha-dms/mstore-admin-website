@@ -11,6 +11,8 @@ import LatestBlogs from './LatestBlogs'
 const ProductStockReportTable = () => {
     const { data } = useQuery([Category], () => request({ url: Category, params: { status: 1, type: "product" } }), {
         refetchOnWindowFocus: false, select: (data) => data?.data?.data,
+        staleTime: 10 * 60 * 1000,
+        cacheTime: 15 * 60 * 1000,
     });
     return (
         <Row className="theme-form dashboard-form">

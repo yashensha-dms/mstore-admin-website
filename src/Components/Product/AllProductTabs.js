@@ -1,11 +1,17 @@
+import dynamic from 'next/dynamic'
+import Loader from '../CommonComponent/Loader'
 import { Col, TabContent, TabPane } from 'reactstrap'
-import GeneralTab from './GeneralTab'
-import InventoryTab from './InventoryTab'
-import SetupTab from './SetupTab'
-import ImagesTab from './ImagesTab'
-import SeoTab from './SeoTab'
-import ShippingTaxTab from './ShippingTaxTab'
-import OptionsTab from './OptionsTab'
+
+// loading must be a function component, not a JSX element
+const TabLoader = () => <Loader />
+
+const GeneralTab = dynamic(() => import('./GeneralTab'), { loading: TabLoader })
+const InventoryTab = dynamic(() => import('./InventoryTab'), { loading: TabLoader })
+const SetupTab = dynamic(() => import('./SetupTab'), { loading: TabLoader })
+const ImagesTab = dynamic(() => import('./ImagesTab'), { loading: TabLoader })
+const SeoTab = dynamic(() => import('./SeoTab'), { loading: TabLoader })
+const ShippingTaxTab = dynamic(() => import('./ShippingTaxTab'), { loading: TabLoader })
+const OptionsTab = dynamic(() => import('./OptionsTab'), { loading: TabLoader })
 
 const AllProductTabs = ({ values, setFieldValue, errors, updateId, activeTab }) => {
     return (

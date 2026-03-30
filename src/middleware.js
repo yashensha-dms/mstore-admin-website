@@ -55,11 +55,15 @@ export async function middleware(request) {
     }
   }
 
-  if (request.cookies.has("uat") && path.split("/dashboard")[2]) {
+  // Permission check: only for authenticated non-auth routes
+  // Strategy: always prefer the account cookie (set at login) — only call API as last resort
+  const needsPermissionCheck = request.cookies.has("uat") && !path.split("/")[2]?.startsWith("auth");
+
+  if (needsPermissionCheck) {
     const token = request.cookies.get("uat")?.value;
-    let data;
-    
-    // Check if we have account data in cookies first
+    let data = null;
+
+    // Step 1: Try cookie first — no network call needed
     if (request.cookies.has("account")) {
       try {
         data = JSON.parse(request.cookies.get("account")?.value || '{}');
@@ -68,26 +72,34 @@ export async function middleware(request) {
       }
     }
 
-    // If no account data, we might need to fetch it (but usually it should be in cookies)
+    // Step 2: Fallback — fetch from API only if cookie is missing/corrupt
     if (!data && token) {
-      let myHeaders = new Headers();
-      myHeaders.append("Authorization", `Bearer ${token}`);
-      const requestOptions = { method: "GET", headers: myHeaders, redirect: "follow" };
       try {
-        const response = await fetch(process.env.API_PROD_URL + selfData, requestOptions);
+        const myHeaders = new Headers();
+        myHeaders.append("Authorization", `Bearer ${token}`);
+        const response = await fetch(process.env.API_PROD_URL + selfData, {
+          method: "GET",
+          headers: myHeaders,
+          redirect: "follow",
+        });
         data = await response.json();
       } catch (e) {
         console.error("Middleware fetch error:", e);
       }
     }
 
-    if (data?.permission?.length) {
-      const securePaths = ConvertPermissionArr(data.permission);
+    // Step 3: Check permissions — try both 'permissions' and 'permission' keys (API may return either)
+    const permissionsArr = data?.permissions || data?.permission;
+    if (permissionsArr?.length) {
+      const securePaths = ConvertPermissionArr(permissionsArr);
       const currentModule = replacePath(path?.split("/")[2]);
-      const matchedPath = securePaths?.find((item) => item?.name == currentModule);
-      
-      if (!matchedPath || matchedPath.permissionsArr.length === 0) {
-        return NextResponse.redirect(new URL(`/${lng}/403`, request.url));
+      // Skip permission check for core always-accessible modules
+      const publicModules = ["dashboard", "403", "account", "notifications", "checkout"];
+      if (currentModule && !publicModules.includes(currentModule)) {
+        const matchedPath = securePaths?.find((item) => item?.name == currentModule);
+        if (!matchedPath || matchedPath.permissionsArr.length === 0) {
+          return NextResponse.redirect(new URL(`/${lng}/403`, request.url));
+        }
       }
     }
   }

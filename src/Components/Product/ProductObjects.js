@@ -63,7 +63,7 @@ export function ProductInitValues(oldData, updateId) {
     // Setup
     tags: updateId ? oldData?.tags?.map((item) => item.id) || [] : [],
     categories: updateId ? oldData?.categories?.map((item) => item.id) || [] : [],
-    is_random_related_products: updateId ? Boolean(Number(oldData?.is_random_related_products)) : true,
+    is_random_related_products: true, // always ON — random related products always enabled (field hidden from UI)
     related_products: updateId ? oldData?.related_products?.map((elem) => elem) || [] : [],
     cross_sell_products: updateId ? oldData?.cross_sell_products?.map((elem) => elem) || [] : [],
     // Images

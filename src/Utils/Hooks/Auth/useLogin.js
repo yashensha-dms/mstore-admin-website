@@ -13,10 +13,17 @@ export const LogInSchema = YupObject({
 
 const LoginHandle = (responseData, router, setShowBoxMessage, setCookie) => {
   if (responseData.status === 200) {
-    setCookie("uat", responseData.data?.access_token, { path: "/", expires: new Date(Date.now() + 24 * 60 * 6000) });
-    const ISSERVER = typeof window === "undefined";
+    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    setCookie("uat", responseData.data?.access_token, {
+      path: "/",
+      expires: tokenExpiry,
+    });
     if (typeof window !== "undefined") {
-      setCookie("account", JSON.stringify(responseData.data))
+      // Store account cookie with same expiry as token — middleware reads this to skip API call
+      setCookie("account", JSON.stringify(responseData.data), {
+        path: "/",
+        expires: tokenExpiry,
+      });
       localStorage.setItem("account", JSON.stringify(responseData.data));
     }
     router.push("/en/dashboard");

@@ -17,10 +17,11 @@ function CkEditorComponent({ onChange, editorLoaded, name, value }) {
     const [editor, setEditor] = useState(null);
 
     useEffect(() => {
-        import("@ckeditor/ckeditor5-react").then(({ CKEditor }) => {
-            import("@ckeditor/ckeditor5-build-classic").then(({ default: ClassicEditor }) => {
-                setEditor({ CKEditor, ClassicEditor });
-            });
+        Promise.all([
+            import("@ckeditor/ckeditor5-react"),
+            import("@ckeditor/ckeditor5-build-classic"),
+        ]).then(([{ CKEditor }, { default: ClassicEditor }]) => {
+            setEditor({ CKEditor, ClassicEditor });
         });
     }, []);
 

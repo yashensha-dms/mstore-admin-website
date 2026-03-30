@@ -12,7 +12,9 @@ const SettingProvider = (props) => {
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [state, dispatch] = useReducer(settingReducer, { setFavicon: "", setLogo: "", setResponsiveImage: "", setTitle: "", setTagline: "", isMultiVendor: false, setDelivery: {}, setCopyRight: "", setDarkLight: "", setDarkLogo: "", setLightLogo: "", setTinyLogo: "" })
     const { data, isLoading, refetch } = useQuery([updateSetting], () => request({ url: updateSetting }), {
-        enabled: false, refetchOnWindowFocus: false, select: (res) => res?.data
+        enabled: false, refetchOnWindowFocus: false, select: (res) => res?.data,
+        staleTime: 10 * 60 * 1000,  // 10 minutes — settings rarely change
+        cacheTime: 15 * 60 * 1000,  // 15 minutes in cache
     });
     useEffect(() => {
         refetch()

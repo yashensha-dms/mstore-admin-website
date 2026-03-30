@@ -12,7 +12,11 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 
 const DashboardChart = () => {
     const { convertCurrency } = useContext(SettingContext)
-    const { data, refetch, isLoading } = useQuery([DashboardChartAPI], () => request({ url: DashboardChartAPI }), { refetchOnWindowFocus: false, enabled: false, select: (data) => data?.data });
+    const { data, refetch, isLoading } = useQuery([DashboardChartAPI], () => request({ url: DashboardChartAPI }), {
+        refetchOnWindowFocus: false, enabled: false, select: (data) => data?.data,
+        staleTime: 5 * 60 * 1000,  // chart data — 5 minutes
+        cacheTime: 10 * 60 * 1000,
+    });
     useEffect(() => {
         refetch()
     }, [])

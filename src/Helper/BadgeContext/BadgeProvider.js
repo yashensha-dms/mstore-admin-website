@@ -12,7 +12,9 @@ const BadgeProvider = (props) => {
     const [state, dispatch] = useReducer(settingReducer, { badges: [], notification: "" })
     const [notification, setNotification] = useState("")
     const { data, isLoading, refetch } = useQuery([BadgeApi], () => request({ url: BadgeApi }), {
-        enabled: false, select: (res) => res?.data
+        enabled: false, select: (res) => res?.data,
+        staleTime: 3 * 60 * 1000,  // 3 minutes — badge counts slightly more time-sensitive
+        cacheTime: 10 * 60 * 1000,
     });
     useEffect(() => {
         cookies.uat && refetch()

@@ -12,6 +12,8 @@ import NoDataFound from "../../CommonComponent/NoDataFound";
 const LatestBlogs = () => {
     const { data, isLoading, refetch } = useQuery([blog], () => request({ url: blog, params: { status: 1, paginate: 2 } }), {
         refetchOnWindowFocus: false, enabled: false, select: (data) => data?.data?.data,
+        staleTime: 5 * 60 * 1000,
+        cacheTime: 10 * 60 * 1000,
     });
     useEffect(() => {
         refetch()
