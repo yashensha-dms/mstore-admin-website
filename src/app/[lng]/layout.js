@@ -17,8 +17,8 @@ export async function generateMetadata() {
   const settingData = await getSettings();
   return {
     metadataBase: new URL('http://localhost:3000'),
-    title: settingData?.values?.general?.site_title || "Fastkart Admin",
-    description: settingData?.values?.general?.site_tagline || "Fastkart Admin Panel",
+    title: settingData?.values?.general?.site_title || "mStore Admin",
+    description: settingData?.values?.general?.site_tagline || "mStore Admin Panel",
     icons: {
       icon: "/assets/images/logo/logo.png",
     }

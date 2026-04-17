@@ -78,9 +78,13 @@ export const attributeValues = Yup.array().of(
   })
 )
 
+export const hsnSchema = Yup.string().notRequired();
+export const barcodeSchema = Yup.string().notRequired();
+
 export const variationSchema = Yup.array().of(Yup.object().shape({
   name: nameSchema,
   price: nameSchema,
   sku: nameSchema,
   quantity: nameSchema,
+  barcode: barcodeSchema
 }))

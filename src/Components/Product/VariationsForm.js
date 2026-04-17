@@ -34,6 +34,7 @@ const VariationsForm = ({ values, setFieldValue, newId, index, elem, errors }) =
               { name: `variations[${index}][discount]`, title: "discount", type: "number", min: '0', max: '100', inputaddon: "true", placeholder: "Enter Discount", postprefix: "%" },
               { name: `variations[${index}][quantity]`, title: "Stock Quantity", type: "number", require: "true", errormsg: "Quantity", placeholder: "Enter Quantity", },
               { name: `variations[${index}][sku]`, title: "sku", require: "true", placeholder: "Enter SKU", errormsg: "SKU" },
+              { name: `variations[${index}][barcode]`, title: "barcode", placeholder: "Enter Barcode" },
             ]}
           />
           <SearchableSelectInput

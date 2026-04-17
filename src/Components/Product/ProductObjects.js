@@ -1,4 +1,4 @@
-import { descriptionSchema, discountSchema, dropDownScheme, ifTypeSimpleSchema, nameSchema, variationSchema, externalUrlSchema } from "../../Utils/Validation/ValidationSchemas";
+import { descriptionSchema, discountSchema, dropDownScheme, ifTypeSimpleSchema, nameSchema, variationSchema, externalUrlSchema, hsnSchema, barcodeSchema } from "../../Utils/Validation/ValidationSchemas";
 
 export const ProductValidationSchema = {
   name: nameSchema,
@@ -12,7 +12,9 @@ export const ProductValidationSchema = {
   discount: discountSchema, // if (type == simple)
   categories: dropDownScheme,
   tax_id: nameSchema,
-  variations: variationSchema
+  variations: variationSchema,
+  hsn_code: hsnSchema,
+  barcode: barcodeSchema,
 };
 
 export function ProductInitValues(oldData, updateId) {
@@ -93,6 +95,8 @@ export function ProductInitValues(oldData, updateId) {
     encourage_view: updateId ? Boolean(oldData?.encourage_view) : true,
     is_trending: updateId ? Boolean(oldData?.is_trending) : false,
     is_return: updateId ? Boolean(oldData?.is_return) : true,
-    status: updateId ? Boolean(oldData?.status) : true
+    status: updateId ? Boolean(oldData?.status) : true,
+    hsn_code: updateId ? oldData?.hsn_code || "" : "",
+    barcode: updateId ? oldData?.barcode || "" : ""
   };
 }

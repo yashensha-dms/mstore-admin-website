@@ -44,9 +44,11 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
               ]} 
             />
       }
-      <SimpleInputField nameList={[{ name: "unit", placeholder: t("EnterUnit(e.g10pieces)"), helpertext: "*Specify the measurement unit, such as 10 Pieces, 1 KG, 1 Ltr, etc." }, {
-        name: "weight", type: "number", placeholder: t("EnterweightGms(e.g100)"), helpertext: "*Specify the weight of this product in Gms."
-      }]} />
+      <SimpleInputField nameList={[
+        { name: "hsn_code", title: "HSNCode", placeholder: t("EnterHSNCode") },
+        { name: "unit", placeholder: t("EnterUnit(e.g10pieces)"), helpertext: "*Specify the measurement unit, such as 10 Pieces, 1 KG, 1 Ltr, etc." }, 
+        { name: "weight", type: "number", placeholder: t("EnterweightGms(e.g100)"), helpertext: "*Specify the weight of this product in Gms." }
+      ]} />
       {values["type"] === "simple" && <SearchableSelectInput
         nameList={[
           {
@@ -64,7 +66,14 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
           },
         ]}
       />}
-      {values["type"] === "simple" && <SimpleInputField nameList={[{ name: "sku", title: "SKU", require: "true", placeholder: t("EnterSKU") }, { name: "quantity", title: "StockQuantity", placeholder: t("EnterQuantity"), type: "number", require: "true" }, { name: "price", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, { name: "sale_price", title: "SalePrice", type: "number", inputaddon: "true", readOnly: 'true' }, { name: "discount", type: "number", inputaddon: "true", postprefix: "%", placeholder: t("EnterDiscount"), min: "0", max: "100" }]} />}
+      {values["type"] === "simple" && <SimpleInputField nameList={[
+        { name: "sku", title: "SKU", require: "true", placeholder: t("EnterSKU") }, 
+        { name: "barcode", title: "Barcode", placeholder: t("EnterBarcode") },
+        { name: "quantity", title: "StockQuantity", placeholder: t("EnterQuantity"), type: "number", require: "true" }, 
+        { name: "price", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, 
+        { name: "sale_price", title: "SalePrice", type: "number", inputaddon: "true", readOnly: 'true' }, 
+        { name: "discount", type: "number", inputaddon: "true", postprefix: "%", placeholder: t("EnterDiscount"), min: "0", max: "100" }
+      ]} />}
       <ProductDateRangePicker values={values} setFieldValue={setFieldValue} />
       {values["type"] === "classified" && <VariationsTab updateId={updateId} values={values} setFieldValue={setFieldValue} errors={errors} />}
     </>
