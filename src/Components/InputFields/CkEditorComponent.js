@@ -1,45 +1,37 @@
+import dynamic from 'next/dynamic';
+import React, { useContext, useState } from "react";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
-import React, { useContext, useEffect, useRef, useState } from "react";
+
+// Dynamic import for the heavy CKEditor components
+const CKEditor = dynamic(async () => {
+    const { CKEditor: Component } = await import("@ckeditor/ckeditor5-react");
+    return Component;
+}, { ssr: false });
+
+const ClassicEditor = dynamic(async () => {
+    const { default: Editor } = await import("@ckeditor/ckeditor5-build-classic");
+    return Editor;
+}, { ssr: false });
 
 function CkEditorComponent({ onChange, editorLoaded, name, value }) {
-    // const editorRef = useRef();
-    // const { CKEditor, ClassicEditor } = editorRef.current || {};
-
-    // useEffect(() => {
-    //     editorRef.current = {
-    //         CKEditor: require("@ckeditor/ckeditor5-react").CKEditor, // v3+
-    //         ClassicEditor: require("@ckeditor/ckeditor5-build-classic")
-    //     };
-    // }, []);
     const { i18Lang } = useContext(I18NextContext);
     const { t } = useTranslation(i18Lang, 'common');
-    const [editor, setEditor] = useState(null);
-
-    useEffect(() => {
-        Promise.all([
-            import("@ckeditor/ckeditor5-react"),
-            import("@ckeditor/ckeditor5-build-classic"),
-        ]).then(([{ CKEditor }, { default: ClassicEditor }]) => {
-            setEditor({ CKEditor, ClassicEditor });
-        });
-    }, []);
 
     return (
         <div>
-            {editorLoaded && editor ? (
-                <editor.CKEditor
-                    type=""
+            {editorLoaded ? (
+                <CKEditor
                     name={name}
-                    editor={editor.ClassicEditor}
-                    data={value}
+                    editor={ClassicEditor}
+                    data={value || ""}
                     onChange={(event, editor) => {
                         const data = editor.getData();
                         onChange(data);
                     }}
                 />
             ) : (
-                <div>{t("Editorloading")}</div>
+                <div className="ck-loading-placeholder">{t("Editorloading")}</div>
             )}
         </div>
     );

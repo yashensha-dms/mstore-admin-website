@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { RiArrowDownSFill, RiArrowUpSFill, RiLock2Line } from "react-icons/ri";
 import { Rating } from "react-simple-star-rating";
 import { Input, Table } from "reactstrap";
@@ -13,6 +13,60 @@ import Status from "./Status";
 import TableLoader from "./TableLoader";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
+
+const TableRow = React.memo(({ tableData, index, headerData, isCheck, handleChange, isHandelEdit, getSubKeysData, current_page, per_page, mutate, moduleName, type, refetch, keyInPermission, convertCurrency, edit, url, t }) => {
+  return (
+    <tr>
+      {headerData?.checkBox && (
+        <td className="sm-width">
+          <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.[index]?.system_reserve !== "1" && isCheck?.includes(tableData?.id)} disabled={headerData?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />
+        </td>
+      )}
+      {headerData.isSerialNo !== false && (
+        <td className="sm-width" onClick={(e) => isHandelEdit(e, tableData, headerData)}>
+          {index + 1 + (current_page - 1) * per_page}
+        </td>
+      )}
+      <>
+        {headerData?.column.map((item, i) => (
+          <td className={item.type == "image" ? "sm-width" : ""} key={i} onClick={(e) => item.type !== "switch" && isHandelEdit(e, tableData, headerData)}>
+            {item.type == "date" ? (
+              <>{dateFormate(tableData[item?.apiKey])}</>
+            ) : item.type == "image" ? (
+              <Avatar data={tableData[item?.apiKey]} placeHolder={item.placeHolderImage} name={tableData} />
+            ) : item.type == "price" ? (
+              <>{convertCurrency(tableData[item?.apiKey])}</>
+            ) : item.type == "rating" ? (
+              <Rating initialValue={tableData.rating} readonly={true} size={20} fillColor="#0da487" />
+            ) : item.type == "switch" ? (
+              <>{!edit || headerData?.data?.[index].system_reserve == "1" ? <Status data={tableData} url={url} disabled={true} /> : <Status data={tableData} url={item.url ? item.url : url} apiKey={item.url && item.apiKey} />}</>
+            ) : item.type == "stock_status" ? (
+              <>
+                <div className={`status-${tableData[item?.apiKey]}`}>
+                  <span>{tableData[item?.apiKey]?.toString().includes("_") ? tableData[item?.apiKey]?.replace(/_/g, " ") : " "}</span>
+                </div>
+              </>
+            ) : item?.subKey ? (
+              <>{getSubKeysData(tableData[item?.apiKey], item?.subKey)}</>
+            ) : (
+              <>{tableData[item?.apiKey]}</>
+            )}
+          </td>
+        ))}
+      </>
+      {headerData?.isOption && <td>{headerData?.data?.[index]?.system_reserve == "1" ? <RiLock2Line /> : <Options fullObj={tableData} mutate={mutate} moduleName={moduleName} type={type} optionPermission={headerData} refetch={refetch} keyInPermission={keyInPermission} />}</td>}
+    </tr>
+  );
+}, (prev, next) => {
+  // Only re-render if this specific row's data or check-status changes
+  return (
+    prev.tableData.id === next.tableData.id &&
+    prev.index === next.index &&
+    (prev.isCheck || []).includes(prev.tableData.id) === (next.isCheck || []).includes(next.tableData.id) &&
+    prev.headerData.data.length === next.headerData.data.length &&
+    JSON.stringify(prev.tableData) === JSON.stringify(next.tableData)
+  );
+});
 
 const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, sortBy, setSortBy, headerData, fetchStatus, moduleName, type, redirectLink, refetch, keyInPermission }) => {
   const { i18Lang } = useContext(I18NextContext);
@@ -100,46 +154,27 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
       <tbody>
         {headerData?.data.length > 0 ? (
           headerData?.data?.map((tableData, index) => (
-            <tr key={index}>
-              {headerData?.checkBox && (
-                <td className="sm-width">
-                  <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.[index]?.system_reserve !== "1" && isCheck?.includes(tableData?.id)} disabled={headerData?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />
-                </td>
-              )}
-              {headerData.isSerialNo !== false && (
-                <td className="sm-width" onClick={(e) => isHandelEdit(e, headerData, tableData)}>
-                  {index + 1 + (current_page - 1) * per_page}
-                </td>
-              )}
-              <>
-                {headerData?.column.map((item, i) => (
-                  <td className={item.type == "image" ? "sm-width" : ""} key={i} onClick={(e) => item.type !== "switch" && isHandelEdit(e, tableData, headerData)}>
-                    {item.type == "date" ? (
-                      <>{dateFormate(tableData[item?.apiKey])}</>
-                    ) : item.type == "image" ? (
-                      <Avatar data={tableData[item?.apiKey]} placeHolder={item.placeHolderImage} name={tableData} />
-                    ) : item.type == "price" ? (
-                      <>{convertCurrency(tableData[item?.apiKey])}</>
-                    ) : item.type == "rating" ? (
-                      <Rating initialValue={tableData.rating} readonly={true} size={20} fillColor="#0da487" />
-                    ) : item.type == "switch" ? (
-                      <>{!edit || headerData?.data?.[index].system_reserve == "1" ? <Status data={tableData} url={url} disabled={true} /> : <Status data={tableData} url={item.url ? item.url : url} apiKey={item.url && item.apiKey} />}</>
-                    ) : item.type == "stock_status" ? (
-                      <>
-                        <div className={`status-${tableData[item?.apiKey]}`}>
-                          <span>{tableData[item?.apiKey]?.toString().includes("_") ? tableData[item?.apiKey]?.replace(/_/g, " ") : " "}</span>
-                        </div>
-                      </>
-                    ) : item?.subKey ? (
-                      <>{getSubKeysData(tableData[item?.apiKey], item?.subKey)}</>
-                    ) : (
-                      <>{tableData[item?.apiKey]}</>
-                    )}
-                  </td>
-                ))}
-              </>
-              {headerData?.isOption && <td>{headerData?.data?.[index]?.system_reserve == "1" ? <RiLock2Line /> : <Options fullObj={tableData} mutate={mutate} moduleName={moduleName} type={type} optionPermission={headerData} refetch={refetch} keyInPermission={keyInPermission} />}</td>}
-            </tr>
+            <TableRow
+              key={tableData.id || index}
+              tableData={tableData}
+              index={index}
+              headerData={headerData}
+              isCheck={isCheck}
+              handleChange={handleChange}
+              isHandelEdit={isHandelEdit}
+              getSubKeysData={getSubKeysData}
+              current_page={current_page}
+              per_page={per_page}
+              mutate={mutate}
+              moduleName={moduleName}
+              type={type}
+              refetch={refetch}
+              keyInPermission={keyInPermission}
+              convertCurrency={convertCurrency}
+              edit={edit}
+              url={url}
+              t={t}
+            />
           ))
         ) : (
           <tr>

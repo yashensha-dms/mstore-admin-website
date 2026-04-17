@@ -1,7 +1,7 @@
 import React from "react";
 import InputField from "./InputField";
 
-const SimpleInputField = ({ nameList }) => {
+const SimpleInputField = React.memo(({ nameList }) => {
   return (
     <>
       {nameList.map(({ name, ...rest }, i) => (
@@ -9,6 +9,6 @@ const SimpleInputField = ({ nameList }) => {
       ))}
     </>
   );
-};
+});
 
 export default SimpleInputField;

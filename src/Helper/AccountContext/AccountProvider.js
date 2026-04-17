@@ -6,7 +6,7 @@ import request from '../../Utils/AxiosUtils';
 import { selfData } from '../../Utils/AxiosUtils/API';
 
 const AccountProvider = (props) => {
-    const [cookies] = useCookies(["uat"]);
+    const [cookies, setCookie] = useCookies(["uat"]);
     const [role, setRole] = useState('')
     const { data, refetch, isLoading } = useQuery([selfData, cookies.uat], () => request({ url: selfData }), {
         enabled: false, select: (res) => { return res?.data },
@@ -27,9 +27,15 @@ const AccountProvider = (props) => {
         if (data) {
             localStorage.setItem("role", JSON.stringify(data?.role))
             setRole(data?.role?.name)
+            // Sync with cookie for middleware optimization
+            const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+            setCookie("account", JSON.stringify(data), {
+                path: "/",
+                expires: tokenExpiry,
+            });
         }
         setAccountData(data)
-    }, [isLoading, cookies.uat])
+    }, [data, cookies.uat])
 
     return (
         <AccountContext.Provider value={{ ...props, accountData, setAccountData, accountContextData, setAccountContextData, role, setRole }}>

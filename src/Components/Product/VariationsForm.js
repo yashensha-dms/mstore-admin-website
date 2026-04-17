@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RiArrowDownSLine } from "react-icons/ri";
 import allPossibleCases from "../../Utils/CustomFunctions/AllPossibleCases";
 import CheckBoxField from "../InputFields/CheckBoxField";
@@ -6,13 +6,9 @@ import FileUploadField from "../InputFields/FileUploadField";
 import SearchableSelectInput from "../InputFields/SearchableSelectInput";
 import SimpleInputField from "../InputFields/SimpleInputField";
 
-const VariationsForm = ({ values, setFieldValue, newId, index, elem, errors }) => {
+const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, errors }) => {
   const [active, setActive] = useState(false);
-  useEffect(() => {
-    setFieldValue(`variations[${index}][attribute_values]`, allPossibleCases(
-      values["combination"]?.map((item) => item?.values?.map((elem) => elem)))[index]
-    )
-  }, [values["variation_options"]])
+  
   useEffect(() => {
     let priceValue, discountValue, salePriceValue
     priceValue = values[`variations`][index]?.price || 0.00;
@@ -20,6 +16,7 @@ const VariationsForm = ({ values, setFieldValue, newId, index, elem, errors }) =
     salePriceValue = priceValue - ((priceValue * discountValue) / 100);
     setFieldValue(`variations[${index}][sale_price]`, salePriceValue)
   }, [values[`variations`][index]?.price, values[`variations`][index]?.discount])
+  
   return (
     <div className="mt-3 shipping-accordion-custom" key={index}>
       <div className="p-3 rule-dropdown d-flex justify-content-between" onClick={() => setActive((prev) => prev !== elem.id && elem.id)}>{newId}<RiArrowDownSLine />
@@ -60,6 +57,14 @@ const VariationsForm = ({ values, setFieldValue, newId, index, elem, errors }) =
       )}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison to prevent re-renders when other parts of the form change
+  return (
+    prevProps.index === nextProps.index &&
+    prevProps.newId === nextProps.newId &&
+    JSON.stringify(prevProps.values?.variations?.[prevProps.index]) === JSON.stringify(nextProps.values?.variations?.[nextProps.index]) &&
+    prevProps.errors?.variations?.[prevProps.index] === nextProps.errors?.variations?.[nextProps.index]
+  );
+});
 
 export default VariationsForm;
