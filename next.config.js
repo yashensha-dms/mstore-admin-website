@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
-const withBundleAnalyzer = require('@next/bundle-analyzer')({ enabled: process.env.ANALYZE === 'true' });
 const nextConfig = {
+  basePath: "/admin",
   reactStrictMode: false,
   swcMinify: true,
   env: {
@@ -14,7 +14,6 @@ const nextConfig = {
       {
         source: "/",
         destination: "/en/dashboard",
-
         permanent: true,
       },
     ];
@@ -63,4 +62,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+module.exports = nextConfig;

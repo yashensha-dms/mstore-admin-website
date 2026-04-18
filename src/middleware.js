@@ -10,19 +10,27 @@ export async function middleware(request) {
   const lng = fallbackLng;
 
   if (path.split("/")[2] !== "auth" && !request.cookies.has("uat")) {
-    return NextResponse.redirect(new URL(`/${lng}/auth/login`, request.url));
+    const url = request.nextUrl.clone();
+    url.pathname = `/${lng}/auth/login`;
+    return NextResponse.redirect(url);
   }
 
   if (path.split("/")[2] == "auth" && request.cookies.has("uat")) {
-    return NextResponse.redirect(new URL(`/${lng}/dashboard`, request.url));
+    const url = request.nextUrl.clone();
+    url.pathname = `/${lng}/dashboard`;
+    return NextResponse.redirect(url);
   }
 
   if (path != `/${lng}/auth/login`) {
     if (path == `/${lng}/auth/otp-verification` && !request.cookies.has("ue")) {
-      return NextResponse.redirect(new URL(`/${lng}/auth/login`, request.url));
+      const url = request.nextUrl.clone();
+      url.pathname = `/${lng}/auth/login`;
+      return NextResponse.redirect(url);
     }
     if (path == `/${lng}/auth/update-password` && (!request.cookies.has("uo") || !request.cookies.has("ue"))) {
-      return NextResponse.redirect(new URL(`/${lng}/auth/login`, request.url));
+      const url = request.nextUrl.clone();
+      url.pathname = `/${lng}/auth/login`;
+      return NextResponse.redirect(url);
     }
   }
 
@@ -36,7 +44,9 @@ export async function middleware(request) {
     !languages.some(loc => request.nextUrl.pathname.startsWith(`/${loc}`)) &&
     !request.nextUrl.pathname.startsWith('/_next')
   ) {
-    return NextResponse.redirect(new URL(`/${lng}${request.nextUrl.pathname}`, request.url))
+    const url = request.nextUrl.clone();
+    url.pathname = `/${lng}${request.nextUrl.pathname}`;
+    return NextResponse.redirect(url);
   }
   // Permission check: only for authenticated non-auth routes
   // Strategy: always prefer the account cookie (set at login) — only call API as last resort
@@ -64,7 +74,9 @@ export async function middleware(request) {
       if (currentModule && !publicModules.includes(currentModule)) {
         const matchedPath = securePaths?.find((item) => item?.name == currentModule);
         if (!matchedPath || matchedPath.permissionsArr.length === 0) {
-          return NextResponse.redirect(new URL(`/${lng}/403`, request.url));
+          const url = request.nextUrl.clone();
+          url.pathname = `/${lng}/403`;
+          return NextResponse.redirect(url);
         }
       }
     }
