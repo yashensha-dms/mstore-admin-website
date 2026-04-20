@@ -19,6 +19,9 @@ export async function generateMetadata() {
     metadataBase: new URL('http://localhost:3000'),
     title: settingData?.values?.general?.site_title || "mStore Admin",
     description: settingData?.values?.general?.site_tagline || "mStore Admin Panel",
+    icons: {
+      icon: settingData?.values?.general?.favicon_image?.original_url,
+    },
   }
 }
 

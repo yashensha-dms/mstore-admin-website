@@ -43,7 +43,7 @@ export const settingReducer = (state, action) => {
     switch (action.type) {
         case "SETTINGIMAGE":
             return {
-                setFavicon: null,
+                setFavicon: action?.favicon?.original_url,
                 setLogo: action.logo?.original_url,
                 setTitle: action.title,
                 setTagline: action.tagline,

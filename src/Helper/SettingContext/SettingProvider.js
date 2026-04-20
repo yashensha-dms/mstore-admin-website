@@ -48,7 +48,7 @@ const SettingProvider = (props) => {
                 darkLogo: data?.values?.general?.dark_logo_image,
                 lightLogo: data?.values?.general?.light_logo_image,
                 tinyLogo: data?.values?.general?.tiny_logo_image,
-                // favicon: data?.values?.general?.favicon_image,
+                favicon: data?.values?.general?.favicon_image,
 
                 title: data?.values?.general?.site_title,
                 tagline: data?.values?.general?.site_tagline,
