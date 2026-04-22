@@ -46,7 +46,7 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
           },
         ]}
       />
-      <CheckBoxField name="is_external" title="is_external" />
+      {/* <CheckBoxField name="is_external" title="is_external" />
         {values['is_external'] && 
             <SimpleInputField 
               nameList={[
@@ -54,7 +54,7 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
                 { name:'external_button_text', placeholder:t("EnterExternalButtonText")}
               ]} 
             />
-      }
+      } */}
       <SimpleInputField nameList={[
         { name: "hsn_code", title: "HSNCode", placeholder: t("EnterHSNCode") },
         { name: "unit", placeholder: t("EnterUnit(e.g10pieces)"), helpertext: "*Specify the measurement unit, such as 10 Pieces, 1 KG, 1 Ltr, etc." }, 
