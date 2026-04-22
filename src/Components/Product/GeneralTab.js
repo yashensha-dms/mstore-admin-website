@@ -17,7 +17,7 @@ const GeneralTab = ({ values, setFieldValue }) => {
   return (
     <>
       <SimpleInputField nameList={[{ name: "name", require: "true", placeholder: t("EnterName") }, { name: "short_description", require: "true", title: "ShortDescription", type: "textarea", rows: 3, placeholder: t("EnterShortDescription"), helpertext: "*Maximum length should be 300 characters." }]} />
-      <DescriptionInput values={values} setFieldValue={setFieldValue} title={t('Description')} nameKey="description" errorMessage={"Descriptionisrequired"} />
+      <DescriptionInput values={values} setFieldValue={setFieldValue} title={t('Description')} nameKey="description" errorMessage={"Descriptionisrequired"} type="textarea" />
       {/* Store field — disabled for single-outlet mode. TODO: enable when multi-store is supported
       {state?.isMultiVendor && <SearchableSelectInput
         nameList={[

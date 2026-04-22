@@ -14,8 +14,22 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
     priceValue = values[`variations`][index]?.price || 0.00;
     discountValue = values[`variations`][index]?.discount || 0.00;
     salePriceValue = priceValue - ((priceValue * discountValue) / 100);
-    setFieldValue(`variations[${index}][sale_price]`, salePriceValue)
+    if (values[`variations`][index]?.sale_price !== salePriceValue) {
+      setFieldValue(`variations[${index}][sale_price]`, salePriceValue)
+    }
   }, [values[`variations`][index]?.price, values[`variations`][index]?.discount])
+
+  useEffect(() => {
+    let priceValue = values[`variations`][index]?.price || 0.00;
+    let salePriceValue = values[`variations`][index]?.sale_price || 0.00;
+    if (priceValue > 0 && salePriceValue >= 0) {
+      let discountValue = ((priceValue - salePriceValue) / priceValue) * 100;
+      if (Math.abs(values[`variations`][index]?.discount - discountValue) > 0.01) {
+        setFieldValue(`variations[${index}][discount]`, discountValue.toFixed(2))
+      }
+    }
+  }, [values[`variations`][index]?.sale_price])
+
   
   return (
     <div className="mt-3 shipping-accordion-custom" key={index}>
@@ -26,8 +40,9 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
           <SimpleInputField
             nameList={[
               { name: `variations[${index}][name]`, title: "name", placeholder: "Enter Name", require: "true", errormsg: "Name" },
-              { name: `variations[${index}][price]`, title: "price", type: "number", placeholder: "Enter Price", require: "true", inputaddon: "true", errormsg: "Price", min: "0" },
-              { name: `variations[${index}][sale_price]`, title: "Sale Price", type: "number", inputaddon: "true", placeholder: "0.00", readOnly: true },
+              { name: `variations[${index}][price]`, title: "MRP", type: "number", placeholder: "Enter Price", require: "true", inputaddon: "true", errormsg: "Price", min: "0" },
+              { name: `variations[${index}][cost]`, title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice"), require: "true" },
+              { name: `variations[${index}][sale_price]`, title: "SellingPrice", type: "number", inputaddon: "true", placeholder: "0.00" },
               { name: `variations[${index}][discount]`, title: "discount", type: "number", min: '0', max: '100', inputaddon: "true", placeholder: "Enter Discount", postprefix: "%" },
               { name: `variations[${index}][quantity]`, title: "Stock Quantity", type: "number", require: "true", errormsg: "Quantity", placeholder: "Enter Quantity", },
               { name: `variations[${index}][sku]`, title: "sku", require: "true", placeholder: "Enter SKU", errormsg: "SKU" },

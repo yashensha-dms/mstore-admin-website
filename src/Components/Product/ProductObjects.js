@@ -11,6 +11,7 @@ export const ProductValidationSchema = {
   price: ifTypeSimpleSchema, // if (type == simple)
   discount: discountSchema, // if (type == simple)
   categories: dropDownScheme,
+  cost: nameSchema,
   tax_id: nameSchema,
   variations: variationSchema,
   hsn_code: hsnSchema,
@@ -48,6 +49,7 @@ export function ProductInitValues(oldData, updateId) {
     sku: updateId ? oldData?.sku || "" : "",
     quantity: updateId ? oldData?.quantity || "" : "",
     price: updateId ? oldData?.price || "" : "",
+    cost: updateId ? oldData?.cost || "" : "",
     sale_price: updateId ? oldData?.sale_price || "" : "0.00",
     discount: updateId ? oldData?.discount || "" : "",
     is_sale_enable: updateId ? oldData?.is_sale_enable || false : false,

@@ -84,6 +84,7 @@ export const barcodeSchema = Yup.string().notRequired();
 export const variationSchema = Yup.array().of(Yup.object().shape({
   name: nameSchema,
   price: nameSchema,
+  cost: nameSchema,
   sku: nameSchema,
   quantity: nameSchema,
   barcode: barcodeSchema

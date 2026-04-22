@@ -11,12 +11,23 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
   // Set the value of sale price
+  // Set the value of sale price
   useEffect(() => {
     if (values['price'] || values['discount']) {
       let salePriceValue = values['price'] - ((values['price'] * values['discount']) / 100);
       setFieldValue("sale_price", salePriceValue)
     }
   }, [values['price'], values['discount']])
+
+  useEffect(() => {
+    if (values['price'] > 0 && values['sale_price'] >= 0) {
+      let discountValue = ((values['price'] - values['sale_price']) / values['price']) * 100;
+      if (Math.abs(values['discount'] - discountValue) > 0.01) {
+        setFieldValue("discount", discountValue.toFixed(2))
+      }
+    }
+  }, [values['sale_price']])
+
   return (
     <>
       <SearchableSelectInput
@@ -70,8 +81,9 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
         { name: "sku", title: "SKU", require: "true", placeholder: t("EnterSKU") }, 
         { name: "barcode", title: "Barcode", placeholder: t("EnterBarcode") },
         { name: "quantity", title: "StockQuantity", placeholder: t("EnterQuantity"), type: "number", require: "true" }, 
-        { name: "price", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, 
-        { name: "sale_price", title: "SalePrice", type: "number", inputaddon: "true", readOnly: 'true' }, 
+        { name: "price", title: "MRP", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, 
+        { name: "cost", title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice"), require: "true" },
+        { name: "sale_price", title: "SellingPrice", type: "number", inputaddon: "true" }, 
         { name: "discount", type: "number", inputaddon: "true", postprefix: "%", placeholder: t("EnterDiscount"), min: "0", max: "100" }
       ]} />}
       <ProductDateRangePicker values={values} setFieldValue={setFieldValue} />
