@@ -1,4 +1,5 @@
 import React, { useContext, useEffect } from "react";
+import { Field } from "formik";
 import SearchableSelectInput from "../InputFields/SearchableSelectInput";
 import SimpleInputField from "../InputFields/SimpleInputField";
 import VariationsTab from "./VariationsTab";
@@ -6,6 +7,7 @@ import ProductDateRangePicker from "./DateRangePicker";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 import CheckBoxField from "../InputFields/CheckBoxField";
+import { ReactstrapRadio } from "../ReactstrapFormik";
 
 const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
   const { i18Lang } = useContext(I18NextContext);
@@ -28,6 +30,16 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
     }
   }, [values['sale_price']])
 
+  useEffect(() => {
+     if(values['unit_weight_type'] === 'weight') {
+        setFieldValue('unit', '1');
+     } else {
+        if (values['unit'] === '1' && !updateId) {
+            setFieldValue('unit', '');
+        }
+     }
+  }, [values['unit_weight_type']]);
+
   return (
     <>
       <SearchableSelectInput
@@ -46,7 +58,7 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
           },
         ]}
       />
-      <CheckBoxField name="is_external" title="is_external" />
+      {/* <CheckBoxField name="is_external" title="is_external" />
         {values['is_external'] && 
             <SimpleInputField 
               nameList={[
@@ -54,12 +66,26 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
                 { name:'external_button_text', placeholder:t("EnterExternalButtonText")}
               ]} 
             />
-      }
+      } */}
       <SimpleInputField nameList={[
         { name: "hsn_code", title: "HSNCode", placeholder: t("EnterHSNCode") },
-        { name: "unit", placeholder: t("EnterUnit(e.g10pieces)"), helpertext: "*Specify the measurement unit, such as 10 Pieces, 1 KG, 1 Ltr, etc." }, 
-        { name: "weight", type: "number", placeholder: t("EnterweightGms(e.g100)"), helpertext: "*Specify the weight of this product in Gms." }
       ]} />
+      <div className="shipping-accordion-custom mb-3">
+        <label className="form-label">{t("UnitOrWeight")}</label>
+        <div className="d-flex gap-3 align-items-center">
+            <Field component={ReactstrapRadio} id="unit_type" name="unit_weight_type" value="unit" label={t("SoldByUnit")} />
+            <Field component={ReactstrapRadio} id="weight_type" name="unit_weight_type" value="weight" label={t("SoldByWeight")} />
+        </div>
+      </div>
+      {values['unit_weight_type'] === 'unit' ? (
+          <SimpleInputField nameList={[
+            { name: "unit", placeholder: t("EnterUnit(e.g10pieces)"), helpertext: "*Specify the measurement unit, such as 10 Pieces, 1 KG, 1 Ltr, etc." }, 
+          ]} />
+      ) : (
+          <SimpleInputField nameList={[
+            { name: "weight", type: "number", placeholder: t("EnterweightGms(e.g100)"), helpertext: "*Specify the weight of this product in Gms." }
+          ]} />
+      )}
       {values["type"] === "simple" && <SearchableSelectInput
         nameList={[
           {

@@ -44,6 +44,7 @@ export function ProductInitValues(oldData, updateId) {
     type: updateId ? oldData?.type || "" : "simple",
     unit: updateId ? oldData?.unit || "" : "",
     weight: updateId ? oldData?.weight || "" : "",
+    unit_weight_type: updateId ? (oldData?.weight > 0 ? "weight" : "unit") : "unit",
     stock_status: updateId ? oldData?.stock_status || "" : "in_stock",
     show_stock_quantity: updateId ? oldData?.show_stock_quantity == 1 ? true : false : false,
     sku: updateId ? oldData?.sku || "" : "",
