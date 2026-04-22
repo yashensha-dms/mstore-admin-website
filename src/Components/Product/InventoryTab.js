@@ -13,7 +13,7 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
   // Set the value of sale price
   // Set the value of sale price
   useEffect(() => {
-    if (values['price'] || values['discount']) {
+    if (values['price'] > 0) {
       let salePriceValue = values['price'] - ((values['price'] * values['discount']) / 100);
       setFieldValue("sale_price", salePriceValue)
     }
@@ -81,8 +81,8 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
         { name: "sku", title: "SKU", require: "true", placeholder: t("EnterSKU") }, 
         { name: "barcode", title: "Barcode", placeholder: t("EnterBarcode") },
         { name: "quantity", title: "StockQuantity", placeholder: t("EnterQuantity"), type: "number", require: "true" }, 
-        { name: "price", title: "MRP", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, 
         { name: "cost", title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice"), require: "true" },
+        { name: "price", title: "MRP", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, 
         { name: "sale_price", title: "SellingPrice", type: "number", inputaddon: "true" }, 
         { name: "discount", type: "number", inputaddon: "true", postprefix: "%", placeholder: t("EnterDiscount"), min: "0", max: "100" }
       ]} />}

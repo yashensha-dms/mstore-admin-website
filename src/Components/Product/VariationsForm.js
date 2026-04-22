@@ -1,21 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { RiArrowDownSLine } from "react-icons/ri";
 import allPossibleCases from "../../Utils/CustomFunctions/AllPossibleCases";
 import CheckBoxField from "../InputFields/CheckBoxField";
 import FileUploadField from "../InputFields/FileUploadField";
 import SearchableSelectInput from "../InputFields/SearchableSelectInput";
 import SimpleInputField from "../InputFields/SimpleInputField";
+import I18NextContext from "@/Helper/I18NextContext";
+import { useTranslation } from "@/app/i18n/client";
 
 const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, errors }) => {
   const [active, setActive] = useState(false);
+  const { i18Lang } = useContext(I18NextContext);
+  const { t } = useTranslation(i18Lang, 'common');
   
   useEffect(() => {
     let priceValue, discountValue, salePriceValue
-    priceValue = values[`variations`][index]?.price || 0.00;
-    discountValue = values[`variations`][index]?.discount || 0.00;
-    salePriceValue = priceValue - ((priceValue * discountValue) / 100);
-    if (values[`variations`][index]?.sale_price !== salePriceValue) {
-      setFieldValue(`variations[${index}][sale_price]`, salePriceValue)
+    priceValue = values[`variations`][index]?.price;
+    discountValue = values[`variations`][index]?.discount || 0;
+    if (priceValue > 0) {
+      salePriceValue = priceValue - ((priceValue * discountValue) / 100);
+      if (values[`variations`][index]?.sale_price !== salePriceValue) {
+        setFieldValue(`variations[${index}][sale_price]`, salePriceValue)
+      }
     }
   }, [values[`variations`][index]?.price, values[`variations`][index]?.discount])
 
@@ -40,8 +46,8 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
           <SimpleInputField
             nameList={[
               { name: `variations[${index}][name]`, title: "name", placeholder: "Enter Name", require: "true", errormsg: "Name" },
-              { name: `variations[${index}][price]`, title: "MRP", type: "number", placeholder: "Enter Price", require: "true", inputaddon: "true", errormsg: "Price", min: "0" },
               { name: `variations[${index}][cost]`, title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice"), require: "true" },
+              { name: `variations[${index}][price]`, title: "MRP", type: "number", placeholder: "Enter Price", require: "true", inputaddon: "true", errormsg: "Price", min: "0" },
               { name: `variations[${index}][sale_price]`, title: "SellingPrice", type: "number", inputaddon: "true", placeholder: "0.00" },
               { name: `variations[${index}][discount]`, title: "discount", type: "number", min: '0', max: '100', inputaddon: "true", placeholder: "Enter Discount", postprefix: "%" },
               { name: `variations[${index}][quantity]`, title: "Stock Quantity", type: "number", require: "true", errormsg: "Quantity", placeholder: "Enter Quantity", },

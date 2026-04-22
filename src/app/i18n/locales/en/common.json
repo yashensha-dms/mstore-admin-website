@@ -458,7 +458,7 @@
   "Stock": "Stock",
   "Price": "Price",
   "MRP": "MRP",
-  "PurchasePrice": "Purchase Price",
+  "PurchasePrice": "Cost",
   "SellingPrice": "Selling Price",
   "Delete": "Delete",
   "Add": "Add",
@@ -949,5 +949,6 @@
   "TotalOrders":"Total Orders",
   "TotalRevenue":"Total Revenue",
   "Symbolisarequired":"Symbol is required",
-  "QuicLinks":"Quick Links"
+  "QuicLinks":"Quick Links",
+  "EnterPurchasePrice": "Enter Cost"
 }

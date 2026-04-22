@@ -50,7 +50,7 @@ export function ProductInitValues(oldData, updateId) {
     quantity: updateId ? oldData?.quantity || "" : "",
     price: updateId ? oldData?.price || "" : "",
     cost: updateId ? oldData?.cost || "" : "",
-    sale_price: updateId ? oldData?.sale_price || "" : "0.00",
+    sale_price: updateId ? oldData?.sale_price || "" : "",
     discount: updateId ? oldData?.discount || "" : "",
     is_sale_enable: updateId ? oldData?.is_sale_enable || false : false,
     sale_starts_at: updateId ? oldData?.sale_starts_at || new Date() : new Date(),
