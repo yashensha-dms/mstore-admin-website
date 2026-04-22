@@ -14,7 +14,9 @@ const PlaceOrder = ({ values }) => {
     const router = useRouter()
     useEffect(() => {
         if (data?.data) {
+        if (data?.data?.order_number) {
             router.push(`/order/details/${data?.data?.order_number}`)
+        }
         }
     }, [isLoading])
     const handleClick = () => {

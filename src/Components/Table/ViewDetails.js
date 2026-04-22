@@ -42,7 +42,7 @@ const ViewDetails = ({ fullObj, tableData, refetch }) => {
     }
     const redirectLink = () => {
         const order_number = fullObj?.order_number?.props?.children?.[1];
-        router.push(`${tableData?.redirectUrl}/${order_number}`)
+        order_number && router.push(`${tableData?.redirectUrl}/${order_number}`)
     }
     return (
         <>

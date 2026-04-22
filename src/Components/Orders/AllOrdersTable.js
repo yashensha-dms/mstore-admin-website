@@ -39,7 +39,7 @@ const AllOrdersTable = ({ data, ...props }) => {
 
     const redirectLink = (data) => {
         const order_number = data?.order_number?.props?.children?.[1]
-        router.push(`/order/details/${order_number}`)
+        order_number && router.push(`/order/details/${order_number}`)
     }
     if (!data) return null;
     return (

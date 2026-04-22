@@ -39,7 +39,7 @@ const RecentOrders = ({ data, ...props }) => {
   headerObj.data = headerObj ? orders : [];
   const redirectLink = (data) => {
     const order_number = data?.order_number?.props?.children?.[1];
-    router.push(`/${i18Lang}/order/details/${order_number}`);
+    order_number && router.push(`/${i18Lang}/order/details/${order_number}`);
   };
   return <ShowTable {...props} headerData={headerObj} redirectLink={redirectLink} />;
 };
