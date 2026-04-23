@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import SearchableSelectInput from "../InputFields/SearchableSelectInput";
 import SimpleInputField from "../InputFields/SimpleInputField";
 import VariationsTab from "./VariationsTab";
@@ -10,20 +10,38 @@ import CheckBoxField from "../InputFields/CheckBoxField";
 const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
-  // Set the value of sale price
-  // Set the value of sale price
+  // Track which field the user last edited so the two effects don't loop into each other.
+  // 'price_discount' means Effect 1 should run; 'sale_price' means Effect 2 should run.
+  const lastChangedRef = useRef(null);
+
+  // Effect 1: user changed price or discount → recompute sale_price
   useEffect(() => {
-    if (values['price'] > 0) {
-      let salePriceValue = values['price'] - ((values['price'] * values['discount']) / 100);
-      setFieldValue("sale_price", salePriceValue)
+    if (lastChangedRef.current === 'sale_price') {
+      // sale_price effect just fired; don't override it
+      lastChangedRef.current = null;
+      return;
+    }
+    lastChangedRef.current = 'price_discount';
+    if (Number(values['price']) > 0) {
+      const salePriceValue = Number(values['price']) - ((Number(values['price']) * Number(values['discount'] || 0)) / 100);
+      setFieldValue("sale_price", parseFloat(salePriceValue.toFixed(2)));
     }
   }, [values['price'], values['discount']])
 
+  // Effect 2: user changed sale_price → recompute discount
   useEffect(() => {
-    if (values['price'] > 0 && values['sale_price'] >= 0) {
-      let discountValue = ((values['price'] - values['sale_price']) / values['price']) * 100;
-      if (Math.abs(values['discount'] - discountValue) > 0.01) {
-        setFieldValue("discount", discountValue.toFixed(2))
+    if (lastChangedRef.current === 'price_discount') {
+      // price/discount effect just fired; don't override it
+      lastChangedRef.current = null;
+      return;
+    }
+    lastChangedRef.current = 'sale_price';
+    const price = Number(values['price']);
+    const salePrice = Number(values['sale_price']);
+    if (price > 0 && salePrice >= 0) {
+      const discountValue = ((price - salePrice) / price) * 100;
+      if (Math.abs(Number(values['discount']) - discountValue) > 0.01) {
+        setFieldValue("discount", parseFloat(discountValue.toFixed(2)));
       }
     }
   }, [values['sale_price']])

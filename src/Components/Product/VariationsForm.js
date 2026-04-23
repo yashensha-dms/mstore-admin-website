@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { RiArrowDownSLine } from "react-icons/ri";
 import allPossibleCases from "../../Utils/CustomFunctions/AllPossibleCases";
 import CheckBoxField from "../InputFields/CheckBoxField";
@@ -13,25 +13,39 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
   
+  // Ref to track which field last changed, preventing circular updates
+  const lastChangedRef = useRef(null);
+
+  // Effect 1: price or discount changed → recompute sale_price
   useEffect(() => {
-    let priceValue, discountValue, salePriceValue
-    priceValue = values[`variations`][index]?.price;
-    discountValue = values[`variations`][index]?.discount || 0;
+    if (lastChangedRef.current === 'sale_price') {
+      lastChangedRef.current = null;
+      return;
+    }
+    lastChangedRef.current = 'price_discount';
+    const priceValue = Number(values[`variations`][index]?.price) || 0;
+    const discountValue = Number(values[`variations`][index]?.discount) || 0;
     if (priceValue > 0) {
-      salePriceValue = priceValue - ((priceValue * discountValue) / 100);
+      const salePriceValue = parseFloat((priceValue - ((priceValue * discountValue) / 100)).toFixed(2));
       if (values[`variations`][index]?.sale_price !== salePriceValue) {
-        setFieldValue(`variations[${index}][sale_price]`, salePriceValue)
+        setFieldValue(`variations[${index}][sale_price]`, salePriceValue);
       }
     }
   }, [values[`variations`][index]?.price, values[`variations`][index]?.discount])
 
+  // Effect 2: sale_price changed → recompute discount
   useEffect(() => {
-    let priceValue = values[`variations`][index]?.price || 0.00;
-    let salePriceValue = values[`variations`][index]?.sale_price || 0.00;
+    if (lastChangedRef.current === 'price_discount') {
+      lastChangedRef.current = null;
+      return;
+    }
+    lastChangedRef.current = 'sale_price';
+    const priceValue = Number(values[`variations`][index]?.price) || 0;
+    const salePriceValue = Number(values[`variations`][index]?.sale_price) || 0;
     if (priceValue > 0 && salePriceValue >= 0) {
-      let discountValue = ((priceValue - salePriceValue) / priceValue) * 100;
-      if (Math.abs(values[`variations`][index]?.discount - discountValue) > 0.01) {
-        setFieldValue(`variations[${index}][discount]`, discountValue.toFixed(2))
+      const discountValue = ((priceValue - salePriceValue) / priceValue) * 100;
+      if (Math.abs(Number(values[`variations`][index]?.discount) - discountValue) > 0.01) {
+        setFieldValue(`variations[${index}][discount]`, parseFloat(discountValue.toFixed(2)));
       }
     }
   }, [values[`variations`][index]?.sale_price])
