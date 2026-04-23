@@ -37,6 +37,12 @@ const ProductSubmitFunction = (mutate, value, updateId) => {
         value["combination"]?.map((item) => item?.values?.map((elem) => elem)))[ind]
     }
   })
+  // Cost: send null if empty, send actual number (including 0) otherwise
+  if (value['cost'] === '' || value['cost'] === null || value['cost'] === undefined) {
+    value['cost'] = null;
+  } else {
+    value['cost'] = parseFloat(value['cost']);
+  }
   mutate(value);
 };
 

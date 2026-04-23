@@ -1,18 +1,18 @@
-import { descriptionSchema, discountSchema, dropDownScheme, ifTypeSimpleSchema, nameSchema, variationSchema, externalUrlSchema, hsnSchema, barcodeSchema } from "../../Utils/Validation/ValidationSchemas";
+import { descriptionSchema, discountSchema, dropDownScheme, ifTypeSimpleSchema, nameSchema, variationSchema, externalUrlSchema, hsnSchema, barcodeSchema, optionalArraySchema } from "../../Utils/Validation/ValidationSchemas";
 
 export const ProductValidationSchema = {
   name: nameSchema,
-  short_description: nameSchema,
+  short_description: barcodeSchema,
   description: descriptionSchema,
-  stock_status: nameSchema,
+  stock_status: ifTypeSimpleSchema,   // only required for simple products
   external_url: externalUrlSchema,
   sku: ifTypeSimpleSchema,
   quantity: ifTypeSimpleSchema,
   price: ifTypeSimpleSchema, // if (type == simple)
   discount: discountSchema, // if (type == simple)
-  categories: dropDownScheme,
-  cost: ifTypeSimpleSchema,
-  tax_id: nameSchema,
+  categories: optionalArraySchema,    // optional array
+  // cost intentionally excluded — backend validates it, Yup should not touch it
+  tax_id: barcodeSchema,              // optional
   variations: variationSchema,
   hsn_code: hsnSchema,
   barcode: barcodeSchema,
@@ -42,16 +42,16 @@ export function ProductInitValues(oldData, updateId) {
     store_id: updateId ? Number(oldData?.store_id) || "" : "",
     // Inverntory  =>Type: Simple
     type: updateId ? oldData?.type || "" : "simple",
-    unit: updateId ? oldData?.unit || "" : "",
-    weight: updateId ? oldData?.weight || "" : "",
+    unit: updateId ? oldData?.unit || "" : "1",
+    weight: updateId ? (oldData?.weight ?? "") : "",
     stock_status: updateId ? oldData?.stock_status || "" : "in_stock",
     show_stock_quantity: updateId ? oldData?.show_stock_quantity == 1 ? true : false : false,
     sku: updateId ? oldData?.sku || "" : "",
-    quantity: updateId ? oldData?.quantity || "" : "",
-    price: updateId ? oldData?.price || "" : "",
-    cost: updateId ? oldData?.cost || "" : "",
-    sale_price: updateId ? oldData?.sale_price || "" : "",
-    discount: updateId ? oldData?.discount || "" : "",
+    quantity: updateId ? (oldData?.quantity ?? "") : "",
+    price: updateId ? (oldData?.price ?? "") : "",
+    cost: updateId ? (oldData?.cost != null ? String(oldData.cost) : "") : "",
+    sale_price: updateId ? (oldData?.sale_price ?? "") : "",
+    discount: updateId ? (oldData?.discount ?? "") : "",
     is_sale_enable: updateId ? oldData?.is_sale_enable || false : false,
     sale_starts_at: updateId ? oldData?.sale_starts_at || new Date() : new Date(),
     sale_expired_at: updateId ? oldData?.sale_expired_at || new Date() : new Date(),
@@ -62,7 +62,7 @@ export function ProductInitValues(oldData, updateId) {
     attributes_ids: updateId ? oldData?.attributes?.map((elem) => elem.id) : [],
     is_external: updateId &&  oldData?.external_url ? true : false,
     external_button_text: updateId ? oldData?.external_button_text : '',
-    external_url: updateId ? oldData?.external_url : '',
+    external_url: updateId ? oldData?.external_url || "" : "",
     variation_image_id: "",
     // Setup
     tags: updateId ? oldData?.tags?.map((item) => item.id) || [] : [],
@@ -84,9 +84,9 @@ export function ProductInitValues(oldData, updateId) {
     product_meta_image: updateId ? oldData?.product_meta_image || "" : "",
     // Shipping Tax
     is_free_shipping: updateId ? Boolean(Number(oldData?.is_free_shipping)) : "",
-    tax_id: updateId ? oldData?.tax_id : "",
-    estimated_delivery_text: updateId ? oldData?.estimated_delivery_text : "",
-    return_policy_text: updateId ? oldData?.return_policy_text : "",
+    tax_id: updateId ? oldData?.tax_id || "" : "",
+    estimated_delivery_text: updateId ? oldData?.estimated_delivery_text || "" : "",
+    return_policy_text: updateId ? oldData?.return_policy_text || "" : "",
 
     // Status
     is_featured: updateId ? Boolean(oldData?.is_featured) : false,

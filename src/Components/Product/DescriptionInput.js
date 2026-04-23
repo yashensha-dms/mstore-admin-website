@@ -40,7 +40,7 @@ const DescriptionInput = ({ values, setFieldValue, nameKey, errorMessage, title,
                             />
                         )}
                         {helpertext && <p className='help-text'>{helpertext}</p>}
-                        <ErrorMessage name={nameKey} render={(msg) => <div className='invalid-feedback d-block'>{t(errorMessage)}</div>} />
+                        <ErrorMessage name={nameKey} render={(msg) => <div className='invalid-feedback d-block'>{msg || t(errorMessage)}</div>} />
                     </Col>
                 </Row>
             </div>

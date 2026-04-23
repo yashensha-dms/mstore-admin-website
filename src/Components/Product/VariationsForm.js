@@ -60,10 +60,10 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
           <SimpleInputField
             nameList={[
               { name: `variations[${index}][name]`, title: "name", placeholder: "Enter Name", require: "true", errormsg: "Name" },
-              { name: `variations[${index}][cost]`, title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice"), require: "true" },
+              { name: `variations[${index}][cost]`, title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice") },
               { name: `variations[${index}][price]`, title: "MRP", type: "number", placeholder: "Enter Price", require: "true", inputaddon: "true", errormsg: "Price", min: "0" },
               { name: `variations[${index}][sale_price]`, title: "SellingPrice", type: "number", inputaddon: "true", placeholder: "0.00" },
-              { name: `variations[${index}][discount]`, title: "discount", type: "number", min: '0', max: '100', inputaddon: "true", placeholder: "Enter Discount", postprefix: "%" },
+              { name: `variations[${index}][discount]`, title: "discount", type: "number", min: '0', max: '100', step: "0.01", inputaddon: "true", placeholder: "Enter Discount", postprefix: "%" },
               { name: `variations[${index}][quantity]`, title: "Stock Quantity", type: "number", require: "true", errormsg: "Quantity", placeholder: "Enter Quantity", },
               { name: `variations[${index}][sku]`, title: "sku", require: "true", placeholder: "Enter SKU", errormsg: "SKU" },
               { name: `variations[${index}][barcode]`, title: "barcode", placeholder: "Enter Barcode" },

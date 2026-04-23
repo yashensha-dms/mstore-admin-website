@@ -20,7 +20,6 @@ const ShippingTaxTab = () => {
           {
             name: "tax_id",
             title: "Tax",
-            require: "true",
             inputprops: {
               name: "tax_id",
               id: "tax_id",

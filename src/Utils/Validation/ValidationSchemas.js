@@ -6,7 +6,7 @@ export const emailSchema = Yup.string().email("Enter Valid Email").required();
 export const passwordSchema = Yup.string().min(8, "Too Short!").max(20, "Too Long!").required();
 export const recaptchaSchema = Yup.string().required();
 export const nameSchema = Yup.string().required();
-export const descriptionSchema = Yup.string().required().min(10, "The description must be at least 10 characters.");
+export const descriptionSchema = Yup.string().notRequired();
 export const roleIdSchema = Yup.string().required();
 export const permissionsSchema = Yup.array().min(1).required();
 export const dropDownScheme = Yup.array().min(1).required();
@@ -21,9 +21,9 @@ export const visibleTimeSchema = Yup.date().when("stock_status", {
   then: Yup.date().required(),
 });
 
-export const externalUrlSchema = Yup.string().when("is_external",{
+export const externalUrlSchema = Yup.string().nullable().when("is_external",{
   is: (val) => val,
-  then: Yup.string().required(),
+  then: Yup.string().nullable().required(),
 })
 
 export const ifTypeSimpleSchema = Yup.string().when("type", {
@@ -56,7 +56,11 @@ export const ifShippingTypeIsFree = Yup.number().when("shipping_type", {
   then: Yup.number().positive().required(),
 });
 
-export const discountSchema = Yup.number().min(0).max(100);
+export const discountSchema = Yup.number()
+  .transform((value, originalValue) => (originalValue === '' || originalValue == null) ? null : value)
+  .nullable()
+  .min(0, 'Discount must be between 0 and 100')
+  .max(100, 'Discount must be between 0 and 100');
 export const requiredSchema = Yup.mixed().required();
 export const StatusSchema = Yup.boolean().required();
 
@@ -78,13 +82,14 @@ export const attributeValues = Yup.array().of(
   })
 )
 
-export const hsnSchema = Yup.string().notRequired();
-export const barcodeSchema = Yup.string().notRequired();
+export const hsnSchema = Yup.string().nullable().notRequired();
+export const barcodeSchema = Yup.string().nullable().notRequired();
+export const optionalArraySchema = Yup.array().notRequired();
 
 export const variationSchema = Yup.array().of(Yup.object().shape({
   name: nameSchema,
   price: nameSchema,
-  cost: nameSchema,
+  // cost excluded: optional field, API returns it as float which Yup.string() rejects
   sku: nameSchema,
   quantity: nameSchema,
   barcode: barcodeSchema

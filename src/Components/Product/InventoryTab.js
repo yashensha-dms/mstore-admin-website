@@ -46,6 +46,20 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
     }
   }, [values['sale_price']])
 
+  // Effect 3: barcode changes → prefill SKU if user hasn't manually edited it.
+  // We track the last barcode value we copied into SKU. If SKU still matches that,
+  // the user hasn't overridden it, so we keep syncing. Otherwise leave SKU alone.
+  const lastSyncedBarcodeRef = useRef(null);
+  useEffect(() => {
+    const barcode = values['barcode'] || '';
+    const currentSku = values['sku'] || '';
+    // Sync if SKU is empty, or if SKU still equals the last barcode we copied in
+    if (currentSku === '' || currentSku === lastSyncedBarcodeRef.current) {
+      setFieldValue('sku', barcode);
+      lastSyncedBarcodeRef.current = barcode;
+    }
+  }, [values['barcode']])
+
   return (
     <>
       <SearchableSelectInput
@@ -96,13 +110,13 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
         ]}
       />}
       {values["type"] === "simple" && <SimpleInputField nameList={[
-        { name: "sku", title: "SKU", require: "true", placeholder: t("EnterSKU") }, 
         { name: "barcode", title: "Barcode", placeholder: t("EnterBarcode") },
+        { name: "sku", title: "SKU", require: "true", placeholder: t("EnterSKU") }, 
         { name: "quantity", title: "StockQuantity", placeholder: t("EnterQuantity"), type: "number", require: "true" }, 
-        { name: "cost", title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice"), require: "true" },
+        { name: "cost", title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice") },
         { name: "price", title: "MRP", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, 
         { name: "sale_price", title: "SellingPrice", type: "number", inputaddon: "true" }, 
-        { name: "discount", type: "number", inputaddon: "true", postprefix: "%", placeholder: t("EnterDiscount"), min: "0", max: "100" }
+        { name: "discount", type: "number", inputaddon: "true", postprefix: "%", placeholder: t("EnterDiscount"), min: "0", max: "100", step: "0.01" }
       ]} />}
       <ProductDateRangePicker values={values} setFieldValue={setFieldValue} />
       {values["type"] === "classified" && <VariationsTab updateId={updateId} values={values} setFieldValue={setFieldValue} errors={errors} />}

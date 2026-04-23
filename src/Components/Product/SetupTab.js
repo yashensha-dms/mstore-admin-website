@@ -58,7 +58,7 @@ const SetupTab = ({ values, setFieldValue, errors, updateId }) => {
     <>
       <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="tags" data={tagData} />
 
-      <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="categories" require="true" data={categoryData} />
+      <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="categories" data={categoryData} />
 
       {/* RandomRelatedProduct — disabled: always ON by default (forced in ProductObjects.js)
       <CheckBoxField name="is_random_related_products" title="RandomRelatedProduct" helpertext="*Enabling this option allows the backend to randomly select 6 products for display." />
