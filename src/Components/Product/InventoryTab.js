@@ -10,41 +10,19 @@ import CheckBoxField from "../InputFields/CheckBoxField";
 const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
-  // Track which field the user last edited so the two effects don't loop into each other.
-  // 'price_discount' means Effect 1 should run; 'sale_price' means Effect 2 should run.
-  const lastChangedRef = useRef(null);
-
-  // Effect 1: user changed price or discount → recompute sale_price
+  /* 
+  // Effect: user changed price (MRP) or sale_price (Selling Price) → recompute discount percentage
   useEffect(() => {
-    if (lastChangedRef.current === 'sale_price') {
-      // sale_price effect just fired; don't override it
-      lastChangedRef.current = null;
-      return;
-    }
-    lastChangedRef.current = 'price_discount';
-    if (Number(values['price']) > 0) {
-      const salePriceValue = Number(values['price']) - ((Number(values['price']) * Number(values['discount'] || 0)) / 100);
-      setFieldValue("sale_price", parseFloat(salePriceValue.toFixed(2)));
-    }
-  }, [values['price'], values['discount']])
-
-  // Effect 2: user changed sale_price → recompute discount
-  useEffect(() => {
-    if (lastChangedRef.current === 'price_discount') {
-      // price/discount effect just fired; don't override it
-      lastChangedRef.current = null;
-      return;
-    }
-    lastChangedRef.current = 'sale_price';
-    const price = Number(values['price']);
-    const salePrice = Number(values['sale_price']);
+    const price = Number(values['price']) || 0;
+    const salePrice = Number(values['sale_price']) || 0;
     if (price > 0 && salePrice >= 0) {
       const discountValue = ((price - salePrice) / price) * 100;
       if (Math.abs(Number(values['discount']) - discountValue) > 0.01) {
         setFieldValue("discount", parseFloat(discountValue.toFixed(2)));
       }
     }
-  }, [values['sale_price']])
+  }, [values['price'], values['sale_price']])
+  */
 
   // Effect 3: barcode changes → prefill SKU if user hasn't manually edited it.
   // We track the last barcode value we copied into SKU. If SKU still matches that,
@@ -116,7 +94,8 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
         { name: "cost", title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice") },
         { name: "price", title: "MRP", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, 
         { name: "sale_price", title: "SellingPrice", type: "number", inputaddon: "true" }, 
-        { name: "discount", type: "number", inputaddon: "true", postprefix: "%", placeholder: t("EnterDiscount"), min: "0", max: "100", step: "0.01" }
+        // { name: "discount", type: "number", inputaddon: "true", postprefix: "%", placeholder: t("EnterDiscount"), min: "0", max: "100", step: "0.01" }
+
       ]} />}
       <ProductDateRangePicker values={values} setFieldValue={setFieldValue} />
       {values["type"] === "classified" && <VariationsTab updateId={updateId} values={values} setFieldValue={setFieldValue} errors={errors} />}

@@ -13,33 +13,9 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
   
-  // Ref to track which field last changed, preventing circular updates
-  const lastChangedRef = useRef(null);
-
-  // Effect 1: price or discount changed → recompute sale_price
+  /* 
+  // Effect: variation price (MRP) or sale_price (Selling Price) changed → recompute discount percentage
   useEffect(() => {
-    if (lastChangedRef.current === 'sale_price') {
-      lastChangedRef.current = null;
-      return;
-    }
-    lastChangedRef.current = 'price_discount';
-    const priceValue = Number(values[`variations`][index]?.price) || 0;
-    const discountValue = Number(values[`variations`][index]?.discount) || 0;
-    if (priceValue > 0) {
-      const salePriceValue = parseFloat((priceValue - ((priceValue * discountValue) / 100)).toFixed(2));
-      if (values[`variations`][index]?.sale_price !== salePriceValue) {
-        setFieldValue(`variations[${index}][sale_price]`, salePriceValue);
-      }
-    }
-  }, [values[`variations`][index]?.price, values[`variations`][index]?.discount])
-
-  // Effect 2: sale_price changed → recompute discount
-  useEffect(() => {
-    if (lastChangedRef.current === 'price_discount') {
-      lastChangedRef.current = null;
-      return;
-    }
-    lastChangedRef.current = 'sale_price';
     const priceValue = Number(values[`variations`][index]?.price) || 0;
     const salePriceValue = Number(values[`variations`][index]?.sale_price) || 0;
     if (priceValue > 0 && salePriceValue >= 0) {
@@ -48,7 +24,8 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
         setFieldValue(`variations[${index}][discount]`, parseFloat(discountValue.toFixed(2)));
       }
     }
-  }, [values[`variations`][index]?.sale_price])
+  }, [values[`variations`][index]?.price, values[`variations`][index]?.sale_price])
+  */
 
   
   return (
@@ -63,7 +40,7 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
               { name: `variations[${index}][cost]`, title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice") },
               { name: `variations[${index}][price]`, title: "MRP", type: "number", placeholder: "Enter Price", require: "true", inputaddon: "true", errormsg: "Price", min: "0" },
               { name: `variations[${index}][sale_price]`, title: "SellingPrice", type: "number", inputaddon: "true", placeholder: "0.00" },
-              { name: `variations[${index}][discount]`, title: "discount", type: "number", min: '0', max: '100', step: "0.01", inputaddon: "true", placeholder: "Enter Discount", postprefix: "%" },
+              // { name: `variations[${index}][discount]`, title: "discount", type: "number", min: '0', max: '100', step: "0.01", inputaddon: "true", placeholder: "Enter Discount", postprefix: "%" },
               { name: `variations[${index}][quantity]`, title: "Stock Quantity", type: "number", require: "true", errormsg: "Quantity", placeholder: "Enter Quantity", },
               { name: `variations[${index}][sku]`, title: "sku", require: "true", placeholder: "Enter SKU", errormsg: "SKU" },
               { name: `variations[${index}][barcode]`, title: "barcode", placeholder: "Enter Barcode" },
