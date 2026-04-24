@@ -4,9 +4,6 @@ const ProductSubmitFunction = (mutate, value, updateId) => {
   if (value["type"] == "classified") {
     delete value["stock_status"]
     delete value["quantity"]
-    delete value["price"]
-    delete value["sale_price"]
-    delete value["discount"]
     delete value["sku"]
   }
   if (value["is_random_related_products"]) {
