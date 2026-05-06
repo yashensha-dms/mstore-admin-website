@@ -36,14 +36,13 @@ const CheckoutSidebar = ({ values, setFieldValue, data, loading, mutate, userDat
     // Submitting data on Checkout
     useEffect(() => {
         if (values['billing_address_id'] && values['shipping_address_id'] && values['delivery_description'] && values['payment_method']) {
-            values["variation_id"] = ""
             delete values['total'];
             mutate(values)
             if (loading) {
                 setStoreCoupon('')
             }
         }
-    }, [values['billing_address_id'], values['shipping_address_id'], values['payment_method'], values['delivery_description'], values['points_amount'], values['wallet_balance']])
+    }, [values['billing_address_id'], values['shipping_address_id'], values['payment_method'], values['delivery_description'], values['points_amount'], values['wallet_balance'], values['products']])
     return (
         <Col xxl="4">
             <Card className="pos-detail-card">
