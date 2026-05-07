@@ -22,7 +22,8 @@ const AllOrdersTable = ({ data, ...props }) => {
             { title: "CustomerName", apiKey: "consumer", subKey: ["name"] },
             { title: "TotalAmount", apiKey: "total", type: 'price' },
             { title: "PaymentStatus", apiKey: "payment_status" },
-            { title: "PaymentMode", apiKey: "payment_method" }
+            { title: "PaymentMode", apiKey: "payment_method" },
+            { title: "OrderStatus", apiKey: "order_status_name" },
         ],
         data: data || []
     };
@@ -32,6 +33,7 @@ const AllOrdersTable = ({ data, ...props }) => {
             element.payment_status = element.payment_status ? <div className={`status-${element?.payment_status?.toString()?.toLowerCase() || ''}`}><span>{element?.payment_status}</span></div> : '-';
             element.payment_mode = element.payment_method ? <div className="payment-mode"><span>{element?.payment_method}</span></div> : '-';
             element.consumer_name = <span className="text-capitalize">{element?.consumer?.name}</span>;
+            element.order_status_name = element?.order_status ? <div className={`status-${element?.order_status?.slug?.toString()?.toLowerCase() || ''}`}><span>{element?.order_status?.name}</span></div> : '-';
             return element;
         });
     }, [headerObj?.data]);

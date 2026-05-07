@@ -32,7 +32,7 @@ const OrderDetailsContain = ({ updateId }) => {
         if (data) {
             setOrderStatus(data?.order_status)
         }
-    }, [isLoading])
+    }, [data])
 
     useEffect(() => {
         refetch()
@@ -48,7 +48,7 @@ const OrderDetailsContain = ({ updateId }) => {
                     </div>
                 </div>}
                 <Col sm="12">
-                    <OrderNumberTable moduleName={`${t('OrderNumber')}: #${data?.order_number}`} data={data} orderStatusData={orderStatusData} setOrderStatus={setOrderStatus} orderStatus={orderStatus} mutate={mutate} orderStatusUpdate={orderStatusUpdate} edit={edit} />
+                    <OrderNumberTable moduleName={`${t('OrderNumber')}: #${data?.order_number}`} data={data} orderStatusData={orderStatusData} setOrderStatus={setOrderStatus} orderStatus={orderStatus} mutate={mutate} orderStatusUpdate={orderStatusUpdate} edit={edit} refetch={refetch} />
                 </Col>
                 {data?.sub_orders?.length > 0 &&
                     <Col sm="12">

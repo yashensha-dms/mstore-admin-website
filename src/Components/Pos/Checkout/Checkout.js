@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AddtoCartAPI, user } from "../../../Utils/AxiosUtils/API";
 import request from "../../../Utils/AxiosUtils";
 import Loader from "../../CommonComponent/Loader";
+import SettingContext from "@/Helper/SettingContext";
 
 const Checkout = ({ loading, mutate, data }) => {
   const [search, setSearch] = useState(false);
@@ -17,7 +18,7 @@ const Checkout = ({ loading, mutate, data }) => {
   const [tc, setTc] = useState(null);
   // Initial Value for checkout
   const [initValues, setInitValues] = useState(
-    { products: [], consumer_id: "", billing_address_id: "", shipping_address_id: "", shipping_total: 0, total: 0, coupon: "", wallet_balance: false, points_amount: false, delivery_description: "", delivery_interval: "", isTimeSlot: false, payment_method: "", isPoint: "", isWallet: "" });
+    { products: [], consumer_id: "", billing_address_id: "", shipping_address_id: "", shipping_total: 0, total: 0, coupon: "", wallet_balance: false, points_amount: false, delivery_description: "", delivery_interval: "", isTimeSlot: true, payment_method: "cod", isPoint: "", isWallet: "" });
   // Calling Add to Cart API
   const { data: addToCartData, isLoading: addToCartLoader, refetch } = useQuery([AddtoCartAPI], () => request({ url: AddtoCartAPI }), { refetchOnWindowFocus: false, cacheTime: 0, select: (res) => res?.data });
   // Getting Users data
@@ -56,7 +57,9 @@ const Checkout = ({ loading, mutate, data }) => {
       initialValues={initValues}
     >
       {({ values, setFieldValue }) => (
-        <Form>
+        <>
+          <SyncDefaults setFieldValue={setFieldValue} values={values} />
+          <Form>
           <div className="pb-4 checkout-section-2">
             <Row className="g-sm-4 g-3">
               <Col xxl="8">
@@ -75,11 +78,25 @@ const Checkout = ({ loading, mutate, data }) => {
               <CheckoutSidebar values={values} setFieldValue={setFieldValue} data={data} loading={loading} mutate={mutate} userData={userData} />
             </Row>
           </div>
-        </Form>
+          </Form>
+        </>
       )
       }
     </Formik >
   );
 };
+
+const SyncDefaults = ({ setFieldValue, values }) => {
+  const { state } = React.useContext(SettingContext);
+  useEffect(() => {
+    if (state?.setDelivery?.same_day && !values['delivery_description']) {
+      setFieldValue("delivery_description", `${state?.setDelivery?.same_day?.title} | ${state?.setDelivery?.same_day?.description}`);
+    }
+    if (!values['payment_method']) {
+        setFieldValue('payment_method', 'cod');
+    }
+  }, [state?.setDelivery, values['payment_method']]);
+  return null;
+}
 
 export default Checkout;

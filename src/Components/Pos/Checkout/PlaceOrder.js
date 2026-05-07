@@ -20,13 +20,24 @@ const PlaceOrder = ({ values }) => {
         }
     }, [isLoading])
     const handleClick = () => {
+        // Fallback defaults if they were missed by the sync
+        if (!values['payment_method']) values['payment_method'] = 'cod';
+        if (!values['delivery_description']) values['delivery_description'] = 'Express Delivery';
+        if (!values['billing_address_id'] && values['shipping_address_id']) values['billing_address_id'] = values['shipping_address_id'];
+        if (!values['shipping_address_id'] && values['billing_address_id']) values['shipping_address_id'] = values['billing_address_id'];
+
         delete values['isPoint']
         delete values['isTimeSlot']
         delete values['isWallet']
         mutate(values)
     }
     return (
-        <Btn className="btn btn-theme payment-btn mt-4" loading={Number(isLoading)} onClick={handleClick} disabled={values['consumer_id'] && values['billing_address_id'] && values['shipping_address_id'] && values['payment_method'] && values['delivery_description'] ? false : true}>
+        <Btn 
+            className="btn btn-theme payment-btn mt-4" 
+            loading={Number(isLoading)} 
+            onClick={handleClick} 
+            disabled={values['consumer_id'] ? false : true}
+        >
             {t("PlaceOrder")}
         </Btn>
     )

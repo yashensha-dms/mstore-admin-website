@@ -12,7 +12,7 @@ import ShowAddress from "./ShowAddress";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 
-const DeliveryAddress = ({ values, updateId, type, title }) => {
+const DeliveryAddress = ({ values, updateId, type, title, setFieldValue }) => {
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
   const [modal, setModal] = useState(false);
@@ -25,6 +25,9 @@ const DeliveryAddress = ({ values, updateId, type, title }) => {
   });
   useEffect(() => {
     setAddress(data)
+    if (data?.address?.length > 0 && !values[`${type}_address_id`]) {
+        setFieldValue(`${type}_address_id`, data.address[0].id);
+    }
   }, [data])
   useEffect(() => {
     if (updateId) {

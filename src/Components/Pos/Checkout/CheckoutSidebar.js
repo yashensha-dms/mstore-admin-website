@@ -35,11 +35,19 @@ const CheckoutSidebar = ({ values, setFieldValue, data, loading, mutate, userDat
 
     // Submitting data on Checkout
     useEffect(() => {
-        if (values['billing_address_id'] && values['shipping_address_id'] && values['delivery_description'] && values['payment_method']) {
-            delete values['total'];
-            mutate(values)
-            if (loading) {
-                setStoreCoupon('')
+        const checkoutValues = { ...values };
+        if (checkoutValues['consumer_id']) {
+            if (!checkoutValues['payment_method']) checkoutValues['payment_method'] = 'cod';
+            if (!checkoutValues['delivery_description']) checkoutValues['delivery_description'] = 'Express Delivery';
+            if (!checkoutValues['billing_address_id'] && checkoutValues['shipping_address_id']) checkoutValues['billing_address_id'] = checkoutValues['shipping_address_id'];
+            if (!checkoutValues['shipping_address_id'] && checkoutValues['billing_address_id']) checkoutValues['shipping_address_id'] = checkoutValues['billing_address_id'];
+
+            if (checkoutValues['billing_address_id'] && checkoutValues['shipping_address_id']) {
+                delete checkoutValues['total'];
+                mutate(checkoutValues)
+                if (loading) {
+                    setStoreCoupon('')
+                }
             }
         }
     }, [values['billing_address_id'], values['shipping_address_id'], values['payment_method'], values['delivery_description'], values['points_amount'], values['wallet_balance'], values['products']])

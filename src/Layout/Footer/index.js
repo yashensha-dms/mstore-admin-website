@@ -12,9 +12,9 @@ const Footer = () => {
     <Container fluid={true}>
       <footer className="footer">
         <Row>
-          <Col md="12" className="footer-copyright text-center">
-          <p className="mb-0">{t(state?.setCopyRight?state?.setCopyRight:'© dms')}</p>
-          </Col>
+          {/* <Col md="12" className="footer-copyright text-center">
+            <p className="mb-0">{t(state?.setCopyRight?state?.setCopyRight:'© dms')}</p>
+          </Col> */}
         </Row>
       </footer>
     </Container>

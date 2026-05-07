@@ -59,13 +59,18 @@ const TableRow = React.memo(({ tableData, index, headerData, isCheck, handleChan
   );
 }, (prev, next) => {
   // Only re-render if this specific row's data or check-status changes
-  return (
-    prev.tableData.id === next.tableData.id &&
-    prev.index === next.index &&
-    (prev.isCheck || []).includes(prev.tableData.id) === (next.isCheck || []).includes(next.tableData.id) &&
-    prev.headerData.data.length === next.headerData.data.length &&
-    JSON.stringify(prev.tableData) === JSON.stringify(next.tableData)
-  );
+  try {
+    return (
+      prev.tableData.id === next.tableData.id &&
+      prev.index === next.index &&
+      (prev.isCheck || []).includes(prev.tableData.id) === (next.isCheck || []).includes(next.tableData.id) &&
+      prev.headerData.data.length === next.headerData.data.length &&
+      JSON.stringify(prev.tableData) === JSON.stringify(next.tableData)
+    );
+  } catch (e) {
+    // If circular structure or other error occurs, allow re-render
+    return false;
+  }
 });
 
 const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, sortBy, setSortBy, headerData, fetchStatus, moduleName, type, redirectLink, refetch, keyInPermission }) => {

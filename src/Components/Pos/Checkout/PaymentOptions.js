@@ -21,9 +21,17 @@ function PaymentOptions({ values, setFieldValue }) {
                                 <div className="accordion-button">
                                     <div className="custom-form-check form-check mb-0">
                                         <Label className="form-check-label" htmlFor="credit">
-                                            <Input className="form-check-input mt-0" type="radio" name="flexRadioDefault" id="credit" onClick={() => {
-                                                setFieldValue('payment_method', "cod")
-                                            }} />{t("CashOnDelivery")}
+                                            <Input 
+                                                className="form-check-input mt-0" 
+                                                type="radio" 
+                                                name="flexRadioDefault" 
+                                                id="credit" 
+                                                checked={values['payment_method'] === 'cod'}
+                                                onChange={() => {
+                                                    setFieldValue('payment_method', "cod")
+                                                }} 
+                                            />
+                                            {t("CashOnDelivery")}
                                         </Label>
                                     </div>
                                 </div>

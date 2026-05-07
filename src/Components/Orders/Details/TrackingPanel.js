@@ -13,9 +13,9 @@ const TrackingPanel = ({ orderStatusData, orderStatus }) => {
         }
     }
 
-    // Filter out statuses that shouldn't be in the main timeline if they are terminal/error
+    // Filter out statuses that shouldn't be in the main timeline if they are terminal/error or redundant
     const mainTimelineSteps = orderStatusData?.filter(elem => 
-        !['cancelled', 'returned'].includes(elem.slug)
+        !['cancelled', 'returned', 'processing', 'shipped'].includes(elem.slug)
     ).sort((a, b) => a.sequence - b.sequence);
 
     const isFailed = ['cancelled', 'returned'].includes(orderStatus?.slug);
@@ -50,8 +50,8 @@ const TrackingPanel = ({ orderStatusData, orderStatus }) => {
                     <div className="panel-content">
                         <div className="icon" style={{ 
                             display: 'flex', 
-                            align-items: 'center', 
-                            justify-content: 'center',
+                            alignItems: 'center', 
+                            justifyContent: 'center',
                             fontSize: '24px',
                             color: '#e22454'
                         }}>
