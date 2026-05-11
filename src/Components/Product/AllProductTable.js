@@ -27,7 +27,7 @@ const AllProductTable = ({ data, ...props }) => {
       { title: "Name", apiKey: "name", sorting: true, sortBy: "desc" },
       { title: "Price", apiKey: "sale_price", sorting: true, sortBy: "desc", type: 'price' },
       { title: "Stock", apiKey: "stock_status", type: 'stock_status' },
-      { title: "StoreName", apiKey: "store", subKey: ["store_name"] },
+      { title: "StockQuantity", apiKey: "quantity", sorting: true, sortBy: "desc" },
       { title: "Approved", apiKey: "is_approved", type: 'switch', url: `${product}${Approved}` },
       { title: "Status", apiKey: "status", type: 'switch' }
     ],

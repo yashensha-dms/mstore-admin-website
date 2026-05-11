@@ -34,7 +34,7 @@ const AttachmentData = ({ state, dispatch, multiple, attachmentsData, refetch, r
                         <Input type="checkbox" id={elem.id} checked={state?.selectedImage?.length > 0 ? multiple ? state.selectedImage.forEach((result) => (result.id == elem.id ? true : false)) : state.selectedImage.every((item) => item.id == elem.id) : false} onChange={(e) => ChoseImages(e, elem)} />
                         <Label htmlFor={elem.id}>
                             <div className="ratio ratio-1x1">
-                                <Image src={elem.original_url} className="img-fluid" alt={elem.name} width={100} height={100} />
+                                <Image src={elem.original_url} className="img-fluid" alt={elem.name} width={100} height={100} unoptimized={elem?.disk === 'external'} />
                             </div>
                             {!redirectToTabs && <AttachmentsDropdown id={elem?.id} />}
                         </Label>

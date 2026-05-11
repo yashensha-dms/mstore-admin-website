@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Form, Formik } from "formik";
 import { useContext, useEffect, useReducer, useState } from "react";
 import { RiUploadCloud2Line } from "react-icons/ri";
-import { Row, TabContent, TabPane } from "reactstrap";
+import { Row, TabContent, TabPane, Input } from "reactstrap";
 import ShowModal from "../../Elements/Alerts&Modals/Modal";
 import Btn from "../../Elements/Buttons/Btn";
 import { selectImageReducer } from "../../Utils/AllReducers";
@@ -61,27 +61,42 @@ const AttachmentModal = (props) => {
                         <div>
                             <RiUploadCloud2Line />
                             <Formik
-                                initialValues={{ attachments: "" }}
-                                validationSchema={YupObject({ attachments: requiredSchema })}
+                                initialValues={{ attachments: "", url: "" }}
                                 onSubmit={(values, { resetForm }) => {
                                     let formData = new FormData();
-                                    Object.values(values.attachments).forEach((el, i) => {
-                                        formData.append(`attachments[${i}]`, el);
-                                    });
+                                    if (values.attachments) {
+                                        Object.values(values.attachments).forEach((el, i) => {
+                                            formData.append(`attachments[${i}]`, el);
+                                        });
+                                    }
+                                    if (values.url) {
+                                        formData.append('url', values.url);
+                                    }
                                     mutate(formData);
                                 }}>
                                 {({ values, setFieldValue, errors }) => (
                                     <Form className="theme-form theme-form-2 mega-form">
                                         <div>
                                             <div className="dflex-wgap justify-content-center ms-auto save-back-button">
-                                                <h2>{t("Dropfilesherepaste")} <span>{t("or")}</span>
-                                                    <FileUploadBrowser errors={errors} id="attachments" name="attachments" type="file" multiple={true} values={values} setFieldValue={setFieldValue} dispatch={dispatch} accept="image/*" />
-                                                </h2>
+                                                <div className="w-100 text-center">
+                                                    <h2>{t("Dropfilesherepaste")} <span>{t("or")}</span>
+                                                        <FileUploadBrowser errors={errors} id="attachments" name="attachments" type="file" multiple={true} values={values} setFieldValue={setFieldValue} dispatch={dispatch} accept="image/*" />
+                                                    </h2>
+                                                    <div className="mt-4">
+                                                        <h5 className="mb-2 text-muted">{t("OR")}</h5>
+                                                        <Input
+                                                            type="text"
+                                                            placeholder={t("EnterImageUrl")}
+                                                            value={values.url}
+                                                            onChange={(e) => setFieldValue("url", e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="modal-footer">
-                                            {values?.attachments.length > 0 &&
-                                                <a href="#javascript" onClick={() => setFieldValue('attachments', "")}>{t("Clear")}</a>
+                                            {(values?.attachments.length > 0 || values?.url) &&
+                                                <a href="#javascript" onClick={() => { setFieldValue('attachments', ""); setFieldValue("url", ""); }}>{t("Clear")}</a>
                                             }
                                             <Btn type="submit" className="ms-auto" title="Insert Media" loading={Number(isLoading)} />
                                         </div>
