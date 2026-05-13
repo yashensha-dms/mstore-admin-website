@@ -42,7 +42,7 @@ export function ProductInitValues(oldData, updateId) {
     store_id: updateId ? Number(oldData?.store_id) || "" : "",
     // Inverntory  =>Type: Simple
     type: updateId ? oldData?.type || "" : "simple",
-    unit: updateId ? oldData?.unit || "" : "1",
+    unit: updateId ? oldData?.unit || "1" : "1",
     weight: updateId ? (oldData?.weight ?? "") : "",
     stock_status: updateId ? oldData?.stock_status || "" : "in_stock",
     show_stock_quantity: updateId ? oldData?.show_stock_quantity == 1 ? true : false : false,

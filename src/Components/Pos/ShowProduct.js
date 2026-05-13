@@ -65,7 +65,7 @@ const ShowProduct = ({ productData, setFieldValue, values }) => {
     <Col>
       <div className="product-box">
         <div className="product-image">
-          <Image src={productData?.product_thumbnail?.original_url ?? placeHolderImage} alt="" className="img-fluid" width={100} height={100} />
+          <Image src={productData?.product_thumbnail?.original_url ?? placeHolderImage} alt="" className="img-fluid" width={100} height={100} unoptimized={true} />
         </div>
         <div className="product-detail">
           <h6 className="name name-2 h-100" onClick={() => window.open(`${settingObj?.general?.site_url}/product/${productData.slug}`)}>{productData.name}</h6>          <h6 className="sold weight text-content fw-normal">{productData?.unit}</h6>

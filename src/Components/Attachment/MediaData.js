@@ -24,7 +24,7 @@ const MediaData = ({ state, dispatch, attachmentsData, refetch }) => {
                         <Input type="checkbox" id={elem.id} checked={state.deleteImage?.includes(elem.id)} onChange={(e) => ChoseImages(e, elem)} />
                         <Label htmlFor={elem.id}>
                             <div className="ratio ratio-1x1">
-                                <Image src={elem.original_url} className="img-fluid" alt="ratio image" height={130} width={130} />
+                                <img src={elem.original_url} className="img-fluid" alt="ratio image" style={{ height: '130px', width: '130px', objectFit: 'cover' }} />
                             </div>
                             <AttachmentsDropdown state={state} dispatch={dispatch} id={elem?.id} refetch={refetch} />
                         </Label>

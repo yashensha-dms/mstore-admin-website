@@ -23,10 +23,11 @@ const ProductSubmitFunction = (mutate, value, updateId) => {
   value['is_return'] = Number(value['is_return'])
   value['status'] = Number(value['status'])
 
+  value['unit'] = value['unit'] || '1';
   value['variations'] = value?.variations?.map((elem, ind) => {
     return {
       ...elem,
-      status: elem?.status ? elem?.status?.length > 0 ? 1 : 0 : 0,
+      status: elem?.status ? 1 : 0,
       variation_image_id: elem.variation_image_id ? elem.variation_image_id : null,
       attribute_values: elem.attribute_values ? elem.attribute_values.map(el => {
         return el.id

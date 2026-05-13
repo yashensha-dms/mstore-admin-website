@@ -7,7 +7,7 @@ const Avatar = ({ data, placeHolder, name, customeClass, height, width, noPrevCl
             {
                 data?.original_url ?
                     <div className={`${!noPrevClass ? 'user-profile user-round' : ""} ${customeClass ? customeClass : ""}`}>
-                        <Image src={data?.original_url} className={customeClass ? customeClass : ""} height={height || 50} width={width || 50} alt={name?.name || ""} unoptimized={data?.disk === 'external'} />
+                        <Image src={data?.original_url} className={customeClass ? customeClass : ""} height={height || 50} width={width || 50} alt={name?.name || ""} unoptimized={true} />
                     </div>
                     : placeHolder ?
                         <div className={`user-profile user-round ${customeClass ? customeClass : ""}`}><Image src={placeHolder} height={height || 50} width={width || 50} alt={name?.name} /></div>

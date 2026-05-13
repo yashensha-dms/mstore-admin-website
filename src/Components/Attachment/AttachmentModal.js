@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, Formik } from "formik";
 import { useContext, useEffect, useReducer, useState } from "react";
-import { RiUploadCloud2Line } from "react-icons/ri";
-import { Row, TabContent, TabPane, Input } from "reactstrap";
+import { RiComputerLine, RiLinkM, RiUploadCloud2Line } from "react-icons/ri";
+import { Row, TabContent, TabPane, Input, Col } from "reactstrap";
 import ShowModal from "../../Elements/Alerts&Modals/Modal";
 import Btn from "../../Elements/Buttons/Btn";
 import { selectImageReducer } from "../../Utils/AllReducers";
@@ -32,8 +32,10 @@ const AttachmentModal = (props) => {
     const [sorting, setSorting] = useState("");
     const [state, dispatch] = useReducer(selectImageReducer, { selectedImage: [], isModalOpen: "", setBrowserImage: '' });
     const { data: attachmentsData, refetch } = useQuery([attachment], () => request({ url: attachment, params: { search, sort: sorting, paginate: paginate, page } }), { enabled: false, refetchOnWindowFocus: false, select: (data) => data?.data });
-    const { mutate, isLoading } = useCreate(createAttachment, false, !redirectToTabs && "/attachment", redirectToTabs ? "No" : false, () => {
+    const queryClient = useQueryClient();
+    const { mutate, isLoading } = useCreate(createAttachment, false, false, redirectToTabs ? "No" : "Attachment Created Successfully", () => {
         refetch();
+        queryClient.invalidateQueries([attachment]);
         !redirectToTabs && setModal(false)
         redirectToTabs && setTabNav(1)
     });
@@ -57,36 +59,61 @@ const AttachmentModal = (props) => {
                     </div >
                 </TabPane>}
                 {create && <TabPane className={tabNav == 2 ? "fade active show" : ""} id="select">
-                    <div className="content-section drop-files-sec">
-                        <div>
-                            <RiUploadCloud2Line />
-                            <Formik
-                                initialValues={{ attachments: "", url: "" }}
-                                onSubmit={(values, { resetForm }) => {
-                                    let formData = new FormData();
-                                    if (values.attachments) {
-                                        Object.values(values.attachments).forEach((el, i) => {
-                                            formData.append(`attachments[${i}]`, el);
-                                        });
-                                    }
-                                    if (values.url) {
-                                        formData.append('url', values.url);
-                                    }
-                                    mutate(formData);
-                                }}>
-                                {({ values, setFieldValue, errors }) => (
-                                    <Form className="theme-form theme-form-2 mega-form">
-                                        <div>
-                                            <div className="dflex-wgap justify-content-center ms-auto save-back-button">
-                                                <div className="w-100 text-center">
-                                                    <h2>{t("Dropfilesherepaste")} <span>{t("or")}</span>
+                    <div className="content-section upload-section">
+                        <Formik
+                            initialValues={{ attachments: "", url: "" }}
+                            onSubmit={(values, { resetForm }) => {
+                                let formData = new FormData();
+                                if (values.attachments) {
+                                    Object.values(values.attachments).forEach((el, i) => {
+                                        formData.append(`attachments[${i}]`, el);
+                                    });
+                                }
+                                if (values.url) {
+                                    formData.append('url', values.url);
+                                }
+                                mutate(formData);
+                            }}>
+                            {({ values, setFieldValue, errors }) => (
+                                <Form className="theme-form theme-form-2 mega-form d-flex flex-column h-100" style={{ minHeight: '600px' }}>
+                                    <div className="flex-grow-1 d-flex align-items-stretch w-100 gap-4 py-4">
+                                        <div className="flex-fill">
+                                            <div className="upload-card h-100">
+                                                {!values.attachments?.length ? (
+                                                    <div className="d-flex flex-column align-items-center justify-content-center h-100 w-100 px-lg-5">
+                                                        <div className="icon-circle mb-3">
+                                                            <RiComputerLine />
+                                                        </div>
+                                                        <h3 className="upload-title text-center">{t("Upload From Device") || "Upload from Device"}</h3>
+                                                        <p className="upload-subtitle text-muted mb-4 text-center">{}</p>
                                                         <FileUploadBrowser errors={errors} id="attachments" name="attachments" type="file" multiple={true} values={values} setFieldValue={setFieldValue} dispatch={dispatch} accept="image/*" />
-                                                    </h2>
-                                                    <div className="mt-4">
-                                                        <h5 className="mb-2 text-muted">{t("OR")}</h5>
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-100 h-100 d-flex flex-column p-4">
+                                                        <div className="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                                                            <h4 className="m-0 fw-bold">{t("SelectedFiles") || "Selected Files"}</h4>
+                                                            <FileUploadBrowser errors={errors} id="attachments" name="attachments" type="file" multiple={true} values={values} setFieldValue={setFieldValue} dispatch={dispatch} accept="image/*" small={true} />
+                                                        </div>
+                                                        <div className="flex-grow-1">
+                                                            <FileUploadBrowser values={values} setFieldValue={setFieldValue} dispatch={dispatch} name="attachments" onlyPreview={true} />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex-fill">
+                                            <div className="upload-card h-100">
+                                                <div className="d-flex flex-column align-items-center justify-content-center h-100 w-100 px-lg-5">
+                                                    <div className="icon-circle mb-3">
+                                                        <RiLinkM />
+                                                    </div>
+                                                    <h3 className="upload-title mb-2 text-center">{t("Import via URL") || "Import via URL"}</h3>
+                                                    <p className="upload-subtitle text-muted mb-4 text-center">{t("Paste image URL") || "Paste a direct link to an image"}</p>
+                                                    <div className="input-group-custom w-100">
                                                         <Input
                                                             type="text"
-                                                            placeholder={t("EnterImageUrl")}
+                                                            className="form-control-lg text-center"
+                                                            placeholder="Paste your image url"
                                                             value={values.url}
                                                             onChange={(e) => setFieldValue("url", e.target.value)}
                                                         />
@@ -94,16 +121,18 @@ const AttachmentModal = (props) => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="modal-footer">
-                                            {(values?.attachments.length > 0 || values?.url) &&
-                                                <a href="#javascript" onClick={() => { setFieldValue('attachments', ""); setFieldValue("url", ""); }}>{t("Clear")}</a>
-                                            }
-                                            <Btn type="submit" className="ms-auto" title="Insert Media" loading={Number(isLoading)} />
+                                    </div>
+                                    <div className="modal-footer-custom pt-3 border-top mt-auto">
+                                        <div className="d-flex align-items-center justify-content-between w-100">
+                                            { (values?.attachments.length > 0 || values?.url) ? (
+                                                <button type="button" className="btn text-danger fw-bold" onClick={() => { setFieldValue('attachments', ""); setFieldValue("url", ""); }}>{t("ClearAll") || "Clear All"}</button>
+                                            ) : <div></div>}
+                                            <Btn type="submit" className="theme-btn-lg px-5" title={t("AddMedia") || "Add Media"} loading={Number(isLoading)} />
                                         </div>
-                                    </Form>
-                                )}
-                            </Formik>
-                        </div>
+                                    </div>
+                                </Form>
+                            )}
+                        </Formik>
                     </div>
                 </TabPane >}
             </TabContent>

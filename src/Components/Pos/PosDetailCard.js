@@ -45,7 +45,7 @@ const PosDetailCard = ({ values, setFieldValue, initValues }) => {
                 <li key={i}>
                   <Image src={item?.variation && item?.variation?.variation_image ? item?.variation?.variation_image?.original_url
                     : item?.product?.product_thumbnail ? item?.product?.product_thumbnail?.original_url
-                      : placeHolderImage} className="img-fluid" alt={item?.product?.name || ''} width={70} height={70} />
+                      : placeHolderImage} className="img-fluid" alt={item?.product?.name || ''} width={70} height={70} unoptimized={true} />
                   <div className="cart-content">
                     <h4>{item?.variation ? item?.variation?.name : item?.product?.name}</h4>
                     <div>

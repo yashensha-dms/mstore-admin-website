@@ -22,7 +22,7 @@ const AttachmentHead = ({ isattachment, state, dispatch, refetch }) => {
     const pathname = usePathname();
     const { mutate } = useMutation((data) => request({ url: attachmentDelete, data: { ids: data }, method: "post" }), {
         onSuccess: (resData) => {
-            SuccessHandle(resData, router, "/attachment", "Deleted Sucessfully", pathname);
+            SuccessHandle(resData, router, false, "Deleted Sucessfully", pathname);
             resData.status == 200 && dispatch({ type: "DeleteSelectedImage", payload: [] });
             refetch()
         },

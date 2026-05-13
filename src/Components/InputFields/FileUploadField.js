@@ -39,7 +39,7 @@ const FileUploadField = ({ values, updateId, setFieldValue, errors, multiple, lo
       {selectedImage?.length > 0 &&
         selectedImage?.map((result, i) => (
           <li key={i}>
-            <Image src={result?.original_url} className="img-fluid" width={100} height={100} alt="remove-icon" priority />
+            <Image src={result?.original_url} className="img-fluid" width={100} height={100} alt="remove-icon" priority unoptimized={true} />
             <p>
               <RiCloseLine className="remove-icon" onClick={() => removeImage(result)}
               />
