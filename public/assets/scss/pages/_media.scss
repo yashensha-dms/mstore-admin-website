@@ -108,7 +108,7 @@
 
   label {
     border: 1px solid #eee;
-    padding: 10px;
+    padding: 0;
     display: block;
     position: relative;
     margin: 0;
@@ -117,17 +117,33 @@
     border-radius: 12px;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
 
     &:hover {
       border-color: var(--theme-color);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      transform: translateY(-4px);
+      
+      img {
+        transform: scale(1.1);
+      }
     }
 
-    img {
+    .ratio {
       width: 100%;
-      object-fit: contain;
-      border-radius: 8px;
+      height: 100%;
+      display: block;
+
+      img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 0;
+        transition: all 0.5s ease;
+      }
     }
   }
 

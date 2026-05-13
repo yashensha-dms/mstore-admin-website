@@ -34,7 +34,7 @@ const AttachmentData = ({ state, dispatch, multiple, attachmentsData, refetch, r
                         <Input type="checkbox" id={elem.id} checked={state?.selectedImage?.some((item) => item.id === elem.id)} onChange={(e) => ChoseImages(e, elem)} />
                         <Label htmlFor={elem.id}>
                             <div className="ratio ratio-1x1">
-                                <img src={elem.original_url} className="img-fluid" alt={elem.name} />
+                                <img src={elem.original_url} alt={elem.name} />
                             </div>
                             {!redirectToTabs && <AttachmentsDropdown id={elem?.id} />}
                         </Label>
