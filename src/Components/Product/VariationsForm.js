@@ -13,19 +13,22 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
   
-  /* 
-  // Effect: variation price (MRP) or sale_price (Selling Price) changed → recompute discount percentage
+  // Auto-generate name based on Product Name and Options
   useEffect(() => {
-    const priceValue = Number(values[`variations`][index]?.price) || 0;
-    const salePriceValue = Number(values[`variations`][index]?.sale_price) || 0;
-    if (priceValue > 0 && salePriceValue >= 0) {
-      const discountValue = ((priceValue - salePriceValue) / priceValue) * 100;
-      if (Math.abs(Number(values[`variations`][index]?.discount) - discountValue) > 0.01) {
-        setFieldValue(`variations[${index}][discount]`, parseFloat(discountValue.toFixed(2)));
-      }
+    const productName = values['name'] || '';
+    const optionLabel = elem?.map(opt => opt.value).join(' - ');
+    const autoName = optionLabel ? `${productName} - ${optionLabel}` : productName;
+    
+    const currentName = values[`variations`][index]?.name;
+    
+    // Only update if current name is empty or matches a previous auto-generated name
+    // We check if it's empty to get started, or if it follows the pattern "[Product Name] - [Anything]"
+    if (!currentName || currentName.startsWith(`${productName} - `) || currentName === productName) {
+       if (currentName !== autoName) {
+         setFieldValue(`variations[${index}][name]`, autoName);
+       }
     }
-  }, [values[`variations`][index]?.price, values[`variations`][index]?.sale_price])
-  */
+  }, [values['name'], elem, index]);
 
   
   return (

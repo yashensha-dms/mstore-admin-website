@@ -6,10 +6,12 @@ import Loader from "../CommonComponent/Loader";
 import usePermissionCheck from "../../Utils/Hooks/usePermissionCheck";
 import placeHolderImage from "../../../public/assets/images/placeholder.png";
 import AccountContext from "../../Helper/AccountContext";
+import SettingContext from "../../Helper/SettingContext";
 
 const AllProductTable = ({ data, ...props }) => {
   const [edit, destroy] = usePermissionCheck(["edit", "destroy"]);
   const { role, setRole } = useContext(AccountContext)
+  const { settingObj } = useContext(SettingContext);
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
     if (storedRole) {
@@ -39,7 +41,7 @@ const AllProductTable = ({ data, ...props }) => {
     return role == 'vendor' ? elem.title !== 'Approved' : elem;
   });
   headerObj.column = headerObj ? pro : [];
-  if (!data) return <Loader />;
+  if (!data || edit === undefined || !role || !settingObj?.general) return <Loader />;
   return <>
     <ShowTable {...props} headerData={headerObj} />
   </>

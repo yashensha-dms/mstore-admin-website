@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Input, Label } from "reactstrap";
+import { Input, Label, Col } from "reactstrap";
 import AttachmentsDropdown from "./AttachmentDropdown";
 
 const AttachmentData = ({ state, dispatch, multiple, attachmentsData, refetch, redirectToTabs }) => {
@@ -29,17 +29,20 @@ const AttachmentData = ({ state, dispatch, multiple, attachmentsData, refetch, r
     return (
         <>
             {attachmentsData?.map((elem, i) => (
-                <div key={i}>
+                <Col key={i}>
                     <div className="library-box">
+                        <div className="attachment-name">
+                            <span>{elem.name || elem.file_name || elem.id || "Media"}</span>
+                        </div>
                         <Input type="checkbox" id={elem.id} checked={state?.selectedImage?.some((item) => item.id === elem.id)} onChange={(e) => ChoseImages(e, elem)} />
                         <Label htmlFor={elem.id}>
                             <div className="ratio ratio-1x1">
                                 <img src={elem.original_url} alt={elem.name} />
                             </div>
-                            {!redirectToTabs && <AttachmentsDropdown id={elem?.id} />}
                         </Label>
+                        {!redirectToTabs && <AttachmentsDropdown id={elem?.id} />}
                     </div>
-                </div>
+                </Col>
             ))}
         </>
     );

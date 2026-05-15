@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Form, Formik } from "formik";
+import { Form, Formik, useFormikContext } from "formik";
 import { useContext, useEffect, useReducer, useState } from "react";
 import { RiComputerLine, RiLinkM, RiUploadCloud2Line } from "react-icons/ri";
-import { Row, TabContent, TabPane, Input, Col } from "reactstrap";
+import { Row, TabContent, TabPane, Input, Col, Label } from "reactstrap";
 import ShowModal from "../../Elements/Alerts&Modals/Modal";
 import Btn from "../../Elements/Buttons/Btn";
 import { selectImageReducer } from "../../Utils/AllReducers";
@@ -19,6 +19,34 @@ import ModalButton from "./ModalButton";
 import TopSection from "./TopSection";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
+
+const AttachmentNameObserver = () => {
+    const { values, setFieldValue } = useFormikContext();
+    useEffect(() => {
+        if (values.attachments?.length > 0 && !values.name) {
+            const fileName = values.attachments[0].name.split('.').slice(0, -1).join('.');
+            setFieldValue("name", fileName);
+        } else if (values.url && !values.name) {
+            try {
+                const url = new URL(values.url);
+                const pathParts = url.pathname.split('/');
+                const lastPart = pathParts[pathParts.length - 1];
+                if (lastPart) {
+                    const fileName = lastPart.split('.').slice(0, -1).join('.');
+                    if (fileName) setFieldValue("name", fileName);
+                }
+            } catch (e) {
+                const pathParts = values.url.split('/');
+                const lastPart = pathParts[pathParts.length - 1];
+                if (lastPart && lastPart.includes('.')) {
+                    const fileName = lastPart.split('.').slice(0, -1).join('.');
+                    if (fileName) setFieldValue("name", fileName);
+                }
+            }
+        }
+    }, [values.attachments, values.url]);
+    return null;
+}
 
 const AttachmentModal = (props) => {
     const { modal, setModal, setFieldValue, name, setSelectedImage, isattachment, multiple, values, showImage, redirectToTabs, noAPICall } = props
@@ -61,7 +89,7 @@ const AttachmentModal = (props) => {
                 {create && <TabPane className={tabNav == 2 ? "fade active show" : ""} id="select">
                     <div className="content-section upload-section">
                         <Formik
-                            initialValues={{ attachments: "", url: "" }}
+                            initialValues={{ attachments: "", url: "", name: "" }}
                             onSubmit={(values, { resetForm }) => {
                                 let formData = new FormData();
                                 if (values.attachments) {
@@ -72,10 +100,14 @@ const AttachmentModal = (props) => {
                                 if (values.url) {
                                     formData.append('url', values.url);
                                 }
+                                if (values.name) {
+                                    formData.append('name', values.name);
+                                }
                                 mutate(formData);
                             }}>
                             {({ values, setFieldValue, errors }) => (
                                 <Form className="theme-form theme-form-2 mega-form d-flex flex-column h-100" style={{ minHeight: '600px' }}>
+                                    <AttachmentNameObserver />
                                     <div className="flex-grow-1 d-flex align-items-stretch w-100 gap-4 py-4">
                                         <div className="flex-fill">
                                             <div className="upload-card h-100">
@@ -94,7 +126,7 @@ const AttachmentModal = (props) => {
                                                             <h4 className="m-0 fw-bold">{t("SelectedFiles") || "Selected Files"}</h4>
                                                             <FileUploadBrowser errors={errors} id="attachments" name="attachments" type="file" multiple={true} values={values} setFieldValue={setFieldValue} dispatch={dispatch} accept="image/*" small={true} />
                                                         </div>
-                                                        <div className="flex-grow-1">
+                                                        <div className="flex-grow-1 overflow-auto" style={{ maxHeight: '200px' }}>
                                                             <FileUploadBrowser values={values} setFieldValue={setFieldValue} dispatch={dispatch} name="attachments" onlyPreview={true} />
                                                         </div>
                                                     </div>
@@ -122,12 +154,25 @@ const AttachmentModal = (props) => {
                                             </div>
                                         </div>
                                     </div>
+                                    <div className="attachment-name-section px-4 pb-4">
+                                        <div className="input-group-custom">
+                                            <Label className="form-label mb-2 fw-bold">{"Attachment title"}</Label>
+                                            <Input
+                                                type="text"
+                                                className="form-control-lg"
+                                                placeholder={"Enter attachment title"}
+                                                value={values.name}
+                                                onChange={(e) => setFieldValue("name", e.target.value)}
+                                            />
+                                            <p className="help-text text-muted mt-2 mb-0 small">{ ""}</p>
+                                        </div>
+                                    </div>
                                     <div className="modal-footer-custom pt-3 border-top mt-auto">
                                         <div className="d-flex align-items-center justify-content-between w-100">
                                             { (values?.attachments.length > 0 || values?.url) ? (
-                                                <button type="button" className="btn text-danger fw-bold" onClick={() => { setFieldValue('attachments', ""); setFieldValue("url", ""); }}>{t("ClearAll") || "Clear All"}</button>
+                                                <button type="button" className="btn text-danger fw-bold" onClick={() => { setFieldValue('attachments', ""); setFieldValue("url", ""); setFieldValue("name", ""); }}>{t("ClearAll") || "Clear All"}</button>
                                             ) : <div></div>}
-                                            <Btn type="submit" className="theme-btn-lg px-5" title={t("AddMedia") || "Add Media"} loading={Number(isLoading)} />
+                                            <Btn type="submit" className="theme-btn-lg px-5" title={ "Add Media"} loading={Number(isLoading)} />
                                         </div>
                                     </div>
                                 </Form>

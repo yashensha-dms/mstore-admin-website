@@ -7,6 +7,8 @@ import allPossibleCases from "../../Utils/CustomFunctions/AllPossibleCases";
 import getStringId from "../../Utils/CustomFunctions/getStringId";
 import VariationsForm from "./VariationsForm";
 import VariationTop from "./VariationTop";
+import VariationSkuAssistant from "./VariationSkuAssistant";
+import SearchableSelectInput from "../InputFields/SearchableSelectInput";
 
 const VariationsTab = ({ values, setFieldValue, errors, updateId }) => {
   const { data } = useQuery([attribute], () => request({ url: attribute }), { refetchOnWindowFocus: false, select: (data) => data.data.data });
@@ -15,6 +17,16 @@ const VariationsTab = ({ values, setFieldValue, errors, updateId }) => {
     // set our combointation in values obj
     setFieldValue("variation_options", allPossibleCases(values["combination"]?.map((item) => item?.values?.map((elem) => ({ name: item.name?.name, value: item.name.attribute_values?.find((attr) => attr.id == elem)?.value })))))
   }, [values["combination"]]);
+
+  // Auto-inject "Weight" attribute for grocery items if empty
+  useEffect(() => {
+    if (values["type"] === "classified" && (!values["combination"] || values["combination"].length === 0 || (values["combination"].length === 1 && !values["combination"][0].name))) {
+      const weightAttr = data?.find(attr => attr.name.toLowerCase() === 'weight');
+      if (weightAttr) {
+        setFieldValue("combination", [{ name: weightAttr, values: [] }]);
+      }
+    }
+  }, [values["type"], data]);
 
   useEffect(() => {
     getNewVariations()
@@ -50,6 +62,29 @@ const VariationsTab = ({ values, setFieldValue, errors, updateId }) => {
   };
   return (
     <div className="variant-box">
+      <VariationSkuAssistant />
+      {values["variations"]?.length > 0 && (
+        <SearchableSelectInput
+          nameList={[
+            {
+              name: "default_variation_id",
+              title: "DefaultVariation",
+              inputprops: {
+                name: "default_variation_id",
+                id: "default_variation_id",
+                options: values["variations"]?.map((v, i) => {
+                   const label = values["variation_options"]?.[i] 
+                    ? values["variation_options"][i].map(opt => opt.value).join(' - ')
+                    : (v.name || `Variation ${i + 1}`);
+                   // Use ID if exists (existing product), otherwise use index (new product)
+                   return { id: v.id !== undefined ? v.id : i, name: label };
+                }),
+                value: values["default_variation_id"],
+              },
+            },
+          ]}
+        />
+      )}
       {values["combination"]?.map((elem, i) => (
         <VariationTop key={i} index={i} data={data} setFieldValue={setFieldValue} values={values} />
       ))}

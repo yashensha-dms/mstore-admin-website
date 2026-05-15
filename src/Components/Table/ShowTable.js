@@ -63,6 +63,8 @@ const TableRow = React.memo(({ tableData, index, headerData, isCheck, handleChan
     return (
       prev.tableData.id === next.tableData.id &&
       prev.index === next.index &&
+      prev.edit === next.edit &&
+      prev.headerData?.noEdit === next.headerData?.noEdit &&
       (prev.isCheck || []).includes(prev.tableData.id) === (next.isCheck || []).includes(next.tableData.id) &&
       prev.headerData.data.length === next.headerData.data.length &&
       JSON.stringify(prev.tableData) === JSON.stringify(next.tableData)
