@@ -16,7 +16,7 @@ import { useTranslation } from "@/app/i18n/client";
 
 const TableRow = React.memo(({ tableData, index, headerData, isCheck, handleChange, isHandelEdit, getSubKeysData, current_page, per_page, mutate, moduleName, type, refetch, keyInPermission, convertCurrency, edit, url, t }) => {
   return (
-    <tr>
+    <tr className={tableData?.customRowClass || ""}>
       {headerData?.checkBox && (
         <td className="sm-width">
           <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.[index]?.system_reserve !== "1" && isCheck?.includes(tableData?.id)} disabled={headerData?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />

@@ -71,3 +71,20 @@
 @import 'themes/dark-sidebar';
 @import 'themes/update';
 @import 'themes/responsive';
+
+/* Highlight unattended/pending orders */
+.unattended-order-row {
+  background-color: rgba(255, 193, 7, 0.15) !important; /* Soft warning amber tint */
+  border-left: 4px solid #ffc107 !important; /* Visual indicator bar on the left */
+  transition: background-color 0.3s ease;
+
+  td {
+    background-color: rgba(255, 193, 7, 0.15) !important; /* Override nested cell background */
+  }
+}
+.unattended-order-row:hover {
+  background-color: rgba(255, 193, 7, 0.25) !important;
+  td {
+    background-color: rgba(255, 193, 7, 0.25) !important;
+  }
+}

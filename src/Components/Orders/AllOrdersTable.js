@@ -29,6 +29,8 @@ const AllOrdersTable = ({ data, ...props }) => {
     };
     let orders = useMemo(() => {
         return headerObj?.data?.filter((element) => {
+            const isPending = element?.order_status?.slug === 'pending';
+            element.customRowClass = isPending ? "unattended-order-row" : "";
             element.order_number = getSpanTag(element.order_number);
             element.payment_status = element.payment_status ? <div className={`status-${element?.payment_status?.toString()?.toLowerCase() || ''}`}><span>{element?.payment_status}</span></div> : '-';
             element.payment_mode = element.payment_method ? <div className="payment-mode"><span>{element?.payment_method}</span></div> : '-';

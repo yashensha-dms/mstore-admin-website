@@ -58,9 +58,9 @@ const OrderNumberTable = ({ moduleName, data, orderStatusData, setOrderStatus, o
                                 <div className="d-flex align-items-center">
                                     <h5>{moduleName}</h5>
                                 </div>
-                                <div className="d-flex flex-column gap-3 w-100 align-items-end">
+                                <div className="d-flex flex-column gap-3 w-100">
                                     {edit && !data?.sub_orders?.length && (
-                                        <div className="status-button-bar d-flex flex-column gap-3">
+                                        <div className="status-button-bar d-flex flex-column gap-3 w-100">
                                             <div className="d-flex align-items-center gap-2 flex-wrap">
                                                 <span className="fw-bold me-2 text-muted" style={{ fontSize: '12px' }}>Order Status:</span>
                                                 {statusActions.map((action) => (

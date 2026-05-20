@@ -8,6 +8,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { replacePath } from "../Utils/CustomFunctions/ReplacePath";
 import I18NextContext from "@/Helper/I18NextContext";
+import OrderNotificationPoller from "../Components/CommonComponent/OrderNotificationPoller";
 
 const Layout = (props) => {
   const { i18Lang, setI18Lang } = useContext(I18NextContext);
@@ -55,6 +56,7 @@ const Layout = (props) => {
   }, [mounted, accountData, path, props.lng]);
   return (
     <>
+      <OrderNotificationPoller />
       <div className="page-wrapper compact-wrapper" id="pageWrapper">
         <Header setMode={setMode} setLtr={setLtr} settingData={'settingData'} />
         <div className="page-body-wrapper">

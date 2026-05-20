@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Col } from "reactstrap";
 import AllProductTable from "@/Components/Product/AllProductTable";
-import { product } from "@/Utils/AxiosUtils/API";
+import { product, ProductImportAPI, ProductExportAPI } from "@/Utils/AxiosUtils/API";
 
 const AllUsers = () => {
   const [isCheck, setIsCheck] = useState([]);
@@ -14,6 +14,7 @@ const AllUsers = () => {
         isCheck={isCheck}
         setIsCheck={setIsCheck}
         isReplicate={{ title: "Duplicate", replicateAPI: "replicate" }}
+        importExport={{ importUrl: ProductImportAPI, exportUrl: ProductExportAPI }}
       />
     </Col>
   );

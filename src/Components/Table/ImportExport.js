@@ -9,11 +9,13 @@ import { YupObject, requiredSchema } from '../../Utils/Validation/ValidationSche
 import FileUploadBrowser from '../InputFields/FileUploadBrowser'
 import I18NextContext from '@/Helper/I18NextContext'
 import { useTranslation } from '@/app/i18n/client'
+import { useRouter } from 'next/navigation'
 
 const ImportExport = ({ importExport, refetch, moduleName }) => {
     const { i18Lang } = useContext(I18NextContext);
     const { t } = useTranslation(i18Lang, "common");
     const [modal, setModal] = useState(false)
+    const router = useRouter()
     const { mutate: exportMutate, isLoading: exportLoader } = useCreate(importExport.exportUrl, false, false, false, (resDta) => {
         if (resDta?.status == 200 || resDta?.status == 201) {
             const blob = new Blob([resDta?.data], { type: 'text/csv' });
@@ -33,7 +35,13 @@ const ImportExport = ({ importExport, refetch, moduleName }) => {
     })
     return (
         <>
-            <a className="btn-outline btn btn-secondary" onClick={() => setModal(true)}><RiUpload2Line />{t("Import")}</a>
+            <a className="btn-outline btn btn-secondary" onClick={() => {
+                if (moduleName.toLowerCase() === 'products') {
+                    router.push(`/${i18Lang}/product/bulk-import`);
+                } else {
+                    setModal(true);
+                }
+            }}><RiUpload2Line />{t("Import")}</a>
             <a className="btn-outline btn btn-secondary" onClick={() => exportMutate()}><RiDownload2Line />{t("Export")}</a >
 
             <ShowModal open={modal} setModal={setModal} modalAttr={{ className: "media-modal modal-dialog modal-dialog-centered modal-xl" }} close={true} title={"InsertMedia"} noClass={true}
