@@ -7,7 +7,7 @@ import TreeForm from '@/Components/category/TreeForm';
 import dynamic from 'next/dynamic';
 import { Category } from '@/Utils/AxiosUtils/API';
 import usePermissionCheck from '@/Utils/Hooks/usePermissionCheck';
-import useCreate from '@/Utils/Hooks/useCreate';
+import useUpdate from '@/Utils/Hooks/useUpdate';
 import I18NextContext from '@/Helper/I18NextContext';
 
 const UpdateBlogCategory = ({ params }) => {
@@ -17,7 +17,7 @@ const UpdateBlogCategory = ({ params }) => {
     const [edit] = usePermissionCheck(["edit"], "category");
     const { i18Lang } = useContext(I18NextContext);
     const { t } = useTranslation(i18Lang, 'common');
-    const { mutate, isLoading } = useCreate(`${Category}/${params?.updateId}`, false, "/blog/category", false);
+    const { mutate, isLoading } = useUpdate(Category, params?.updateId, "/blog/category");
     return (
         <>
             <Container fluid={true}>

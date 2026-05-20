@@ -105,8 +105,8 @@ const AttachmentModal = (props) => {
                                 }
                                 mutate(formData);
                             }}>
-                            {({ values, setFieldValue, errors }) => (
-                                <Form className="theme-form theme-form-2 mega-form d-flex flex-column h-100" style={{ minHeight: '600px' }}>
+                            {({ values, setFieldValue, errors, handleSubmit }) => (
+                                <div className="theme-form theme-form-2 mega-form d-flex flex-column h-100" style={{ minHeight: '600px' }}>
                                     <AttachmentNameObserver />
                                     <div className="flex-grow-1 d-flex align-items-stretch w-100 gap-4 py-4">
                                         <div className="flex-fill">
@@ -172,10 +172,10 @@ const AttachmentModal = (props) => {
                                             { (values?.attachments.length > 0 || values?.url) ? (
                                                 <button type="button" className="btn text-danger fw-bold" onClick={() => { setFieldValue('attachments', ""); setFieldValue("url", ""); setFieldValue("name", ""); }}>{t("ClearAll") || "Clear All"}</button>
                                             ) : <div></div>}
-                                            <Btn type="submit" className="theme-btn-lg px-5" title={ "Add Media"} loading={Number(isLoading)} />
+                                            <Btn type="button" className="theme-btn-lg px-5" title={ "Add Media"} loading={Number(isLoading)} onClick={handleSubmit} />
                                         </div>
                                     </div>
-                                </Form>
+                                </div>
                             )}
                         </Formik>
                     </div>

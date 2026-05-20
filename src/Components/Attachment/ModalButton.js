@@ -53,7 +53,7 @@ const ModalButton = ({ setModal, attachmentsData, dispatch, state, name, setSele
                     </div>
                 </div>
                 <div className="right-part">
-                    <Btn type="submit" className="btn btn-solid" title={tabNav === 2 ? "Submit" : t("InsertMedia")} loading={Number(isLoading)} onClick={() => handleClick(state.selectedImage)} />
+                    <Btn type="button" className="btn btn-solid" title={tabNav === 2 ? "Submit" : t("InsertMedia")} loading={Number(isLoading)} onClick={() => handleClick(state.selectedImage)} />
                 </div>
             </div>
         </>

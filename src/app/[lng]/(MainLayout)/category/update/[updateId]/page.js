@@ -6,14 +6,14 @@ import { Category } from "@/Utils/AxiosUtils/API";
 import CategoryForm from "@/Components/category/CategoryForm";
 import TreeForm from "@/Components/category/TreeForm";
 import usePermissionCheck from "@/Utils/Hooks/usePermissionCheck";
-import useCreate from "@/Utils/Hooks/useCreate";
+import useUpdate from "@/Utils/Hooks/useUpdate";
 
 const CategoryUpdate = ({params}) => {
   const TableTitle = dynamic(() => import("@/Components/Table/TableTitle"), {
     ssr: false,
   });
   const [edit] = usePermissionCheck(["edit"]);
-  const { mutate, isLoading } = useCreate(`${Category}/${params?.updateId}`, false, "/category", false);
+  const { mutate, isLoading } = useUpdate(Category, params?.updateId, "/category");
   return (
     <>
       <Container fluid={true}>
