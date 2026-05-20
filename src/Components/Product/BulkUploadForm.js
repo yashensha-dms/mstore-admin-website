@@ -275,24 +275,31 @@ const BulkUploadForm = () => {
                               <th>HSN Code</th>
                               <th>MRP</th>
                               <th>Selling Price</th>
+                              <th>Discount</th>
                               <th>Cost</th>
                               <th>SKU</th>
                               <th>Barcode</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {parsedData.rows.map((row, idx) => (
-                              <tr key={idx}>
-                                <td>{idx + 1}</td>
-                                <td className="text-truncate" style={{ maxWidth: "150px" }}>{row.name}</td>
-                                <td>{formatScientific(row.hsn_code || row.hsncode || row["hsn code"]) || "-"}</td>
-                                <td>{row.mrp || row.price || "-"}</td>
-                                <td>{row.selling_price || row.sale_price || row["selling price"] || "-"}</td>
-                                <td>{row.cost || "-"}</td>
-                                <td>{formatScientific(row.sku) || "-"}</td>
-                                <td>{formatScientific(row.barcode) || "-"}</td>
-                              </tr>
-                            ))}
+                            {parsedData.rows.map((row, idx) => {
+                              const mrp = parseFloat(row.mrp || row.price || 0);
+                              const selling = parseFloat(row.selling_price || row.sale_price || row["selling price"] || 0);
+                              const discountAmount = Math.max(0, mrp - selling);
+                              return (
+                                <tr key={idx}>
+                                  <td>{idx + 1}</td>
+                                  <td className="text-truncate" style={{ maxWidth: "150px" }}>{row.name}</td>
+                                  <td>{formatScientific(row.hsn_code || row.hsncode || row["hsn code"]) || "-"}</td>
+                                  <td>{row.mrp || row.price || "-"}</td>
+                                  <td>{row.selling_price || row.sale_price || row["selling price"] || "-"}</td>
+                                  <td>{discountAmount > 0 ? discountAmount.toFixed(2) : "0.00"}</td>
+                                  <td>{row.cost || "-"}</td>
+                                  <td>{formatScientific(row.sku) || "-"}</td>
+                                  <td>{formatScientific(row.barcode) || "-"}</td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </Table>
                       </div>
@@ -345,6 +352,7 @@ const BulkUploadForm = () => {
                           <th>HSN Code</th>
                           <th>MRP</th>
                           <th>Selling Price</th>
+                          <th>Discount</th>
                           <th>Cost</th>
                           <th>SKU</th>
                           <th>Barcode</th>
@@ -358,6 +366,7 @@ const BulkUploadForm = () => {
                             <td>{formatScientific(prod.hsn_code) || "-"}</td>
                             <td>{prod.price || "-"}</td>
                             <td>{prod.sale_price || "-"}</td>
+                            <td>{prod.discount !== null && prod.discount !== undefined ? parseFloat(prod.discount).toFixed(2) : "0.00"}</td>
                             <td>{prod.cost || "-"}</td>
                             <td>{formatScientific(prod.sku) || "-"}</td>
                             <td>{formatScientific(prod.barcode) || "-"}</td>

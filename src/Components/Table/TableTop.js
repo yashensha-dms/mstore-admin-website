@@ -26,30 +26,28 @@ const TableTop = (props) => {
   };
   return (
     <div className="show-box">
-      {filterHeader?.noPageDrop !== true && <div className="me-auto">
-        <Form className="entries-form" onSubmit={(e) => { e.preventDefault() }}>
-          <Label>
-            {t("Show")}:
-            <select className="form-control" onChange={(e) => setPaginate(e.target.value)}>
-              <option>15</option> <option>25</option> <option>50</option> <option>100</option>
-            </select>
-          </Label>
-          <span>{t("Entries")}</span>
-          {
-            destroy && isCheck?.length > 0 &&
-            <TableDeleteOption url={url} setIsCheck={setIsCheck} isCheck={isCheck} />
-          }
-          {edit && isCheck?.length > 0 && isReplicate && <TableDuplicateOption isReplicate={isReplicate} url={url} isCheck={isCheck} setIsCheck={setIsCheck} refetch={refetch} />}
-        </Form>
-
-      </div>}
+      {filterHeader?.noPageDrop !== true && (
+        <div className="me-auto">
+          <Form className="entries-form" onSubmit={(e) => { e.preventDefault() }}>
+            <Label>
+              {t("Show")}:
+              <select className="form-control" onChange={(e) => setPaginate(e.target.value)}>
+                <option>15</option> <option>25</option> <option>50</option> <option>100</option>
+              </select>
+            </Label>
+            <span>{t("Entries")}</span>
+          </Form>
+        </div>
+      )}
       {dateRange && <CalenderFilter date={date} setDate={setDate} />}
-      {filterHeader?.noSearch !== true && <div className="role-search">
-        <Label htmlFor="role-search" className="form-label"> {t("Search")}:</Label>
+      {filterHeader?.noSearch !== true && (
+        <div className="role-search">
+          <Label htmlFor="role-search" className="form-label"> {t("Search")}:</Label>
 
-        <Input type="search" className="form-control" id="role-search" value={text}
-          onChange={(e) => { onChange(e.target.value); setText(e.target.value) }} />
-      </div>}
+          <Input type="search" className="form-control" id="role-search" value={text}
+            onChange={(e) => { onChange(e.target.value); setText(e.target.value) }} />
+        </div>
+      )}
     </div>
   );
 };

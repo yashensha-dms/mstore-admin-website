@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import { RiArrowDownSFill, RiArrowUpSFill, RiLock2Line } from "react-icons/ri";
 import { Rating } from "react-simple-star-rating";
 import { Input, Table } from "reactstrap";
@@ -16,10 +16,10 @@ import { useTranslation } from "@/app/i18n/client";
 
 const TableRow = React.memo(({ tableData, index, headerData, isCheck, handleChange, isHandelEdit, getSubKeysData, current_page, per_page, mutate, moduleName, type, refetch, keyInPermission, convertCurrency, edit, url, t }) => {
   return (
-    <tr className={tableData?.customRowClass || ""}>
+    <tr className={`${tableData?.customRowClass || ""} ${isCheck?.some(id => String(id) === String(tableData?.id)) ? "row-checked" : ""}`}>
       {headerData?.checkBox && (
         <td className="sm-width">
-          <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.[index]?.system_reserve !== "1" && isCheck?.includes(tableData?.id)} disabled={headerData?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />
+          <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.[index]?.system_reserve !== "1" && isCheck?.some(id => String(id) === String(tableData?.id))} disabled={headerData?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />
         </td>
       )}
       {headerData.isSerialNo !== false && (
@@ -65,7 +65,7 @@ const TableRow = React.memo(({ tableData, index, headerData, isCheck, handleChan
       prev.index === next.index &&
       prev.edit === next.edit &&
       prev.headerData?.noEdit === next.headerData?.noEdit &&
-      (prev.isCheck || []).includes(prev.tableData.id) === (next.isCheck || []).includes(next.tableData.id) &&
+      (prev.isCheck || []).some(id => String(id) === String(prev.tableData?.id)) === (next.isCheck || []).some(id => String(id) === String(next.tableData?.id)) &&
       prev.headerData.data.length === next.headerData.data.length &&
       JSON.stringify(prev.tableData) === JSON.stringify(next.tableData)
     );
@@ -82,15 +82,20 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
   const [edit] = usePermissionCheck(["edit", "destroy"]);
   const [colSpann, setColSpann] = useState();
   const router = useRouter();
-  const orignalDataLength = headerData?.data?.filter((elem) => elem.system_reserve == "1").length;
+  const selectableItems = headerData?.data?.filter((elem) => elem.system_reserve !== "1") || [];
   /* Select All Data */
-  const handleChange = (result) => {
-    if (isCheck?.includes(result.id)) {
-      let removeValue = [...isCheck];
-      removeValue.splice(removeValue.indexOf(result.id), 1);
-      setIsCheck(removeValue);
-    } else setIsCheck([...isCheck, result.id]);
-  };
+  const handleChange = useCallback((result) => {
+    if (!result || result.id === undefined || result.id === null) return;
+    setIsCheck((prevCheck) => {
+      const currentCheck = Array.isArray(prevCheck) ? prevCheck : [];
+      const exists = currentCheck.some(id => String(id) === String(result.id));
+      if (exists) {
+        return currentCheck.filter(id => String(id) !== String(result.id));
+      } else {
+        return [...currentCheck, result.id];
+      }
+    });
+  }, [setIsCheck]);
   /* Sorting Data */
   const handleSort = (title) => {
     setSortBy({ ...sortBy, field: title, sort: `${sortBy.sort == "asc" ? "desc" : "asc"}` });
@@ -128,8 +133,40 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
     }
   };
   return (
-    <Table id="table_id" className={`role-table ${headerData?.noCustomClass ? "" : "refund-table"} all-package theme-table datatable-wrapper`}>
-      <TableLoader fetchStatus={fetchStatus} />
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        .theme-table tbody tr {
+          transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .theme-table tbody tr:hover {
+          background-color: #f8fafc !important;
+        }
+        .theme-table tbody tr.row-checked {
+          background-color: rgba(13, 168, 155, 0.06) !important;
+        }
+        .theme-table tbody tr.row-checked:hover {
+          background-color: rgba(13, 168, 155, 0.1) !important;
+        }
+        .checkbox_animated {
+          cursor: pointer !important;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .checkbox_animated:not(:disabled):hover {
+          transform: scale(1.15);
+        }
+        .checkbox_animated:checked {
+          background-color: var(--theme-color, #0da89b) !important;
+          border-color: var(--theme-color, #0da89b) !important;
+        }
+        .table-responsive.border-table {
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+          border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        }
+      `}} />
+      <Table id="table_id" className={`role-table ${headerData?.noCustomClass ? "" : "refund-table"} all-package theme-table datatable-wrapper`}>
+        <TableLoader fetchStatus={fetchStatus} />
       <thead>
         <tr>
           <>
@@ -138,10 +175,10 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
                 <Input
                   className="custom-control-input checkbox_animated"
                   type={"checkbox"}
-                  checked={headerData?.data?.length > 0 && isCheck?.length == headerData?.data?.length}
-                  disabled={orignalDataLength == headerData?.data?.length ? true : false}
+                  checked={selectableItems.length > 0 && selectableItems.every(item => isCheck?.some(id => String(id) === String(item.id)))}
+                  disabled={selectableItems.length === 0}
                   onChange={(e) => {
-                    e.target.checked ? setIsCheck([...headerData?.data?.map((item) => item.id)]) : setIsCheck([]);
+                    e.target.checked ? setIsCheck(selectableItems.map((item) => item.id)) : setIsCheck([]);
                   }}
                 />
               </th>
@@ -192,6 +229,7 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
         )}
       </tbody>
     </Table>
+    </>
   );
 };
 
