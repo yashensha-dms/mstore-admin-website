@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Container } from "reactstrap";
 import ConvertPermissionArr from "../Utils/CustomFunctions/ConvertPermissionArr";
-import Footer from "./Footer";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { replacePath } from "../Utils/CustomFunctions/ReplacePath";
@@ -65,7 +64,6 @@ const Layout = (props) => {
             <Container fluid={true}>
               {props.children}
             </Container>
-            <Footer />
           </div>
         </div>
       </div>

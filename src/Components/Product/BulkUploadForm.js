@@ -20,7 +20,7 @@ import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 import request from "@/Utils/AxiosUtils";
 import { Category, product } from "@/Utils/AxiosUtils/API";
-import Btn from "@/Elements/Buttons/Btn";
+import Button from "@/Components/CommonComponent/Button";
 
 // CSV line parser supporting quoted fields and stripping Excel single quotes
 const parseCSVLine = (line) => {
@@ -412,28 +412,29 @@ const BulkUploadForm = () => {
   };
 
   return (
-    <Container fluid className="bulk-upload-container pb-5">
-      <Row className="page-title-container align-items-center mb-4">
-        <Col xs="12">
-          <div className="title-header option-title">
-            <h3 className="header-gradient-accent">{t("BulkProductUpload")}</h3>
-            <p className="text-muted small mb-0">Import large quantities of products via CSV and map columns instantly</p>
-          </div>
-        </Col>
-      </Row>
+    <div className="flex flex-col h-[calc(100vh-140px)] lg:h-[calc(100vh-125px)] min-h-0 w-full overflow-hidden text-slate-800">
+      {/* Top Head Section */}
+      <div className="flex-none mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h3 className="text-xl font-bold text-slate-900 bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">{t("BulkProductUpload")}</h3>
+          <p className="text-slate-500 text-xs mt-0.5">Import large quantities of products via CSV and map columns instantly</p>
+        </div>
+      </div>
 
-      <Row>
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
         {/* Main Workspace */}
-        <Col lg={mode === "UPLOAD" ? "8" : "12"}>
-          <Card className="glass-card-premium border-0 shadow-sm overflow-hidden mb-4">
-            <CardBody className="p-4">
+        <div className={`${mode === "UPLOAD" ? "lg:col-span-8" : "lg:col-span-12"} flex flex-col h-full min-h-0 overflow-hidden`}>
+          <div className="flex flex-col h-full min-h-0 bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+            <div className="flex flex-col flex-1 min-h-0 p-4 lg:p-6">
               
               {/* UPLOAD MODE */}
               {mode === "UPLOAD" && (
-                <div className="py-2">
+                <div className="flex-1 flex flex-col justify-center min-h-0">
                   <div
-                    className={`drag-drop-zone-premium ${
-                      isDragging ? "drag-active" : ""
+                    className={`group flex flex-col justify-center items-center border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 h-full min-h-[300px] ${
+                      isDragging 
+                        ? "border-primary bg-primary/5 scale-[0.99]" 
+                        : "border-slate-300 bg-slate-50/50 hover:border-primary/80 hover:bg-slate-50"
                     }`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
@@ -443,307 +444,331 @@ const BulkUploadForm = () => {
                     <input
                       type="file"
                       ref={fileInputRef}
-                      className="d-none"
+                      className="hidden"
                       accept=".csv"
                       onChange={(e) => handleFileChange(e.target.files[0])}
                     />
-                    <div className="upload-cloud-icon-box">
-                      <RiUploadCloud2Line size={36} />
+                    <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/5 text-primary mb-4 transition-all duration-300 group-hover:bg-primary/10 group-hover:text-primary group-hover:scale-110 group-hover:shadow-md group-hover:shadow-primary/20">
+                      <RiUploadCloud2Line size={32} className="animate-pulse" />
                     </div>
-                    <h5 className="mb-2 fw-bold text-dark">{t("DragDropCSV")}</h5>
-                    <p className="text-muted small mb-4">
+                    <h5 className="mb-1 font-bold text-slate-800 text-base">{t("DragDropCSV")}</h5>
+                    <p className="text-slate-500 text-xs mb-5">
                       {t("CSVFilesOnly")} &bull; Max size: 10MB
                     </p>
-                    <Btn 
-                      className="btn btn-theme px-4 py-2 border-0 shadow-xs" 
+                    <Button 
+                      type="button"
+                      variant="primary"
+                      size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         fileInputRef.current?.click();
                       }}
                     >
                       Browse Files
-                    </Btn>
+                    </Button>
                   </div>
                 </div>
               )}
 
               {/* PREVIEW & MAPPING MODE */}
               {mode === "PREVIEW" && parsedData && (
-                <div>
+                <div className="flex flex-col h-full min-h-0">
                   {/* File Stats Summary Header */}
-                  <div className="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
-                    <div className="d-flex align-items-center gap-3">
-                      <div className="p-3 rounded-3 text-primary" style={{ background: "rgba(99, 102, 241, 0.08)" }}>
-                        <RiFileList2Line size={24} />
+                  <div className="flex-none flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl text-primary bg-primary/10">
+                        <RiFileList2Line size={22} />
                       </div>
                       <div>
-                        <h6 className="m-0 fw-bold text-dark">{file?.name}</h6>
-                        <div className="d-flex gap-2 align-items-center mt-1">
-                          <span className="badge-custom-pill badge-custom-neutral">
+                        <h6 className="m-0 font-bold text-slate-900 text-sm">{file?.name}</h6>
+                        <div className="flex gap-2 items-center mt-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                             {(file?.size / 1024).toFixed(1)} KB
                           </span>
-                          <span className="badge-custom-pill badge-custom-info">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                             {parsedData.totalRows} {t("Records")}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <Btn className="btn btn-outline-danger btn-sm px-3 py-2" onClick={handleClear} title="Cancel">
-                      <RiCloseLine className="me-1" size={16} /> {t("Cancel")}
-                    </Btn>
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      icon={RiCloseLine}
+                      onClick={handleClear} 
+                      title="Cancel"
+                      className="!text-red-600 !border-red-200 hover:!bg-red-50"
+                    >
+                      {t("Cancel")}
+                    </Button>
                   </div>
 
                   {/* Mapping Rules Info Banner */}
-                  <Alert color="light" className="d-flex align-items-start border border-light-subtle rounded-3 mb-4 shadow-xs" style={{ background: "rgba(248, 250, 252, 0.8)" }}>
-                    <RiInformationLine className="text-info me-2 mt-1" size={20} />
-                    <div className="small text-muted">
-                      <strong>Dynamic Header Mapping:</strong> Columns were matched based on name proximity. Review and verify the selections below before running the importer.
+                  <div className="flex-none my-3 p-3 bg-slate-50 border border-slate-200/60 rounded-xl flex items-start gap-2.5">
+                    <RiInformationLine className="text-primary mt-0.5 shrink-0" size={18} />
+                    <div className="text-xs text-slate-600 leading-normal">
+                      <strong className="text-slate-800">Dynamic Header Mapping:</strong> Columns were matched based on name proximity. Review and verify the selections below before running the importer.
                     </div>
-                  </Alert>
-
-                  {/* Columns Mapping Panel */}
-                  <div className="mapping-panel-premium mb-5">
-                    <div className="d-flex align-items-center gap-2 mb-4 border-bottom pb-2">
-                      <h6 className="m-0 fw-bold text-dark">Configure Column Mapping</h6>
-                    </div>
-                    <Row className="g-3">
-                      {DEFAULT_FIELDS.map((field) => {
-                        const isMapped = !!mapping[field.key];
-                        return (
-                          <Col xl="3" lg="4" md="6" key={field.key}>
-                            <div className={`mapping-card-premium ${field.required ? "required" : "optional"} ${isMapped ? "matched" : ""}`}>
-                              <div className="w-100">
-                                <span className="mapping-field-label">
-                                  <span className="d-flex align-items-center gap-1">
-                                    {isMapped && <RiCheckLine className="text-success" size={14} />}
-                                    {field.label.split(" (")[0]}
-                                  </span>
-                                  {field.required ? (
-                                    <span className="badge-custom-pill badge-custom-danger py-0 px-2" style={{ fontSize: '0.65rem' }}>Required</span>
-                                  ) : (
-                                    <span className="badge-custom-pill badge-custom-neutral py-0 px-2" style={{ fontSize: '0.65rem' }}>Optional</span>
-                                  )}
-                                </span>
-                                <select
-                                  className="mapping-field-select"
-                                  value={mapping[field.key] || ""}
-                                  onChange={(e) => handleMappingChange(field.key, e.target.value)}
-                                >
-                                  <option value="">-- Skip Field --</option>
-                                  {parsedData.headers.map((h, i) => (
-                                    <option key={i} value={h}>{h}</option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                          </Col>
-                        );
-                      })}
-                    </Row>
                   </div>
 
-                  {/* Data Preview Table */}
-                  <div className="preview-table-container mb-4">
-                    <h6 className="mb-3 fw-bold text-dark d-flex align-items-center">
-                      <span className="badge-custom-pill badge-custom-success me-2" style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>Data Preview</span>
-                      <small className="text-muted">Showing first 5 rows</small>
-                    </h6>
-                    
-                    <div className="preview-table-card">
-                      <div className="table-responsive">
-                        <Table className="preview-table-premium align-middle">
-                          <thead>
-                            <tr>
-                              <th>#</th>
-                              <th>Image</th>
-                              <th>Product Name</th>
-                              <th>SKU & Barcode</th>
-                              <th>MRP Price</th>
-                              <th>Selling Price</th>
-                              <th>Category Status</th>
-                              <th>HSN Code</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {parsedData.rows.slice(0, 5).map((row, idx) => {
-                              const nameVal = row[mapping["name"]] || "-";
-                              const skuVal = row[mapping["sku"]] || "-";
-                              const priceVal = row[mapping["price"]] || "-";
-                              const salePriceVal = mapping["sale_price"] ? row[mapping["sale_price"]] : "";
-                              const hsnVal = mapping["hsn_code"] ? row[mapping["hsn_code"]] : "";
-                              const barcodeVal = mapping["barcode"] ? row[mapping["barcode"]] : "";
-                              
-                              // Category resolution check
-                              const catVal = mapping["category_name"] ? row[mapping["category_name"]] : "";
-                              const catExists = catVal ? !!flattenedCategories[catVal.trim().toLowerCase()] : null;
+                  {/* Scrolling Panel for Mapping Cards & Table */}
+                  <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-5 custom-scrollbar">
+                    {/* Columns Mapping Panel */}
+                    <div className="bg-slate-50/50 border border-slate-200/50 rounded-2xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <h6 className="m-0 font-bold text-slate-800 text-sm">Configure Column Mapping</h6>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {DEFAULT_FIELDS.map((field) => {
+                          const isMapped = !!mapping[field.key];
+                          return (
+                            <div 
+                              key={field.key} 
+                              className={`flex flex-col justify-between p-3 rounded-xl border bg-white transition-all h-full ${
+                                isMapped 
+                                  ? "border-emerald-200 bg-emerald-50/20 shadow-sm" 
+                                  : field.required
+                                    ? "border-l-4 border-l-red-500 border-slate-200"
+                                    : "border-l-4 border-l-slate-400 border-slate-200"
+                              }`}
+                            >
+                              <div className="w-full">
+                                <span className="flex items-center justify-between text-xs font-semibold text-slate-600 mb-2">
+                                  <span className="flex items-center gap-1 truncate max-w-[75%]">
+                                    {isMapped && <RiCheckLine className="text-emerald-600 shrink-0" size={14} />}
+                                    <span className="truncate">{field.label.split(" (")[0]}</span>
+                                  </span>
+                                  {field.required ? (
+                                    <span className="px-1.5 py-0.5 text-[10px] font-bold tracking-wide rounded-md bg-red-100 text-red-700 uppercase">Required</span>
+                                  ) : (
+                                    <span className="px-1.5 py-0.5 text-[10px] font-bold tracking-wide rounded-md bg-slate-100 text-slate-500 uppercase">Optional</span>
+                                  )}
+                                </span>
+                                <div className="relative mt-1">
+                                  <select
+                                    className="w-full pl-3 pr-8 py-1.5 text-xs font-medium text-slate-800 bg-white border border-slate-300 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none appearance-none cursor-pointer"
+                                    value={mapping[field.key] || ""}
+                                    onChange={(e) => handleMappingChange(field.key, e.target.value)}
+                                  >
+                                    <option value="">-- Skip Field --</option>
+                                    {parsedData.headers.map((h, i) => (
+                                      <option key={i} value={h}>{h}</option>
+                                    ))}
+                                  </select>
+                                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                    </svg>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                              // Image link check
-                              const imageVal = mapping["image_url"] ? row[mapping["image_url"]] : "";
+                    {/* Data Preview Table */}
+                    <div>
+                      <h6 className="mb-2.5 font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          Data Preview
+                        </span>
+                        <span className="text-slate-500 text-xs font-normal">Showing first 5 rows</span>
+                      </h6>
+                      
+                      <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left border-collapse align-middle">
+                            <thead>
+                              <tr className="bg-slate-50 border-b border-slate-200">
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">#</th>
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Image</th>
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Product Name</th>
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">SKU & Barcode</th>
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">MRP Price</th>
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Selling Price</th>
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Category Status</th>
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">HSN Code</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {parsedData.rows.slice(0, 5).map((row, idx) => {
+                                const nameVal = row[mapping["name"]] || "-";
+                                const skuVal = row[mapping["sku"]] || "-";
+                                const priceVal = row[mapping["price"]] || "-";
+                                const salePriceVal = mapping["sale_price"] ? row[mapping["sale_price"]] : "";
+                                const hsnVal = mapping["hsn_code"] ? row[mapping["hsn_code"]] : "";
+                                const barcodeVal = mapping["barcode"] ? row[mapping["barcode"]] : "";
+                                
+                                const catVal = mapping["category_name"] ? row[mapping["category_name"]] : "";
+                                const catExists = catVal ? !!flattenedCategories[catVal.trim().toLowerCase()] : null;
+                                const imageVal = mapping["image_url"] ? row[mapping["image_url"]] : "";
 
-                              return (
-                                <tr key={idx} className="table-hover-row">
-                                  <td className="fw-semibold text-muted">{idx + 1}</td>
-                                  <td>
-                                    {imageVal && imageVal.startsWith("http") ? (
-                                      <img 
-                                        src={imageVal} 
-                                        alt="preview" 
-                                        className="image-preview-thumb"
-                                      />
-                                    ) : (
-                                      <span className="text-muted small">-</span>
-                                    )}
-                                  </td>
-                                  <td className="text-truncate fw-semibold text-dark" style={{ maxWidth: "220px" }}>{nameVal}</td>
-                                  <td>
-                                    <div className="d-flex flex-column gap-1">
-                                      <span className="badge-custom-pill badge-custom-neutral font-monospace w-fit">{skuVal}</span>
-                                      {barcodeVal && (
-                                        <span className="text-muted small font-monospace" style={{ fontSize: '0.725rem' }}>Bar: {barcodeVal}</span>
-                                      )}
-                                    </div>
-                                  </td>
-                                  <td className="text-dark fw-bold">{priceVal}</td>
-                                  <td className="text-success fw-bold">{salePriceVal || priceVal}</td>
-                                  <td>
-                                    {catVal ? (
-                                      catExists ? (
-                                        <span className="badge-custom-pill badge-custom-success">{catVal} (Exists)</span>
+                                return (
+                                  <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                    <td className="p-3 text-xs font-semibold text-slate-400">{idx + 1}</td>
+                                    <td className="p-3">
+                                      {imageVal && imageVal.startsWith("http") ? (
+                                        <img 
+                                          src={imageVal} 
+                                          alt="preview" 
+                                          className="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-sm hover:scale-125 transition-transform origin-center"
+                                        />
                                       ) : (
-                                        <span className="badge-custom-pill badge-custom-warning">{catVal} (New)</span>
-                                      )
-                                    ) : (
-                                      <span className="text-muted small">-</span>
-                                    )}
-                                  </td>
-                                  <td>{hsnVal || "-"}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </Table>
+                                        <span className="text-slate-400 text-xs">-</span>
+                                      )}
+                                    </td>
+                                    <td className="p-3 text-xs font-semibold text-slate-800 truncate max-w-[200px]" title={nameVal}>{nameVal}</td>
+                                    <td className="p-3">
+                                      <div className="flex flex-col gap-1">
+                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-600 w-fit border border-slate-200/50">{skuVal}</span>
+                                        {barcodeVal && (
+                                          <span className="text-[10px] text-slate-500 font-mono">Bar: {barcodeVal}</span>
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="p-3 text-xs font-bold text-slate-900">{priceVal}</td>
+                                    <td className="p-3 text-xs font-bold text-emerald-600">{salePriceVal || priceVal}</td>
+                                    <td className="p-3">
+                                      {catVal ? (
+                                        catExists ? (
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">{catVal} (Exists)</span>
+                                        ) : (
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100">{catVal} (New)</span>
+                                        )
+                                      ) : (
+                                        <span className="text-slate-400 text-xs">-</span>
+                                      )}
+                                    </td>
+                                    <td className="p-3 text-xs text-slate-600">{hsnVal || "-"}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="d-flex justify-content-end mt-4 pt-3 border-top">
-                    <Btn
-                      className="btn btn-theme px-5 py-2 d-flex align-items-center border-0 shadow-sm"
+                  {/* Actions footer bar */}
+                  <div className="flex-none flex justify-end mt-4 pt-3 border-t border-slate-100">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="lg"
+                      icon={RiPlayLine}
                       onClick={startImport}
                       title="Import Products"
                     >
-                      <RiPlayLine className="me-2" size={18} /> Import {parsedData.totalRows} Products
-                    </Btn>
+                      Import {parsedData.totalRows} Products
+                    </Button>
                   </div>
                 </div>
               )}
 
               {/* IMPORT RUNNING OR DONE STATE */}
               {(mode === "IMPORTING" || mode === "DONE") && (
-                <div className="py-2">
-                  <div className="d-flex align-items-center justify-content-between mb-3">
-                    <h6 className="m-0 fw-bold d-flex align-items-center text-dark">
+                <div className="flex flex-col h-full min-h-0">
+                  <div className="flex-none flex items-center justify-between mb-3.5">
+                    <h6 className="m-0 font-bold flex items-center text-slate-800 text-sm">
                       {mode === "IMPORTING" ? (
                         <>
-                          <RiLoader4Line className="spinner me-2 text-primary" size={24} />
+                          <RiLoader4Line className="animate-spin mr-2 text-primary" size={22} />
                           Importing products sequentially...
                         </>
                       ) : (
                         <>
-                          <RiCheckLine className="text-success me-2 border rounded-circle p-1 bg-light-success" size={28} />
+                          <RiCheckLine className="text-emerald-600 mr-2 border border-emerald-100 rounded-full p-1 bg-emerald-50" size={24} />
                           Import completed successfully!
                         </>
                       )}
                     </h6>
-                    <div className="text-muted small fw-semibold">
+                    <div className="text-slate-500 text-xs font-semibold">
                       {importProgress.current} / {importProgress.total} products processed
                     </div>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="progress-bar-glow-container mb-4">
+                  <div className="flex-none h-2.5 bg-slate-100 rounded-full overflow-hidden mb-4 border border-slate-200/50">
                     <div 
-                      className={`progress-bar-glow-fill ${mode === 'DONE' ? 'bg-success' : 'bg-primary'}`}
+                      className={`h-full rounded-full transition-all duration-300 ${mode === 'DONE' ? 'bg-emerald-500' : 'bg-primary'}`}
                       style={{ width: `${(importProgress.current / importProgress.total) * 100}%` }}
                     />
                   </div>
 
                   {/* Metrics Summary Row */}
-                  <Row className="g-3 mb-4">
-                    <Col sm="4">
-                      <div className="metric-box-premium success">
-                        <div>
-                          <span className="metric-box-title">Success</span>
-                          <h4 className="metric-box-value text-success">{importProgress.success}</h4>
-                        </div>
-                        <div className="metric-icon-box success">
-                          <RiCheckLine size={20} />
-                        </div>
+                  <div className="flex-none grid grid-cols-3 gap-4 mb-4">
+                    <div className="flex items-center justify-between p-3 bg-white border border-slate-200/60 border-l-4 border-l-emerald-500 rounded-xl hover:translate-y-[-1px] transition-transform shadow-xs">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Success</span>
+                        <h4 className="text-lg font-extrabold text-emerald-600 leading-tight">{importProgress.success}</h4>
                       </div>
-                    </Col>
-                    <Col sm="4">
-                      <div className="metric-box-premium danger">
-                        <div>
-                          <span className="metric-box-title">Failure</span>
-                          <h4 className="metric-box-value text-danger">{importProgress.failure}</h4>
-                        </div>
-                        <div className="metric-icon-box danger">
-                          <RiAlertLine size={20} />
-                        </div>
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600">
+                        <RiCheckLine size={18} />
                       </div>
-                    </Col>
-                    <Col sm="4">
-                      <div className="metric-box-premium info">
-                        <div>
-                          <span className="metric-box-title">Remaining</span>
-                          <h4 className="metric-box-value text-primary">{importProgress.total - importProgress.current}</h4>
-                        </div>
-                        <div className="metric-icon-box info">
-                          <RiFileList2Line size={20} />
-                        </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white border border-slate-200/60 border-l-4 border-l-red-500 rounded-xl hover:translate-y-[-1px] transition-transform shadow-xs">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Failure</span>
+                        <h4 className="text-lg font-extrabold text-red-600 leading-tight">{importProgress.failure}</h4>
                       </div>
-                    </Col>
-                  </Row>
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600">
+                        <RiAlertLine size={18} />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white border border-slate-200/60 border-l-4 border-l-primary rounded-xl hover:translate-y-[-1px] transition-transform shadow-xs">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Remaining</span>
+                        <h4 className="text-lg font-extrabold text-primary leading-tight">{importProgress.total - importProgress.current}</h4>
+                      </div>
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary">
+                        <RiFileList2Line size={18} />
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Live Status Log console */}
-                  <div className="terminal-window mb-4">
-                    <div className="terminal-header">
-                      <div className="terminal-controls">
-                        <span className="terminal-control-dot red" />
-                        <span className="terminal-control-dot yellow" />
-                        <span className="terminal-control-dot green" />
+                  <div className="flex-1 min-h-0 flex flex-col border border-slate-800 rounded-xl bg-slate-950 overflow-hidden shadow-lg">
+                    <div className="flex-none bg-slate-900 px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                      <div className="flex gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                       </div>
-                      <span className="terminal-title">Import Console Logs</span>
+                      <span className="text-slate-500 text-[10px] font-semibold font-mono tracking-wider">IMPORT CONSOLE LOGS</span>
                       {mode === "IMPORTING" ? (
-                        <span className="badge-custom-pill badge-custom-info py-0 px-2 text-white" style={{ fontSize: '0.65rem', border: 'none', background: '#3b82f6' }}>RUNNING</span>
+                        <span className="px-1.5 py-0.5 text-[9px] font-bold tracking-wide rounded bg-blue-600 text-white font-mono">RUNNING</span>
                       ) : (
-                        <span className="badge-custom-pill badge-custom-success py-0 px-2 text-white" style={{ fontSize: '0.65rem', border: 'none', background: '#10b981' }}>COMPLETED</span>
+                        <span className="px-1.5 py-0.5 text-[9px] font-bold tracking-wide rounded bg-emerald-600 text-white font-mono">COMPLETED</span>
                       )}
                     </div>
                     
-                    <div className="terminal-body custom-scrollbar" ref={terminalBodyRef}>
+                    <div className="flex-1 min-h-0 overflow-y-auto p-4 font-mono text-[11px] leading-relaxed text-slate-400 select-text" ref={terminalBodyRef}>
                       {importLogs.map((log, idx) => {
-                        let textClass = "terminal-text-default";
-                        if (log.includes("SUCCESS:")) textClass = "terminal-text-success";
-                        else if (log.includes("ERROR:") || log.includes("WARNING: Could not create")) textClass = "terminal-text-error";
-                        else if (log.includes("WARNING:")) textClass = "terminal-text-warning";
-                        else if (log.includes("Created root category") || log.includes("Resolved category")) textClass = "terminal-text-info";
+                        let textClass = "text-slate-400";
+                        if (log.includes("SUCCESS:")) textClass = "text-emerald-400";
+                        else if (log.includes("ERROR:") || log.includes("WARNING: Could not create")) textClass = "text-red-400";
+                        else if (log.includes("WARNING:")) textClass = "text-amber-400";
+                        else if (log.includes("Created root category") || log.includes("Resolved category")) textClass = "text-sky-400";
 
                         const time = log.substring(0, 8);
                         const message = log.substring(11);
 
                         return (
-                          <div key={idx} className="terminal-line">
-                            <span className="terminal-time">[{time}]</span>
+                          <div key={idx} className="flex items-start gap-2 mb-1">
+                            <span className="text-slate-600 select-none">[{time}]</span>
                             <span className={textClass}>{message}</span>
                           </div>
                         );
                       })}
                       {isImporting && (
-                        <div className="terminal-line">
-                          <span className="terminal-time">[{new Date().toLocaleTimeString()}]</span>
-                          <span className="terminal-text-default d-flex align-items-center gap-1">
-                            System processing... <span className="terminal-cursor" />
+                        <div className="flex items-start gap-2">
+                          <span className="text-slate-600 select-none">[{new Date().toLocaleTimeString()}]</span>
+                          <span className="text-slate-400 flex items-center gap-1">
+                            System processing... <span className="inline-block w-1.5 h-3 bg-emerald-500 animate-[ping_1.5s_infinite]" />
                           </span>
                         </div>
                       )}
@@ -752,553 +777,108 @@ const BulkUploadForm = () => {
 
                   {/* Footer options */}
                   {mode === "DONE" && (
-                    <div className="d-flex justify-content-center gap-3 pt-2">
-                      <Btn
-                        className="btn btn-outline-secondary px-4 py-2 border border-secondary"
+                    <div className="flex-none flex justify-center gap-3 pt-4 border-t border-slate-100 mt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
                         onClick={handleClear}
                         title="Import Another File"
                       >
                         Import Another File
-                      </Btn>
-                      <Btn
-                        className="btn btn-theme px-4 py-2 border-0 d-flex align-items-center"
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="primary"
+                        icon={RiArrowRightLine}
+                        iconPosition="right"
                         onClick={() => router.push(`/${i18Lang}/product`)}
                         title="View Products Table"
                       >
-                        View Products <RiArrowRightLine className="ms-2" />
-                      </Btn>
+                        View Products
+                      </Button>
                     </div>
                   )}
                 </div>
               )}
 
-            </CardBody>
-          </Card>
-        </Col>
+            </div>
+          </div>
+        </div>
 
-        {/* Right Info Box — Only displayed in initial UPLOAD screen */}
+        {/* Right Guideline Box — Only displayed in initial UPLOAD screen */}
         {mode === "UPLOAD" && (
-          <Col lg="4">
-            <Card className="glass-card-premium border-0 shadow-sm h-100">
-              <CardBody className="p-4 d-flex flex-column justify-content-between">
-                <div>
-                  <h5 className="instruction-title">
-                    <RiInformationLine className="text-primary" size={22} />
-                    {t("Instructions")}
+          <div className="lg:col-span-4 flex flex-col h-full min-h-0 overflow-hidden">
+            <div className="flex flex-col h-full min-h-0 bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+              <div className="flex flex-col flex-1 min-h-0 p-4 lg:p-6">
+                <div className="flex-none">
+                  <h5 className="font-bold text-slate-800 text-base flex items-center gap-2 mb-2">
+                    <RiInformationLine className="text-primary" size={20} />
+                    {t("Guidelines")}
                   </h5>
-                  <p className="text-muted small mb-4">
+                  <p className="text-slate-500 text-xs mb-4">
                     Follow these guidelines to import your product master list seamlessly. Click below to download the official CSV template.
                   </p>
 
-                  <button
-                    className="btn btn-outline-primary w-100 mb-4 d-flex align-items-center justify-content-center py-2 border-primary"
+                  <Button
+                    type="button"
+                    variant="outline"
+                    icon={RiDownload2Line}
                     onClick={handleDownloadTemplate}
-                    style={{ borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600' }}
+                    className="w-full !border-primary/20 hover:!bg-primary/5 !text-primary"
                   >
-                    <RiDownload2Line className="me-2" size={18} />
                     {t("DownloadTemplate")}
-                  </button>
+                  </Button>
+                </div>
 
-                  <h6 className="border-bottom pb-2 mb-3 fw-bold text-dark">{t("CSVFieldsGuidelines")}</h6>
+                <h6 className="flex-none border-b border-slate-100 pb-2 mt-5 mb-3 font-bold text-slate-800 text-sm">{t("CSVFieldsGuidelines")}</h6>
+                
+                {/* Scrollable rules list */}
+                <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-3.5 custom-scrollbar">
+                  <div className="bg-slate-50 border border-slate-200/60 border-l-4 border-l-red-500 rounded-xl p-3.5 hover:translate-x-1 transition-transform">
+                    <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-extrabold tracking-wide bg-red-100 text-red-700 uppercase mb-2">Required Fields</span>
+                    <p className="text-slate-600 text-xs leading-normal">
+                      <strong>DISPLAY NAME</strong> (or Name), <strong>Code</strong> (maps to SKU/Barcode), and <strong>MRP</strong> (Base Price) must be mapped to proceed.
+                    </p>
+                  </div>
                   
-                  <div className="field-rules">
-                    <div className="instruction-step-card required">
-                      <span className="step-label required">Required Fields</span>
-                      <p className="text-muted small mb-0">
-                        <strong>DISPLAY NAME</strong> (or Name), <strong>Code</strong> (maps to SKU/Barcode), and <strong>MRP</strong> (Base Price) must be mapped to proceed.
-                      </p>
-                    </div>
-                    
-                    <div className="instruction-step-card category">
-                      <span className="step-label category">Dynamic Categories</span>
-                      <p className="text-muted small mb-0">
-                        Categories are checked dynamically. If the category name doesn't match any existing one, a new root-level category is created automatically.
-                      </p>
-                    </div>
+                  <div className="bg-slate-50 border border-slate-200/60 border-l-4 border-l-blue-500 rounded-xl p-3.5 hover:translate-x-1 transition-transform">
+                    <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-extrabold tracking-wide bg-blue-100 text-blue-700 uppercase mb-2">Dynamic Categories</span>
+                    <p className="text-slate-600 text-xs leading-normal">
+                      Categories are checked dynamically. If the category name doesn't match any existing one, a new root-level category is created automatically.
+                    </p>
+                  </div>
 
-                    <div className="instruction-step-card image">
-                      <span className="step-label image">Media Attachments</span>
-                      <p className="text-muted small mb-0">
-                        Providing image URLs will automatically upload them to media attachments first and link them as the main product thumbnail.
-                      </p>
-                    </div>
+                  <div className="bg-slate-50 border border-slate-200/60 border-l-4 border-l-emerald-500 rounded-xl p-3.5 hover:translate-x-1 transition-transform">
+                    <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-extrabold tracking-wide bg-emerald-100 text-emerald-700 uppercase mb-2">Media Attachments</span>
+                    <p className="text-slate-600 text-xs leading-normal">
+                      Providing image URLs will automatically upload them to media attachments first and link them as the main product thumbnail.
+                    </p>
                   </div>
                 </div>
-              </CardBody>
-            </Card>
-          </Col>
+              </div>
+            </div>
+          </div>
         )}
-      </Row>
+      </div>
 
-      {/* Global CSS spinner and visual polish rules */}
+      {/* Global CSS scrollbar styling for neat custom scrollbars inside cards */}
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        .spinner {
-          animation: spin 1s linear infinite;
-        }
-        .bg-light-dark {
-          background-color: #f1f5f9 !important;
-          color: #334155 !important;
-        }
-        .shadow-xs {
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-        .w-fit {
-          width: fit-content;
-        }
-        /* Custom scoped styles */
-        .glass-card-premium {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(226, 232, 240, 0.8) !important;
-          box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-          border-radius: 16px;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .glass-card-premium:hover {
-          box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06);
-        }
-        .header-gradient-accent {
-          font-size: 1.6rem;
-          font-weight: 700;
-          color: #0f172a;
-          background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          margin-bottom: 0.25rem;
-        }
-        .drag-drop-zone-premium {
-          border: 2.5px dashed #cbd5e1;
-          background: #f8fafc;
-          border-radius: 16px;
-          padding: 4rem 2rem;
-          text-align: center;
-          cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
-          overflow: hidden;
-        }
-        .drag-drop-zone-premium::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: radial-gradient(circle at center, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        .drag-drop-zone-premium:hover::before {
-          opacity: 1;
-        }
-        .drag-drop-zone-premium:hover {
-          border-color: #4f46e5;
-          background: #f5f7ff;
-          box-shadow: 0 10px 25px -10px rgba(99, 102, 241, 0.15);
-        }
-        .drag-drop-zone-premium.drag-active {
-          border-color: #4f46e5;
-          background: rgba(79, 70, 229, 0.06);
-          box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.12);
-          transform: scale(0.995);
-        }
-        .upload-cloud-icon-box {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 80px;
-          height: 80px;
-          border-radius: 24px;
-          background: #f0f3ff;
-          color: #4f46e5;
-          margin-bottom: 1.5rem;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          animation: bounce-slow 3s ease-in-out infinite;
-        }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-        .drag-drop-zone-premium:hover .upload-cloud-icon-box {
-          background: #4f46e5;
-          color: #ffffff;
-          transform: scale(1.05) translateY(-4px);
-          box-shadow: 0 12px 20px -8px rgba(79, 70, 229, 0.4);
-        }
-        .instruction-title {
-          font-weight: 700;
-          color: #0f172a;
-          margin-bottom: 1.25rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-        .instruction-step-card {
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-left: 4px solid #64748b;
-          border-radius: 4px 12px 12px 4px;
-          padding: 1.25rem 1rem;
-          margin-bottom: 1rem;
-          transition: all 0.25s ease;
-          position: relative;
-        }
-        .instruction-step-card:hover {
-          transform: translateX(4px);
-          background: #ffffff;
-          box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.05);
-        }
-        .instruction-step-card.required {
-          border-left-color: #ef4444;
-        }
-        .instruction-step-card.category {
-          border-left-color: #3b82f6;
-        }
-        .instruction-step-card.image {
-          border-left-color: #10b981;
-        }
-        .step-label {
-          display: inline-flex;
-          align-items: center;
-          padding: 0.15rem 0.5rem;
-          font-size: 0.725rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          border-radius: 4px;
-          margin-bottom: 0.5rem;
-          letter-spacing: 0.05em;
-        }
-        .step-label.required { background: #fee2e2; color: #b91c1c; }
-        .step-label.category { background: #dbeafe; color: #1e40af; }
-        .step-label.image { background: #d1fae5; color: #065f46; }
-
-        .mapping-panel-premium {
-          background: rgba(248, 250, 252, 0.6);
-          border: 1px solid rgba(226, 232, 240, 0.8);
-          border-radius: 16px;
-          padding: 1.5rem;
-          margin-bottom: 2rem;
-        }
-        .mapping-card-premium {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 1.25rem 1rem;
-          transition: all 0.25s ease;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          position: relative;
-        }
-        .mapping-card-premium:hover {
-          border-color: #cbd5e1;
-          box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.04);
-        }
-        .mapping-card-premium.required {
-          border-top: 3px solid #ef4444;
-        }
-        .mapping-card-premium.optional {
-          border-top: 3px solid #94a3b8;
-        }
-        .mapping-card-premium.matched {
-          border-color: #10b981;
-          background-color: #f0fdf4;
-        }
-        .mapping-card-premium.matched.required {
-          border-top-color: #10b981;
-        }
-        .mapping-card-premium.matched.optional {
-          border-top-color: #10b981;
-        }
-        .mapping-card-premium.matched .mapping-field-label {
-          color: #065f46;
-        }
-        .mapping-field-label {
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: #475569;
-          margin-bottom: 0.75rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .mapping-field-select {
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          padding: 0.6rem 2rem 0.6rem 0.75rem;
-          font-size: 0.85rem;
-          font-weight: 500;
-          color: #1e293b;
-          width: 100%;
-          transition: all 0.2s ease;
-          background-color: #ffffff;
-          appearance: none;
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-          background-repeat: no-repeat;
-          background-position: right 0.75rem center;
-          background-size: 1rem;
-        }
-        .mapping-field-select:focus {
-          border-color: #4f46e5;
-          outline: 0;
-          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-        }
-
-        .preview-table-card {
-          border: 1px solid rgba(226, 232, 240, 0.8);
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.01);
-        }
-        .preview-table-premium {
-          margin-bottom: 0;
-        }
-        .preview-table-premium th {
-          background: #f8fafc !important;
-          color: #475569 !important;
-          font-weight: 600;
-          font-size: 0.8rem;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          padding: 1rem 1.25rem;
-          border-bottom: 1px solid #e2e8f0;
-        }
-        .preview-table-premium td {
-          padding: 1rem 1.25rem;
-          font-size: 0.875rem;
-          color: #334155;
-          border-bottom: 1px solid #f1f5f9;
-        }
-        .preview-table-premium tbody tr {
-          transition: background-color 0.2s ease;
-        }
-        .preview-table-premium tbody tr:hover {
-          background-color: rgba(99, 102, 241, 0.04);
-        }
-        .image-preview-thumb {
-          width: 46px;
-          height: 46px;
-          border-radius: 8px;
-          object-fit: cover;
-          transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
-          border: 1px solid #e2e8f0;
-        }
-        .image-preview-thumb:hover {
-          transform: scale(1.25);
-          box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
-          z-index: 10;
-          position: relative;
-        }
-
-        .badge-custom-pill {
-          display: inline-flex;
-          align-items: center;
-          padding: 0.35rem 0.75rem;
-          font-weight: 600;
-          font-size: 0.725rem;
-          line-height: 1;
-          border-radius: 9999px;
-          border-width: 1px;
-          border-style: solid;
-        }
-        .badge-custom-success {
-          background-color: rgba(16, 185, 129, 0.06);
-          color: #047857;
-          border-color: rgba(16, 185, 129, 0.2);
-        }
-        .badge-custom-warning {
-          background-color: rgba(245, 158, 11, 0.06);
-          color: #b45309;
-          border-color: rgba(245, 158, 11, 0.2);
-        }
-        .badge-custom-danger {
-          background-color: rgba(239, 68, 68, 0.06);
-          color: #b91c1c;
-          border-color: rgba(239, 68, 68, 0.2);
-        }
-        .badge-custom-info {
-          background-color: rgba(59, 130, 246, 0.06);
-          color: #1d4ed8;
-          border-color: rgba(59, 130, 246, 0.2);
-        }
-        .badge-custom-neutral {
-          background-color: rgba(100, 116, 139, 0.06);
-          color: #475569;
-          border-color: rgba(100, 116, 139, 0.2);
-        }
-
-        .progress-bar-glow-container {
-          height: 14px;
-          background: #e2e8f0;
-          border-radius: 9999px;
-          overflow: hidden;
-          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-        .progress-bar-glow-fill {
-          height: 100%;
-          border-radius: 9999px;
-          transition: width 0.3s ease;
-          position: relative;
-        }
-        @keyframes progress-bar-stripes-move {
-          0% { background-position: 1rem 0; }
-          100% { background-position: 0 0; }
-        }
-        .progress-bar-glow-fill::after {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background-image: linear-gradient(
-            45deg,
-            rgba(255, 255, 255, 0.15) 25%,
-            transparent 25%,
-            transparent 50%,
-            rgba(255, 255, 255, 0.15) 50%,
-            rgba(255, 255, 255, 0.15) 75%,
-            transparent 75%,
-            transparent
-          );
-          background-size: 1rem 1rem;
-          animation: progress-bar-stripes-move 1s linear infinite;
-        }
-        .metric-box-premium {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 1.25rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          transition: all 0.2s ease;
-        }
-        .metric-box-premium:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.03);
-        }
-        .metric-box-premium.success { border-left: 4px solid #10b981; }
-        .metric-box-premium.danger { border-left: 4px solid #ef4444; }
-        .metric-box-premium.info { border-left: 4px solid #3b82f6; }
-        .metric-box-title {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: #64748b;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin-bottom: 0.25rem;
-          display: block;
-        }
-        .metric-box-value {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #0f172a;
-          line-height: 1.2;
-        }
-        .metric-icon-box {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-          transition: all 0.2s ease;
-        }
-        .metric-icon-box.success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-        .metric-icon-box.danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-        .metric-icon-box.info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-
-        .terminal-window {
-          background: #090e1a;
-          border: 1px solid #1e293b;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.03);
-        }
-        .terminal-header {
-          background: #111827;
-          padding: 0.75rem 1.25rem;
-          border-bottom: 1px solid #1e293b;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .terminal-controls {
-          display: flex;
-          gap: 6px;
-        }
-        .terminal-control-dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-        }
-        .terminal-control-dot.red { background: #ef4444; }
-        .terminal-control-dot.yellow { background: #f59e0b; }
-        .terminal-control-dot.green { background: #10b981; }
-        .terminal-title {
-          color: #64748b;
-          font-size: 0.725rem;
-          font-weight: 600;
-          font-family: ui-monospace, monospace;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-        .terminal-body {
-          padding: 1.25rem;
-          height: 280px;
-          overflow-y: auto;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-          font-size: 0.8rem;
-          line-height: 1.6;
-          background: radial-gradient(circle at center, rgba(16, 185, 129, 0.02) 0%, transparent 100%), #090e1a;
-        }
-        .terminal-line {
-          margin-bottom: 0.35rem;
-          display: flex;
-          align-items: flex-start;
-          gap: 0.75rem;
-        }
-        .terminal-time {
-          color: #475569;
-          user-select: none;
-          font-size: 0.75rem;
-        }
-        .terminal-text-success { color: #34d399; }
-        .terminal-text-error { color: #f87171; }
-        .terminal-text-warning { color: #fbbf24; }
-        .terminal-text-info { color: #60a5fa; }
-        .terminal-text-default { color: #94a3b8; }
         .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
+          width: 5px;
+          height: 5px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #334155;
+          background: #cbd5e1;
           border-radius: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #475569;
-        }
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-        .terminal-cursor {
-          display: inline-block;
-          width: 8px;
-          height: 15px;
-          background: #10b981;
-          animation: blink 1s step-end infinite;
-          vertical-align: middle;
+          background: #94a3b8;
         }
       `}} />
-    </Container>
+    </div>
   );
 };
 
