@@ -27,6 +27,7 @@ const AllProductTable = ({ data, ...props }) => {
     column: [
       { title: "Image", apiKey: "product_thumbnail", type: 'image', placeHolderImage: placeHolderImage },
       { title: "Name", apiKey: "name", sorting: true, sortBy: "desc" },
+      { title: "Category", apiKey: "categories_name" },
       { title: "Price", apiKey: "sale_price", sorting: true, sortBy: "desc", type: 'price' },
       { title: "Stock", apiKey: "stock_status", type: 'stock_status' },
       { title: "StockQuantity", apiKey: "quantity", sorting: true, sortBy: "desc" },
@@ -35,7 +36,14 @@ const AllProductTable = ({ data, ...props }) => {
     ],
     data: data || []
   };
-  headerObj.data.map((element) => element.sale_price = element?.sale_price)
+  headerObj.data.forEach((element) => {
+    element.sale_price = element?.sale_price;
+    if (Array.isArray(element.categories)) {
+      element.categories_name = element.categories.map(cat => cat.name).join(", ");
+    } else {
+      element.categories_name = "-";
+    }
+  });
 
   let pro = headerObj?.column?.filter((elem) => {
     return role == 'vendor' ? elem.title !== 'Approved' : elem;
