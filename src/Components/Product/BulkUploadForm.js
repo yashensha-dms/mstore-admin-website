@@ -416,7 +416,7 @@ const BulkUploadForm = () => {
       {/* Top Head Section */}
       <div className="flex-none mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-slate-900 bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">{t("BulkProductUpload")}</h3>
+          <h3 className="text-xl font-bold text-slate-900 ">{t("BulkProductUpload")}</h3>
           <p className="text-slate-500 text-xs mt-0.5">Import large quantities of products via CSV and map columns instantly</p>
         </div>
       </div>
@@ -477,7 +477,7 @@ const BulkUploadForm = () => {
                   <div className="flex-none flex items-center justify-between pb-3 border-b border-slate-100">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-xl text-primary bg-primary/10">
-                        <RiFileList2Line size={22} />
+                        <RiFileList2Line size={24} />
                       </div>
                       <div>
                         <h6 className="m-0 font-bold text-slate-900 text-sm">{file?.name}</h6>
