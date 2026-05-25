@@ -19,7 +19,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 import request from "@/Utils/AxiosUtils";
-import { Category, product } from "@/Utils/AxiosUtils/API";
+import { Category, product, tax } from "@/Utils/AxiosUtils/API";
 import Button from "@/Components/CommonComponent/Button";
 
 // CSV line parser supporting quoted fields and stripping Excel single quotes
@@ -70,9 +70,11 @@ const parseCSV = (text) => {
 const DEFAULT_FIELDS = [
   { key: "name", label: "Product Name (Required)", detect: ["display name", "name"], required: true },
   { key: "sku", label: "SKU (Required)", detect: ["code", "sku"], required: true },
-  { key: "barcode", label: "Barcode (Optional)", detect: ["code", "barcode"], required: false },
+  { key: "barcode", label: "Barcode (Optional)", detect: ["barcode", "bar code"], required: false },
   { key: "price", label: "MRP / Base Price (Required)", detect: ["mrp", "price"], required: true },
   { key: "sale_price", label: "Selling Price / Rate (Optional)", detect: ["rate", "ccp", "sale price", "selling price"], required: false },
+  { key: "quantity", label: "Stock/Quantity (Optional)", detect: ["stock", "quantity", "qty"], required: false },
+  { key: "tax_id", label: "Tax Rate (Optional)", detect: ["tax", "gst", "tax rate", "tax percentage"], required: false },
   { key: "hsn_code", label: "HSN Code (Optional)", detect: ["hsncode", "hsn code", "hsn_code"], required: false },
   { key: "short_description", label: "Short Description (Optional)", detect: ["short description", "short_description"], required: false },
   { key: "description", label: "Long Description (Optional)", detect: ["long description", "description"], required: false },
@@ -107,6 +109,13 @@ const BulkUploadForm = () => {
     { refetchOnWindowFocus: false, select: (data) => data?.data?.data }
   );
 
+  // Fetch taxes to match against
+  const { data: taxData } = useQuery(
+    [tax],
+    () => request({ url: tax, params: { status: 1 } }),
+    { refetchOnWindowFocus: false, select: (data) => data?.data?.data }
+  );
+
   // Scroll terminal to bottom on log updates without affecting viewport
   useEffect(() => {
     if (terminalBodyRef.current) {
@@ -133,6 +142,22 @@ const BulkUploadForm = () => {
     return map;
   }, [categoryData]);
 
+  // Flattened taxes mapping name/rate -> id
+  const flattenedTaxes = useMemo(() => {
+    if (!taxData) return {};
+    const map = {};
+    taxData.forEach((tItem) => {
+      if (tItem.name) {
+        map[tItem.name.trim().toLowerCase()] = tItem.id;
+      }
+      if (tItem.rate !== undefined && tItem.rate !== null) {
+        map[String(tItem.rate)] = tItem.id;
+        map[String(tItem.rate) + "%"] = tItem.id;
+      }
+    });
+    return map;
+  }, [taxData]);
+
   // Handle Drag Events
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -155,13 +180,26 @@ const BulkUploadForm = () => {
   const detectMappings = (headers) => {
     const newMapping = {};
     DEFAULT_FIELDS.forEach(field => {
-      const matchedHeader = headers.find(h => {
+      // 1. Try exact matches first
+      let matchedHeader = headers.find(h => {
         const hNorm = h.toLowerCase().trim().replace(/_/g, " ");
         return field.detect.some(keyword => {
           const kwNorm = keyword.toLowerCase().trim().replace(/_/g, " ");
-          return hNorm === kwNorm || hNorm.includes(kwNorm) || kwNorm.includes(hNorm);
+          return hNorm === kwNorm;
         });
       });
+
+      // 2. If no exact match, try substring match
+      if (!matchedHeader) {
+        matchedHeader = headers.find(h => {
+          const hNorm = h.toLowerCase().trim().replace(/_/g, " ");
+          return field.detect.some(keyword => {
+            const kwNorm = keyword.toLowerCase().trim().replace(/_/g, " ");
+            return hNorm.includes(kwNorm) || kwNorm.includes(hNorm);
+          });
+        });
+      }
+
       newMapping[field.key] = matchedHeader || "";
     });
     setMapping(newMapping);
@@ -221,6 +259,7 @@ const BulkUploadForm = () => {
     setImportLogs([]);
 
     const categoryCache = { ...flattenedCategories };
+    const taxCache = { ...flattenedTaxes };
     const imageUrlCache = {}; // Cache uploaded images to avoid double calls
 
     for (let i = 0; i < parsedData.rows.length; i++) {
@@ -258,6 +297,51 @@ const BulkUploadForm = () => {
               addLog(`[Row ${rowNum}] Created root category "${catName}" (ID: ${newCatId})`);
             } else {
               addLog(`[Row ${rowNum}] WARNING: Could not create category "${catName}". Saving without category.`);
+            }
+          }
+        }
+
+        // 1.5 Resolve Tax ID
+        let resolvedTaxId = null;
+        const mappedTaxCol = mapping["tax_id"];
+        if (mappedTaxCol && row[mappedTaxCol]) {
+          const taxValStr = String(row[mappedTaxCol]).trim();
+          if (taxValStr) {
+            const taxValLower = taxValStr.toLowerCase();
+            if (taxCache[taxValLower]) {
+              resolvedTaxId = taxCache[taxValLower];
+              addLog(`[Row ${rowNum}] Resolved tax "${taxValStr}" to ID ${taxCache[taxValLower]}`);
+            } else {
+              // Try parsing numeric rate e.g. "5%" -> 5, "8" -> 8
+              const parsedRate = parseFloat(taxValStr.replace(/%/g, ""));
+              if (!isNaN(parsedRate)) {
+                const rateStr = String(parsedRate);
+                if (taxCache[rateStr]) {
+                  resolvedTaxId = taxCache[rateStr];
+                  addLog(`[Row ${rowNum}] Resolved tax rate ${parsedRate}% to ID ${taxCache[rateStr]}`);
+                } else {
+                  addLog(`[Row ${rowNum}] Tax "${taxValStr}" (Rate: ${parsedRate}%) not found. Creating new tax...`);
+                  const taxRes = await request({
+                    url: "/tax",
+                    method: "post",
+                    data: {
+                      name: taxValStr.includes("%") ? taxValStr : `${taxValStr}%`,
+                      rate: parsedRate,
+                      status: 1
+                    }
+                  });
+                  if (taxRes?.status === 200 || taxRes?.status === 201) {
+                    const newTaxId = taxRes.data.id;
+                    taxCache[taxValLower] = newTaxId;
+                    taxCache[rateStr] = newTaxId;
+                    taxCache[rateStr + "%"] = newTaxId;
+                    resolvedTaxId = newTaxId;
+                    addLog(`[Row ${rowNum}] Created tax "${taxValStr}" (ID: ${newTaxId})`);
+                  } else {
+                    addLog(`[Row ${rowNum}] WARNING: Could not create tax "${taxValStr}". Saving without tax.`);
+                  }
+                }
+              }
             }
           }
         }
@@ -311,6 +395,16 @@ const BulkUploadForm = () => {
         const salePriceCol = mapping["sale_price"];
         const salePriceVal = salePriceCol && row[salePriceCol] ? parseFloat(row[salePriceCol]) : null;
 
+        // Stock / Quantity Resolution
+        let quantityVal = 100;
+        const mappedQtyCol = mapping["quantity"];
+        if (mappedQtyCol && row[mappedQtyCol]) {
+          const parsedQty = parseInt(row[mappedQtyCol], 10);
+          if (!isNaN(parsedQty)) {
+            quantityVal = parsedQty;
+          }
+        }
+
         const productPayload = {
           name: nameVal,
           sku: skuVal,
@@ -320,7 +414,7 @@ const BulkUploadForm = () => {
           type: "simple",
           unit: "1",
           stock_status: "in_stock",
-          quantity: 9999,
+          quantity: quantityVal,
           show_stock_quantity: 0,
           status: 1,
           is_approved: 1,
@@ -334,6 +428,7 @@ const BulkUploadForm = () => {
           is_return: 1,
           is_free_shipping: 0,
           categories: categoryIds,
+          tax_id: resolvedTaxId,
           product_thumbnail_id: imageId || null,
           hsn_code: mapping["hsn_code"] && row[mapping["hsn_code"]] ? row[mapping["hsn_code"]] : "",
           barcode: mapping["barcode"] && row[mapping["barcode"]] ? row[mapping["barcode"]] : skuVal,
@@ -368,6 +463,7 @@ const BulkUploadForm = () => {
     addLog("Bulk import completed successfully.");
     queryClient.invalidateQueries([product]);
     queryClient.invalidateQueries([Category]);
+    queryClient.invalidateQueries([tax]);
   };
 
   const handleDownloadTemplate = () => {
@@ -575,7 +671,7 @@ const BulkUploadForm = () => {
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                           Data Preview
                         </span>
-                        <span className="text-slate-500 text-xs font-normal">Showing first 5 rows</span>
+                        <span className="text-slate-500 text-xs font-normal">Showing all {parsedData.totalRows} rows</span>
                       </h6>
                       
                       <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -590,11 +686,12 @@ const BulkUploadForm = () => {
                                 <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">MRP Price</th>
                                 <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Selling Price</th>
                                 <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Category Status</th>
+                                <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Tax</th>
                                 <th className="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">HSN Code</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                              {parsedData.rows.slice(0, 5).map((row, idx) => {
+                              {parsedData.rows.map((row, idx) => {
                                 const nameVal = row[mapping["name"]] || "-";
                                 const skuVal = row[mapping["sku"]] || "-";
                                 const priceVal = row[mapping["price"]] || "-";
@@ -604,6 +701,8 @@ const BulkUploadForm = () => {
                                 
                                 const catVal = mapping["category_name"] ? row[mapping["category_name"]] : "";
                                 const catExists = catVal ? !!flattenedCategories[catVal.trim().toLowerCase()] : null;
+                                const taxVal = mapping["tax_id"] ? row[mapping["tax_id"]] : "";
+                                const taxExists = taxVal ? !!flattenedTaxes[taxVal.trim().toLowerCase()] || !isNaN(parseFloat(taxVal.replace(/%/g, ""))) : null;
                                 const imageVal = mapping["image_url"] ? row[mapping["image_url"]] : "";
 
                                 return (
@@ -637,6 +736,17 @@ const BulkUploadForm = () => {
                                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">{catVal} (Exists)</span>
                                         ) : (
                                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100">{catVal} (New)</span>
+                                        )
+                                      ) : (
+                                        <span className="text-slate-400 text-xs">-</span>
+                                      )}
+                                    </td>
+                                    <td className="p-3">
+                                      {taxVal ? (
+                                        taxExists ? (
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">{taxVal.includes("%") ? taxVal : `${taxVal}%`}</span>
+                                        ) : (
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100">{taxVal.includes("%") ? taxVal : `${taxVal}%`} (New)</span>
                                         )
                                       ) : (
                                         <span className="text-slate-400 text-xs">-</span>
