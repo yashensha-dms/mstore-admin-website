@@ -1,21 +1,14 @@
-import { toast } from "react-toastify";
+let addToastFn = null;
+
+export const registerToastContainer = (fn) => {
+  addToastFn = fn;
+};
 
 export const ToastNotification = (type, message) => {
-  switch (type) {
-    case "success":
-      toast.success(message);
-      break;
-    case "error":
-      toast.error(message || "Something went wrong , check api integration");
-      break;
-    case "warn":
-      toast.warn(message);
-      break;
-    case "info":
-      toast.info(message);
-      break;
-    default:
-      toast(message);
+  if (addToastFn) {
+    addToastFn({ type, message });
+  } else {
+    console.log(`[Toast ${type}]: ${message}`);
   }
   return true;
 };

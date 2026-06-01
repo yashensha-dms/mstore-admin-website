@@ -1,17 +1,17 @@
 :root {
-    --theme-color: #313D4D;
+    --theme-color: #172B4D;
     // ck editor variables
     --ck-color-base-active: var(--theme-color) !important;
     --ck-color-base-active-focus: var(--theme-color) !important;
     --ck-color-button-on-color: var(--theme-color) !important;
     --ck-color-upload-bar-background: var(--theme-color) !important;
     --ck-color-link-default: var(--theme-color) !important;
-    --ck-color-button-on-hover-background: rgba(13, 164, 134, 0.1) !important;
-    --ck-color-button-on-active-background: rgba(13, 164, 134, 0.1) !important;
-    --ck-color-button-on-background: rgba(13, 164, 134, 0.1) !important;
-    --ck-color-focus-outer-shadow: rgba(13, 164, 134, 0.1) !important;
-    --ck-color-focus-border-coordinates: 168, 85%, 35% !important;
-    --ck-color-table-focused-cell-background: rgb(13 164 135 / 10%) !important;
+    --ck-color-button-on-hover-background: rgba(23, 43, 77, 0.1) !important;
+    --ck-color-button-on-active-background: rgba(23, 43, 77, 0.1) !important;
+    --ck-color-button-on-background: rgba(23, 43, 77, 0.1) !important;
+    --ck-color-focus-outer-shadow: rgba(23, 43, 77, 0.1) !important;
+    --ck-color-focus-border-coordinates: 218, 54%, 20% !important;
+    --ck-color-table-focused-cell-background: rgb(23 43 77 / 10%) !important;
 }
 
 // General variables
@@ -33,7 +33,7 @@ $grey-9: #999999;
 $inner-bg: #f9f9f6;
 $grey-darker: #222222;
 $bg-color: #fafafb;
-$primary-color: #313D4D;
+$primary-color: #172B4D;
 $secondary-color: #ef3f3e;
 $success-color: #9e65c2;
 $info-color: #a927f9;

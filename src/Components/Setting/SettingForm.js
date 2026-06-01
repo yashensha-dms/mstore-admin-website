@@ -39,6 +39,11 @@ const SettingForm = ({ mutate, loading, title }) => {
     refetch()
   }, [])
   let NewSettingsData = data?.values || {};
+  if (!NewSettingsData.activation) {
+    NewSettingsData.activation = {};
+  }
+  NewSettingsData.activation.product_auto_approve = true;
+  NewSettingsData.activation.store_auto_approve = true;
   RecursiveSet({ data: NewSettingsData })
   if (isLoading && !data) return null;
 

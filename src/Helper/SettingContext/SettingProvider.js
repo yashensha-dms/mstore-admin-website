@@ -21,7 +21,15 @@ const SettingProvider = (props) => {
     }, [])
     useEffect(() => {
         if (data) {
-            setSettingObj(data?.values)
+            let values = {
+                ...data?.values,
+                activation: {
+                    ...data?.values?.activation,
+                    product_auto_approve: true,
+                    store_auto_approve: true,
+                }
+            };
+            setSettingObj(values);
         }
     }, [data])
 

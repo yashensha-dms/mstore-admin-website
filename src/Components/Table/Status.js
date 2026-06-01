@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
-import { RiQuestionLine } from "react-icons/ri";
-import { FormGroup, Input, Label } from "reactstrap";
+import { HelpCircle } from "lucide-react";
+import * as Switch from "@radix-ui/react-switch";
 import ShowModal from "../../Elements/Alerts&Modals/Modal";
 import Btn from "../../Elements/Buttons/Btn";
 import BadgeContext from "../../Helper/BadgeContext";
@@ -47,19 +47,55 @@ const Status = ({ url, data, disabled, apiKey }) => {
   };
   return (
     <>
-      <FormGroup switch className="ps-0 form-switch form-check">
-        <Label
-          className="switch switch-sm"
-          onClick={() => !disabled && setModal(true)}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .radix-switch-root {
+          width: 36px;
+          height: 20px;
+          background-color: #cbd5e1;
+          border-radius: 9999px;
+          position: relative;
+          border: none;
+          cursor: pointer;
+          outline: none;
+          transition: background-color 200ms ease;
+          display: inline-flex;
+          align-items: center;
+          padding: 0;
+        }
+        .radix-switch-root[data-state="checked"] {
+          background-color: #172B4D;
+        }
+        .radix-switch-root[disabled] {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .radix-switch-thumb {
+          display: block;
+          width: 16px;
+          height: 16px;
+          background-color: white;
+          border-radius: 50%;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+          transition: transform 200ms ease;
+          transform: translateX(2px);
+          will-change: transform;
+        }
+        .radix-switch-root[data-state="checked"] .radix-switch-thumb {
+          transform: translateX(18px);
+        }
+      `}} />
+      
+      <div className="flex items-center">
+        <Switch.Root
+          checked={status}
+          onCheckedChange={() => !disabled && setModal(true)}
+          disabled={disabled}
+          className="radix-switch-root"
         >
-          <Input
-            type="switch"
-            disabled={disabled ? disabled : false}
-            checked={status}
-          />
-          <span className={`switch-state ${disabled ? "disabled" : ""}`}></span>
-        </Label>
-      </FormGroup>
+          <Switch.Thumb className="radix-switch-thumb" />
+        </Switch.Root>
+      </div>
+
       <ShowModal
         open={modal}
         close={false}
@@ -81,7 +117,7 @@ const Status = ({ url, data, disabled, apiKey }) => {
         }
       >
         <div className="remove-box">
-          <RiQuestionLine className="icon-box wo-bg" />
+          <HelpCircle className="icon-box wo-bg" />
           <h5 className="modal-title">{t("Confirmation")}</h5>
           <p>{t("Areyousureyouwanttoproceed?")} </p>
         </div>

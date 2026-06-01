@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { RiDeleteBinLine } from "react-icons/ri";
+import { Trash2 } from "lucide-react";
 import ShowModal from "../../Elements/Alerts&Modals/Modal";
 import Btn from "../../Elements/Buttons/Btn";
 import useDeleteAll from "../../Utils/Hooks/useDeleteAll";
@@ -22,10 +22,10 @@ const TableDeleteOption = ({ url, setIsCheck, isCheck }) => {
   return (
     <>
       <a
-        className="align-items-center btn btn-outline btn-sm d-flex"
+        className="align-items-center btn btn-outline btn-sm d-flex cursor-pointer"
         onClick={() => setModal(true)}
       >
-        <RiDeleteBinLine /> {t("Delete")}
+        <Trash2 className="w-4 h-4 mr-1.5" /> {t("Delete")}
       </a>
       <ShowModal
         open={modal}
@@ -52,7 +52,7 @@ const TableDeleteOption = ({ url, setIsCheck, isCheck }) => {
         }
       >
         <div className="remove-box">
-          <RiDeleteBinLine className="icon-box" />
+          <Trash2 className="icon-box" />
           <h2>{t("DeleteItem")}?</h2>
           <p>
             {t("ThisItemWillBeDeletedPermanently") +

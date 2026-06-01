@@ -56,8 +56,8 @@ const RightNav = ({ setMode, setOpenSearchBar }) => {
       </div> */}
       <ul className="nav-menus" ref={ref}>
         <li>
-          <span className="header-search" onClick={() => setOpenSearchBar(true)}>
-            <RiSearchLine />
+          <span className="header-search-btn" onClick={() => setOpenSearchBar(true)}>
+            <RiSearchLine size={18} />
           </span>
         </li>
         {/* <li>

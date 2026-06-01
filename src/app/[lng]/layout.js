@@ -1,8 +1,7 @@
 import '../../../public/assets/scss/app.scss'
-import 'react-toastify/dist/ReactToastify.css'
-import { ToastContainer } from 'react-toastify'
 import I18NextProvider from "@/Helper/I18NextContext/I18NextProvider"
 import TanstackWrapper from "@/Layout/TanstackWrapper"
+import RadixToastContainer from "@/Components/CommonComponent/RadixToastContainer"
 import { cache } from 'react'
 
 const getSettings = cache(async () => {
@@ -41,7 +40,7 @@ export default function RootLayout({ children, params: { lng } }) {
         <I18NextProvider>
           <TanstackWrapper>{children}</TanstackWrapper>
         </I18NextProvider>
-        <ToastContainer theme="colored" />
+        <RadixToastContainer />
       </body>
     </html>
   )

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { RiDeleteBinLine } from "react-icons/ri";
+import { Trash2 } from "lucide-react";
 import ShowModal from "../../Elements/Alerts&Modals/Modal";
 import Btn from "../../Elements/Buttons/Btn";
 import I18NextContext from "@/Helper/I18NextContext";
@@ -23,8 +23,8 @@ const DeleteButton = ({ id, mutate, noImage }) => {
             />
           ) : (
             <a>
-              <RiDeleteBinLine
-                className="text-danger"
+              <Trash2
+                className="text-danger w-5 h-5 cursor-pointer"
                 onClick={() => {
                   setModal(true);
                 }}
@@ -58,7 +58,7 @@ const DeleteButton = ({ id, mutate, noImage }) => {
         }
       >
         <div className="remove-box">
-          <RiDeleteBinLine className="icon-box" />
+          <Trash2 className="icon-box" />
           <h2>{t("DeleteItem")}?</h2>
           <p>
             {t("ThisItemWillBeDeletedPermanently") +
