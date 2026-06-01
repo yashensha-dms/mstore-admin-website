@@ -70,12 +70,12 @@ const parseCSV = (text) => {
 const DEFAULT_FIELDS = [
   { key: "name", label: "Product Name (Required)", detect: ["display name", "name"], required: true },
   { key: "sku", label: "SKU (Required)", detect: ["code", "sku"], required: true },
-  { key: "barcode", label: "Barcode (Optional)", detect: ["barcode", "bar code"], required: false },
+  { key: "barcode", label: "Barcode (Optional)", detect: ["barcode", "bar code", "bar_code"], required: false },
   { key: "price", label: "MRP / Base Price (Required)", detect: ["mrp", "price"], required: true },
   { key: "sale_price", label: "Selling Price / Rate (Optional)", detect: ["rate", "ccp", "sale price", "selling price"], required: false },
   { key: "quantity", label: "Stock/Quantity (Optional)", detect: ["stock", "quantity", "qty"], required: false },
   { key: "tax_id", label: "Tax Rate (Optional)", detect: ["tax", "gst", "tax rate", "tax percentage"], required: false },
-  { key: "hsn_code", label: "HSN Code (Optional)", detect: ["hsncode", "hsn code", "hsn_code"], required: false },
+  { key: "hsn_code", label: "HSN Code (Optional)", detect: ["hsn", "hsncode", "hsn code", "hsn_code"], required: false },
   { key: "short_description", label: "Short Description (Optional)", detect: ["short description", "short_description"], required: false },
   { key: "description", label: "Long Description (Optional)", detect: ["long description", "description"], required: false },
   { key: "image_url", label: "Image Link (Optional)", detect: ["image link", "image_url"], required: false },
@@ -470,6 +470,7 @@ const BulkUploadForm = () => {
     const headers = [
       "CATEGORY",
       "Code",
+      "Barcode",
       "Hsncode",
       "MRP",
       "CCP",
@@ -484,6 +485,7 @@ const BulkUploadForm = () => {
     const sampleRow = [
       "Grocery",
       "TEA-GRN-001",
+      "8901052003693",
       "09021000",
       "29.99",
       "24.99",
@@ -697,7 +699,7 @@ const BulkUploadForm = () => {
                                 const priceVal = row[mapping["price"]] || "-";
                                 const salePriceVal = mapping["sale_price"] ? row[mapping["sale_price"]] : "";
                                 const hsnVal = mapping["hsn_code"] ? row[mapping["hsn_code"]] : "";
-                                const barcodeVal = mapping["barcode"] ? row[mapping["barcode"]] : "";
+                                const barcodeVal = mapping["barcode"] && row[mapping["barcode"]] ? row[mapping["barcode"]] : skuVal;
                                 
                                 const catVal = mapping["category_name"] ? row[mapping["category_name"]] : "";
                                 const catExists = catVal ? !!flattenedCategories[catVal.trim().toLowerCase()] : null;
