@@ -9,12 +9,12 @@ import NoSsr from "../../Utils/HOC/NoSsr";
 import usePermissionCheck from "../../Utils/Hooks/usePermissionCheck";
 import ImportExport from "./ImportExport";
 
-const TableTitle = ({ moduleName, onlyTitle, type, filterHeader, importExport, refetch }) => {
+const TableTitle = ({ moduleName, onlyTitle, type, filterHeader, importExport, refetch, keyInPermission }) => {
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
   const router = useRouter();
   const pathname = usePathname();
-  const [create] = usePermissionCheck(["create"]);
+  const [create] = usePermissionCheck(["create"], keyInPermission);
   return (
     <div className="title-header option-title">
       <h5>{filterHeader?.customTitle ? t(filterHeader?.customTitle) : t(Pluralize(moduleName))}</h5>
@@ -25,13 +25,13 @@ const TableTitle = ({ moduleName, onlyTitle, type, filterHeader, importExport, r
           <Btn className="align-items-center btn-theme add-button" title={t("Add") + " " + t(moduleName)} onClick={() =>
             type == "post" && (moduleName.toLowerCase()) == "tag"
               ?
-              router.push(`/${i18Lang}/${pathname.split("/")[2]}/tag/create`)
+              router.push(`${pathname}/tag/create`)
               :
               type == 'post'
                 ?
-                router.push(`/${i18Lang}/${pathname.split("/")[2]}/category/create`)
+                router.push(`${pathname}/category/create`)
                 :
-                router.push(`/${i18Lang}/${pathname.split("/")[2]}/create`)
+                router.push(`${pathname}/create`)
           }>
             <FiPlus />
           </Btn>

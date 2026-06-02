@@ -34,6 +34,14 @@ const MENUITEMS = [
       { title: "Q&A", path: "/qna", displayTitle: "All Tag", permission: ["question_and_answer.index", "question_and_answer.create"] },
     ],
   },
+  {
+    title: "OfferBanners",
+    displayTitle: "Offer Banners",
+    icon: <RiImageLine />,
+    path: "/offer-banner",
+    permission: ["offer_banner.index"],
+    type: "link"
+  },
   // {
   //   title: "Stores",
   //   displayTitle: "Store",

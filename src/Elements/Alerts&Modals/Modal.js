@@ -53,6 +53,20 @@ const ShowModal = ({ open = false, buttons, title, close = true, modalAttr, setM
             animation: contentShow 200ms cubic-bezier(0.16, 1, 0.3, 1);
             outline: none;
           }
+
+          /* Support larger modals */
+          .radix-dialog-content.media-modal,
+          .radix-dialog-content.modal-xl {
+            max-width: 1200px !important;
+            width: 95vw !important;
+            padding: 24px 32px !important;
+          }
+
+          .radix-dialog-content.modal-lg {
+            max-width: 800px !important;
+            width: 90vw !important;
+            padding: 24px 32px !important;
+          }
           
           @keyframes overlayShow {
             from { opacity: 0; }
