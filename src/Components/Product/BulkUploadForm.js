@@ -67,19 +67,21 @@ const parseCSV = (text) => {
 };
 
 // Standard product fields mapping config
+// NOTE: detect arrays are ordered most-specific-first. "code" removed from sku to prevent
+// substring collisions with "Hsncode"/"Barcode" columns. Each field now has broad variations.
 const DEFAULT_FIELDS = [
-  { key: "name", label: "Product Name (Required)", detect: ["display name", "name"], required: true },
-  { key: "sku", label: "SKU (Required)", detect: ["code", "sku"], required: true },
-  { key: "barcode", label: "Barcode (Optional)", detect: ["barcode", "bar code", "bar_code"], required: false },
-  { key: "price", label: "MRP / Base Price (Required)", detect: ["mrp", "price"], required: true },
-  { key: "sale_price", label: "Selling Price / Rate (Optional)", detect: ["rate", "ccp", "sale price", "selling price"], required: false },
-  { key: "quantity", label: "Stock/Quantity (Optional)", detect: ["stock", "quantity", "qty"], required: false },
-  { key: "tax_id", label: "Tax Rate (Optional)", detect: ["tax", "gst", "tax rate", "tax percentage"], required: false },
-  { key: "hsn_code", label: "HSN Code (Optional)", detect: ["hsn", "hsncode", "hsn code", "hsn_code"], required: false },
-  { key: "short_description", label: "Short Description (Optional)", detect: ["short description", "short_description"], required: false },
-  { key: "description", label: "Long Description (Optional)", detect: ["long description", "description"], required: false },
-  { key: "image_url", label: "Image Link (Optional)", detect: ["image link", "image_url"], required: false },
-  { key: "category_name", label: "Category Name (Optional)", detect: ["category", "categories"], required: false }
+  { key: "name", label: "Product Name (Required)", detect: ["product name", "product_name", "display name", "display_name", "item name", "item_name", "name"], required: true },
+  { key: "sku", label: "SKU (Required)", detect: ["sku", "sku code", "sku_code", "product code", "product_code", "item code", "item_code", "code"], required: true },
+  { key: "barcode", label: "Barcode (Optional)", detect: ["barcode", "bar code", "bar_code", "ean", "ean code", "upc", "upc code", "gtin"], required: false },
+  { key: "price", label: "MRP / Base Price (Required)", detect: ["mrp", "base price", "base_price", "price", "unit price", "unit_price"], required: true },
+  { key: "sale_price", label: "Selling Price / Rate (Optional)", detect: ["sale price", "sale_price", "selling price", "selling_price", "ccp", "rate", "offer price", "discounted price"], required: false },
+  { key: "quantity", label: "Stock/Quantity (Optional)", detect: ["stock", "quantity", "qty", "inventory", "stock quantity", "stock_quantity", "available qty"], required: false },
+  { key: "tax_id", label: "Tax Rate (Optional)", detect: ["tax", "gst", "tax rate", "tax_rate", "tax percentage", "tax_percentage", "gst rate", "vat"], required: false },
+  { key: "hsn_code", label: "HSN Code (Optional)", detect: ["hsn code", "hsn_code", "hsncode", "hsn", "hsn no", "hsn number", "sac code", "sac"], required: false },
+  { key: "short_description", label: "Short Description (Optional)", detect: ["short description", "short_description", "short desc", "brief description", "summary"], required: false },
+  { key: "description", label: "Long Description (Optional)", detect: ["long description", "long_description", "description", "full description", "product description", "details"], required: false },
+  { key: "image_url", label: "Image Link (Optional)", detect: ["image link", "image_link", "image url", "image_url", "product image", "image", "photo", "thumbnail"], required: false },
+  { key: "category_name", label: "Category Name (Optional)", detect: ["category name", "category_name", "category", "categories", "product category", "group"], required: false }
 ];
 
 const BulkUploadForm = () => {
@@ -176,32 +178,48 @@ const BulkUploadForm = () => {
     }
   };
 
-  // Run dynamic header detection with robust underscore removal
+  // Run dynamic header detection with two-pass approach to prevent collisions.
+  // Pass 1: exact matches for ALL fields. Pass 2: substring for remaining unmatched.
+  // Headers already claimed are excluded from subsequent matches.
   const detectMappings = (headers) => {
     const newMapping = {};
+    const claimedHeaders = new Set();
+
+    // Normalize helper
+    const norm = (s) => s.toLowerCase().trim().replace(/_/g, " ").replace(/\s+/g, " ");
+
+    // Pass 1: Exact matches for all fields first (highest confidence)
     DEFAULT_FIELDS.forEach(field => {
-      // 1. Try exact matches first
-      let matchedHeader = headers.find(h => {
-        const hNorm = h.toLowerCase().trim().replace(/_/g, " ");
-        return field.detect.some(keyword => {
-          const kwNorm = keyword.toLowerCase().trim().replace(/_/g, " ");
-          return hNorm === kwNorm;
+      const matchedHeader = headers.find(h => {
+        if (claimedHeaders.has(h)) return false;
+        const hNorm = norm(h);
+        return field.detect.some(kw => norm(kw) === hNorm);
+      });
+      if (matchedHeader) {
+        newMapping[field.key] = matchedHeader;
+        claimedHeaders.add(matchedHeader);
+      }
+    });
+
+    // Pass 2: Substring matches for remaining unmatched fields
+    DEFAULT_FIELDS.forEach(field => {
+      if (newMapping[field.key]) return; // Already matched in pass 1
+      const matchedHeader = headers.find(h => {
+        if (claimedHeaders.has(h)) return false;
+        const hNorm = norm(h);
+        return field.detect.some(kw => {
+          const kwNorm = norm(kw);
+          return hNorm.includes(kwNorm) || kwNorm.includes(hNorm);
         });
       });
-
-      // 2. If no exact match, try substring match
-      if (!matchedHeader) {
-        matchedHeader = headers.find(h => {
-          const hNorm = h.toLowerCase().trim().replace(/_/g, " ");
-          return field.detect.some(keyword => {
-            const kwNorm = keyword.toLowerCase().trim().replace(/_/g, " ");
-            return hNorm.includes(kwNorm) || kwNorm.includes(hNorm);
-          });
-        });
+      if (matchedHeader) {
+        newMapping[field.key] = matchedHeader;
+        claimedHeaders.add(matchedHeader);
+      } else {
+        newMapping[field.key] = "";
       }
-
-      newMapping[field.key] = matchedHeader || "";
     });
+
     setMapping(newMapping);
   };
 
