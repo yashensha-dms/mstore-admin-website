@@ -22,7 +22,7 @@ const ReceiptModalTable = ({ data }) => {
                 detailsToFetch.map(async (elem) => {
                     try {
                         const response = await request({ url: `${product}/${elem.id}` });
-                        const productObj = response?.data;
+                        const productObj = response?.data?.data || response?.data;
                         if (productObj) {
                             newDetails[elem.id] = {
                                 price: productObj.price,
@@ -87,9 +87,11 @@ const ReceiptModalTable = ({ data }) => {
                             <td className="description">
                                 {elem?.pivot?.variation?.name || elem.name}
                                 {resolvedBarcode && (
-                                    <span className="d-block text-muted mt-1" style={{ fontSize: '11px' }}>
-                                        {resolvedBarcode}
-                                    </span>
+                                    <div className="mt-1">
+                                        <span className="d-block text-muted" style={{ fontSize: '10px', letterSpacing: '1px' }}>
+                                            {resolvedBarcode}
+                                        </span>
+                                    </div>
                                 )}
                             </td>
                             <td className="price">
