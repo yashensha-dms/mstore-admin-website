@@ -67,17 +67,21 @@ const parseCSV = (text) => {
 };
 
 // Standard product fields mapping config
-// NOTE: detect arrays are ordered most-specific-first. "code" removed from sku to prevent
-// substring collisions with "Hsncode"/"Barcode" columns. Each field now has broad variations.
+// NOTE: detect arrays are ordered most-specific-first. "code" is intentionally NOT in sku's
+// detect list to prevent Pass-2 substring collisions with "Hsncode"/"Barcode" columns.
+// hsn_code is listed BEFORE sku/barcode so it wins exact-match priority in Pass 1.
 const DEFAULT_FIELDS = [
   { key: "name", label: "Product Name (Required)", detect: ["product name", "product_name", "display name", "display_name", "item name", "item_name", "name"], required: true },
-  { key: "sku", label: "SKU (Required)", detect: ["sku", "sku code", "sku_code", "product code", "product_code", "item code", "item_code", "code"], required: true },
+  // hsn_code intentionally before sku/barcode — "hsncode" must claim its header in Pass 1
+  // before "code" substring logic in Pass 2 could incorrectly assign it to sku.
+  { key: "hsn_code", label: "HSN Code (Optional)", detect: ["hsn code", "hsn_code", "hsncode", "hsn", "hsn no", "hsn number", "sac code", "sac"], required: false },
   { key: "barcode", label: "Barcode (Optional)", detect: ["barcode", "bar code", "bar_code", "ean", "ean code", "upc", "upc code", "gtin"], required: false },
+  // "code" is excluded from sku detect to avoid substring match on "Hsncode" or "Barcode"
+  { key: "sku", label: "SKU (Required)", detect: ["sku", "sku code", "sku_code", "product code", "product_code", "item code", "item_code", "code"], required: true },
   { key: "price", label: "MRP / Base Price (Required)", detect: ["mrp", "base price", "base_price", "price", "unit price", "unit_price"], required: true },
   { key: "sale_price", label: "Selling Price / Rate (Optional)", detect: ["sale price", "sale_price", "selling price", "selling_price", "ccp", "rate", "offer price", "discounted price"], required: false },
   { key: "quantity", label: "Stock/Quantity (Optional)", detect: ["stock", "quantity", "qty", "inventory", "stock quantity", "stock_quantity", "available qty"], required: false },
   { key: "tax_id", label: "Tax Rate (Optional)", detect: ["tax", "gst", "tax rate", "tax_rate", "tax percentage", "tax_percentage", "gst rate", "vat"], required: false },
-  { key: "hsn_code", label: "HSN Code (Optional)", detect: ["hsn code", "hsn_code", "hsncode", "hsn", "hsn no", "hsn number", "sac code", "sac"], required: false },
   { key: "short_description", label: "Short Description (Optional)", detect: ["short description", "short_description", "short desc", "brief description", "summary"], required: false },
   { key: "description", label: "Long Description (Optional)", detect: ["long description", "long_description", "description", "full description", "product description", "details"], required: false },
   { key: "image_url", label: "Image Link (Optional)", detect: ["image link", "image_link", "image url", "image_url", "product image", "image", "photo", "thumbnail"], required: false },
@@ -454,6 +458,10 @@ const BulkUploadForm = () => {
           description: mapping["description"] && row[mapping["description"]] ? row[mapping["description"]] : "",
           is_random_related_products: 1
         };
+
+        // Log resolved barcode & hsn_code so they can be verified in the terminal
+        addLog(`[Row ${rowNum}] Barcode → "${productPayload.barcode}" | HSN → "${productPayload.hsn_code || "(empty)"}"`);
+
 
         // 4. Submit Product
         const prodRes = await request({
