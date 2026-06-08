@@ -1,7 +1,7 @@
 import '../../../public/assets/scss/app.scss'
 import I18NextProvider from "@/Helper/I18NextContext/I18NextProvider"
 import TanstackWrapper from "@/Layout/TanstackWrapper"
-import RadixToastContainer from "@/Components/CommonComponent/RadixToastContainer"
+import { Toaster } from "sonner"
 import { cache } from 'react'
 
 const getSettings = cache(async () => {
@@ -40,7 +40,17 @@ export default function RootLayout({ children, params: { lng } }) {
         <I18NextProvider>
           <TanstackWrapper>{children}</TanstackWrapper>
         </I18NextProvider>
-        <RadixToastContainer />
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            duration: 5000,
+            style: {
+              fontFamily: "'Public Sans', sans-serif",
+            },
+          }}
+        />
       </body>
     </html>
   )
