@@ -59,6 +59,33 @@ const AllProductTable = ({ url, moduleName, isCheck, setIsCheck, isReplicate, im
   const [deleteModal, setDeleteModal] = useState(false);
   const [categorySearch, setCategorySearch] = useState("");
 
+  // Restore pagination state on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedPage = sessionStorage.getItem("product-table-page");
+      if (storedPage) {
+        setPage(Number(storedPage));
+      }
+      const storedPaginate = sessionStorage.getItem("product-table-paginate");
+      if (storedPaginate) {
+        setPaginate(Number(storedPaginate));
+      }
+    }
+  }, []);
+
+  // Save pagination state changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("product-table-page", page);
+    }
+  }, [page]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("product-table-paginate", paginate);
+    }
+  }, [paginate]);
+
   // Fetch role on mount
   useEffect(() => {
     const storedRole = localStorage.getItem("role");

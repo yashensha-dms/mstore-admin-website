@@ -36,7 +36,32 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
       setFieldValue('sku', barcode);
       lastSyncedBarcodeRef.current = barcode;
     }
-  }, [values['barcode']])
+  }, [values['barcode']]);
+
+  // Sync stock_status and quantity
+  useEffect(() => {
+    if (values['type'] === 'simple') {
+      const quantity = Number(values['quantity']) || 0;
+      const stockStatus = values['stock_status'];
+
+      if (stockStatus === 'out_of_stock' && quantity !== 0) {
+        setFieldValue('quantity', 0);
+      }
+    }
+  }, [values['stock_status']]);
+
+  useEffect(() => {
+    if (values['type'] === 'simple') {
+      const quantity = Number(values['quantity']) || 0;
+      const stockStatus = values['stock_status'];
+
+      if (quantity > 0 && stockStatus !== 'in_stock') {
+        setFieldValue('stock_status', 'in_stock');
+      } else if (quantity <= 0 && stockStatus !== 'out_of_stock') {
+        setFieldValue('stock_status', 'out_of_stock');
+      }
+    }
+  }, [values['quantity']]);
 
   return (
     <>

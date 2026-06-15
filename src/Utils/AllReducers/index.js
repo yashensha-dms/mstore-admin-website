@@ -9,14 +9,17 @@ export const selectImageReducer = (state, action) => {
     switch (action.type) {
         case "SELECTEDIMAGE":
             return {
+                ...state,
                 selectedImage: action.payload
             };
         case "ISMODELOPEN":
             return {
+                ...state,
                 isModalOpen: action.payload
             };
         case "SETBROWSERIMAGE":
             return {
+                ...state,
                 setBrowserImage: action.payload
             };
         default:

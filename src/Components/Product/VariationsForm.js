@@ -30,6 +30,27 @@ const VariationsForm = React.memo(({ values, setFieldValue, newId, index, elem, 
     }
   }, [values['name'], elem, index]);
 
+  // Sync stock_status and quantity for variations
+  const variation = values[`variations`]?.[index];
+  const stockStatus = variation?.stock_status;
+  const quantity = variation?.quantity;
+
+  useEffect(() => {
+    const qty = Number(quantity) || 0;
+    if (stockStatus === 'out_of_stock' && qty !== 0) {
+      setFieldValue(`variations[${index}][quantity]`, 0);
+    }
+  }, [stockStatus, index]);
+
+  useEffect(() => {
+    const qty = Number(quantity) || 0;
+    if (qty > 0 && stockStatus !== 'in_stock') {
+      setFieldValue(`variations[${index}][stock_status]`, 'in_stock');
+    } else if (qty <= 0 && stockStatus !== 'out_of_stock') {
+      setFieldValue(`variations[${index}][stock_status]`, 'out_of_stock');
+    }
+  }, [quantity, index, stockStatus]);
+
   
   return (
     <div className="mt-3 shipping-accordion-custom" key={index}>

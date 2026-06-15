@@ -125,17 +125,18 @@ const AttachmentModal = (props) => {
     }, [searchText]);
 
     const selectImage = (item) => {
+        const selected = state?.selectedImage || [];
         if (multiple) {
-            const isSelected = state.selectedImage.some(el => el.id === item.id);
+            const isSelected = selected.some(el => el.id === item.id);
             if (isSelected) {
                 dispatch({
                     type: "SELECTEDIMAGE", 
-                    payload: state.selectedImage.filter(el => el.id !== item.id)
+                    payload: selected.filter(el => el.id !== item.id)
                 });
             } else {
                 dispatch({
                     type: "SELECTEDIMAGE", 
-                    payload: [...state.selectedImage, item]
+                    payload: [...selected, item]
                 });
             }
         } else {
@@ -144,7 +145,7 @@ const AttachmentModal = (props) => {
     };
 
     const handleConfirmSelection = () => {
-        const value = state.selectedImage;
+        const value = state?.selectedImage || [];
         const storeImageObject = name?.split("_id")[0];
 
         if (multiple) {
@@ -174,7 +175,7 @@ const AttachmentModal = (props) => {
     const totalPages = Math.ceil(totalItems / paginate) || 1;
 
     // Get active selected item details (for sidebar preview)
-    const activePreviewItem = state.selectedImage?.[state.selectedImage.length - 1] || null;
+    const activePreviewItem = state?.selectedImage?.[(state?.selectedImage?.length || 0) - 1] || null;
 
     return (
         <Dialog.Root open={modal} onOpenChange={setModal}>
@@ -281,7 +282,7 @@ const AttachmentModal = (props) => {
                                         ) : (
                                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-4">
                                                 {attachmentsData.data.map((item) => {
-                                                    const isSelected = state.selectedImage.some(el => el.id === item.id);
+                                                    const isSelected = state?.selectedImage?.some(el => el.id === item.id) || false;
                                                     return (
                                                         <div 
                                                             key={item.id}
@@ -411,7 +412,7 @@ const AttachmentModal = (props) => {
                                                 <div className="mt-6 space-y-3 pt-4 border-t border-slate-200/60 shrink-0">
                                                     <div className="flex items-center justify-between">
                                                         <span className="text-sm text-slate-500 font-medium">
-                                                            {state.selectedImage.length} {t("FileSelected")}
+                                                            {(state?.selectedImage?.length || 0)} {t("FileSelected")}
                                                         </span>
                                                         <button 
                                                             type="button"
