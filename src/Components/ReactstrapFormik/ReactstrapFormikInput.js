@@ -15,7 +15,7 @@ const ReactstrapFormikInput = ({ field: { ...fields }, form: { touched, errors }
       {props.label ? (
         <>
           <FormGroup floating>
-            <Input {...props} {...fields} invalid={Boolean(touched[fields.name] && errors[fields.name])} valid={Boolean(touched[fields.name] && !errors[fields.name])} autoComplete="off" />
+            <Input {...props} {...fields} invalid={Boolean(touched[fields.name] && errors[fields.name])} valid={Boolean(touched[fields.name] && !errors[fields.name])} autoComplete="off" onWheel={(e) => props.type === "number" && e.target.blur()} />
             <Label htmlFor={props.id}>{t(props.label)}</Label>
             {touched[fields.name] && errors[fields.name] ? <FormFeedback>{t(handleModifier(errors[fields.name]).split(" ").join(""))}</FormFeedback> : ""}
           </FormGroup>
@@ -29,7 +29,7 @@ const ReactstrapFormikInput = ({ field: { ...fields }, form: { touched, errors }
                 if (props.min && props.max) {
                   if (e.target.value > 100) e.target.value = 100; if (e.target.value < 0) e.target.value = 0;
                 } else false
-              }} />
+              }} onWheel={(e) => props.type === "number" && e.target.blur()} />
               {props.postprefix && <InputGroupText>{props.postprefix}</InputGroupText>}
               {touched[fields.name] && errors[fields.name] ? <FormFeedback>{t(handleModifier(errors[fields.name]).split(" ").join(""))}</FormFeedback> : ""}
               {props?.errormsg && <ErrorMessage name={fields.name} render={(msg) => <div className="invalid-feedback d-block">{t(props.errormsg)} {t('IsRequired')}</div>} />}
@@ -51,7 +51,7 @@ const ReactstrapFormikInput = ({ field: { ...fields }, form: { touched, errors }
                       if (props.min && props.max) {
                         if (e.target.value > 100) e.target.value = 100; if (e.target.value < 0) e.target.value = 0;
                       } else false
-                    }} />
+                    }} onWheel={(e) => props.type === "number" && e.target.blur()} />
                     {props?.helpertext && <p className="help-text">{props?.helpertext}</p>}
                     {touched[fields.name] && errors[fields.name] ?
                       <FormFeedback>

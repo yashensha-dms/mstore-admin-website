@@ -18,24 +18,16 @@ const VariationSkuAssistant = () => {
         const newVariations = variations.map((variation, index) => {
             const options = optionsList[index] || [];
             
-            // Look for an attribute value that looks like a measurement (kg, l, g, pcs, etc.)
-            const quantityOption = options.find(opt => {
-                const val = String(opt.value || "").toLowerCase();
-                return val.match(/\d/) && (
-                    val.includes('kg') || 
-                    val.includes('g') || 
-                    val.includes('l') || 
-                    val.includes('ml') || 
-                    val.includes('pcs') ||
-                    val.includes('pc') ||
-                    val.includes('piece')
-                );
-            }) || options[0]; // Fallback to the first attribute if no measurement found
+            if (!options || options.length === 0) return variation;
 
-            if (!quantityOption || !quantityOption.value) return variation;
+            const optionSuffixes = options.map(opt => {
+                const val = String(opt.value || "");
+                return parseSkuQuantity(val);
+            }).filter(Boolean);
 
-            const parsedValue = parseSkuQuantity(String(quantityOption.value));
-            const suggestedSku = `${values.sku}%${parsedValue}`;
+            if (optionSuffixes.length === 0) return variation;
+
+            const suggestedSku = `${values.sku}-${optionSuffixes.join('-')}`.replace(/-+/g, '-');
 
             const currentSku = variation.sku || "";
             const currentBarcode = variation.barcode || "";
