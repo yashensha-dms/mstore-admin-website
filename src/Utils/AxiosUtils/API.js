@@ -62,7 +62,9 @@ export const coupon = "/coupon";
 export const product = "/product";
 export const ProductImportAPI = "product/csv/import";
 export const ProductExportAPI = "product/csv/export";
-export const Approved = '/approve'
+export const Approved = '/approve';
+export const featuredProduct = "/featured-product";
+export const trendingProduct = "/trending-product";
 
 // shipping api
 export const shipping = "/shipping";
