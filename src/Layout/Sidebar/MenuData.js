@@ -29,6 +29,7 @@ const MENUITEMS = [
       { title: "AllProducts", path: "/product", displayTitle: "All Product", badgeType: 'badge bg-warning text-dark ml-3', badgeValue: 0, permission: ["product.create"] },
       { title: "Featured Products", path: "/featured-product", displayTitle: "Featured Products", permission: ["product.create"] },
       { title: "Trending Products", path: "/trending-product", displayTitle: "Trending Products", permission: ["product.create"] },
+      { title: "Bestselling Products", path: "/bestselling-product", displayTitle: "Bestselling Products", permission: ["product.create"] },
       { title: "BulkUpload", path: "/product/bulk-import", displayTitle: "Bulk Upload", permission: ["product.create"] },
       { title: "Attributes", path: "/attribute", displayTitle: "All Attributes", permission: ["attribute.index", "attribute.create"] },
       { title: "Categories", path: "/category", displayTitle: "Categories", permission: ["category.index"] },

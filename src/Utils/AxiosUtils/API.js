@@ -65,6 +65,7 @@ export const ProductExportAPI = "product/csv/export";
 export const Approved = '/approve';
 export const featuredProduct = "/featured-product";
 export const trendingProduct = "/trending-product";
+export const bestsellingProduct = "/bestselling-product";
 
 // shipping api
 export const shipping = "/shipping";

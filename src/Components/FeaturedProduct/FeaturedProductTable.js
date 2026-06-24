@@ -28,10 +28,15 @@ const FeaturedProductTable = ({ isCheck, setIsCheck }) => {
     setLoading(true);
     try {
       const res = await request({ url: featuredProduct, method: "GET" });
-      if (res && res.data) {
-        setFeaturedList(res.data);
+      if (res?.status === 200 || res?.status === 201) {
+        setFeaturedList(res.data || []);
+      } else {
+        console.error("Featured Product API error:", res);
+        const errMsg = res?.response?.data?.message || res?.message || "Failed to load featured products";
+        ToastNotification("error", errMsg);
       }
     } catch (error) {
+      console.error("Featured Product catch error:", error);
       ToastNotification("error", error?.message || "Failed to load featured products");
     } finally {
       setLoading(false);
@@ -259,18 +264,22 @@ const FeaturedProductTable = ({ isCheck, setIsCheck }) => {
               </thead>
               <tbody>
                 {pickableProducts.map((prod) => (
-                  <tr key={prod.id}>
+                  <tr
+                    key={prod.id}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      if (selectedIds.includes(prod.id)) {
+                        setSelectedIds(selectedIds.filter((id) => id !== prod.id));
+                      } else {
+                        setSelectedIds([...selectedIds, prod.id]);
+                      }
+                    }}
+                  >
                     <td>
                       <Input
                         type="checkbox"
                         checked={selectedIds.includes(prod.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedIds([...selectedIds, prod.id]);
-                          } else {
-                            setSelectedIds(selectedIds.filter((id) => id !== prod.id));
-                          }
-                        }}
+                        readOnly
                       />
                     </td>
                     <td>

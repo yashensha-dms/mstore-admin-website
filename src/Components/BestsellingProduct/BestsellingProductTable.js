@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Table, Card, CardBody, Input } from "reactstrap";
 import { RiDeleteBinLine, RiArrowUpLine, RiArrowDownLine, RiSearchLine } from "react-icons/ri";
 import request from "../../Utils/AxiosUtils";
-import { trendingProduct, product } from "../../Utils/AxiosUtils/API";
+import { bestsellingProduct, product } from "../../Utils/AxiosUtils/API";
 import ShowModal from "../../Elements/Alerts&Modals/Modal";
 import Btn from "../../Elements/Buttons/Btn";
 import { ToastNotification } from "../../Utils/CustomFunctions/ToastNotification";
@@ -11,33 +11,33 @@ import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 import Loader from "../CommonComponent/Loader";
 
-const TrendingProductTable = ({ isCheck, setIsCheck }) => {
+const BestsellingProductTable = ({ isCheck, setIsCheck }) => {
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, "common");
 
   const [loading, setLoading] = useState(true);
-  const [trendingList, setTrendingList] = useState([]);
+  const [bestsellingList, setBestsellingList] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [searchVal, setSearchVal] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
 
-  // Fetch trending products
-  const fetchTrending = async () => {
+  // Fetch bestselling products
+  const fetchBestselling = async () => {
     setLoading(true);
     try {
-      const res = await request({ url: trendingProduct, method: "GET" });
+      const res = await request({ url: bestsellingProduct, method: "GET" });
       if (res?.status === 200 || res?.status === 201) {
-        setTrendingList(res.data || []);
+        setBestsellingList(res.data || []);
       } else {
-        console.error("Trending Product API error:", res);
-        const errMsg = res?.response?.data?.message || res?.message || "Failed to load trending products";
+        console.error("Bestselling Product API error:", res);
+        const errMsg = res?.response?.data?.message || res?.message || "Failed to load bestselling products";
         ToastNotification("error", errMsg);
       }
     } catch (error) {
-      console.error("Trending Product catch error:", error);
-      ToastNotification("error", error?.message || "Failed to load trending products");
+      console.error("Bestselling Product catch error:", error);
+      ToastNotification("error", error?.message || "Failed to load bestselling products");
     } finally {
       setLoading(false);
     }
@@ -63,7 +63,7 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
   };
 
   useEffect(() => {
-    fetchTrending();
+    fetchBestselling();
   }, []);
 
   useEffect(() => {
@@ -72,22 +72,22 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
     }
   }, [modalOpen, searchVal]);
 
-  // Handle deletion (removing from trending)
+  // Handle deletion (removing from bestselling)
   const handleDelete = async (productId) => {
-    if (window.confirm("Are you sure you want to remove this product from the trending list?")) {
+    if (window.confirm("Are you sure you want to remove this product from the bestselling list?")) {
       try {
-        await request({ url: `${trendingProduct}/${productId}`, method: "DELETE" });
-        ToastNotification("success", "Product removed from trending list");
-        fetchTrending();
+        await request({ url: `${bestsellingProduct}/${productId}`, method: "DELETE" });
+        ToastNotification("success", "Product removed from bestselling list");
+        fetchBestselling();
       } catch (error) {
-        ToastNotification("error", error?.message || "Failed to remove trending product");
+        ToastNotification("error", error?.message || "Failed to remove bestselling product");
       }
     }
   };
 
   // Reordering handlers (Up / Down)
   const handleMove = async (index, direction) => {
-    const listCopy = [...trendingList];
+    const listCopy = [...bestsellingList];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= listCopy.length) return;
 
@@ -96,24 +96,24 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
     listCopy[index] = listCopy[targetIndex];
     listCopy[targetIndex] = temp;
 
-    setTrendingList(listCopy);
+    setBestsellingList(listCopy);
 
     // Persist reorder to DB
     try {
       const ids = listCopy.map(item => item.id);
       await request({
-        url: `${trendingProduct}/reorder`,
+        url: `${bestsellingProduct}/reorder`,
         method: "PATCH",
-        data: { trending_product_ids: ids }
+        data: { bestselling_product_ids: ids }
       });
       ToastNotification("success", "Order updated");
     } catch (error) {
       ToastNotification("error", "Failed to save reorder");
-      fetchTrending(); // revert
+      fetchBestselling(); // revert
     }
   };
 
-  // Save selected trending products
+  // Save selected bestselling products
   const handleSaveSelection = async () => {
     if (selectedIds.length === 0) {
       setModalOpen(false);
@@ -121,22 +121,22 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
     }
     try {
       await request({
-        url: trendingProduct,
+        url: bestsellingProduct,
         method: "POST",
         data: { product_ids: selectedIds }
       });
-      ToastNotification("success", "Trending products updated successfully");
+      ToastNotification("success", "Bestselling products updated successfully");
       setSelectedIds([]);
       setModalOpen(false);
-      fetchTrending();
+      fetchBestselling();
     } catch (error) {
-      ToastNotification("error", error?.message || "Failed to add trending products");
+      ToastNotification("error", error?.message || "Failed to add bestselling products");
     }
   };
 
-  // Filter pickable products (exclude already trending)
+  // Filter pickable products (exclude already bestselling)
   const pickableProducts = allProducts.filter(
-    (prod) => !trendingList.some((feat) => feat.product_id === prod.id)
+    (prod) => !bestsellingList.some((feat) => feat.product_id === prod.id)
   );
 
   return (
@@ -144,22 +144,22 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
       <Card>
         <CardBody>
           <div className="title-header option-title">
-            <h5>{t("Trending Products")}</h5>
+            <h5>{t("Bestselling Products")}</h5>
             <div className="right-options">
               <Btn
                 className="btn-solid"
                 type="button"
                 onClick={() => setModalOpen(true)}
-                title="Add Trending Product"
+                title="Add Bestselling Product"
               />
             </div>
           </div>
 
           {loading ? (
             <Loader />
-          ) : trendingList.length === 0 ? (
+          ) : bestsellingList.length === 0 ? (
             <div className="no-data-found-box text-center py-5">
-              <p className="text-slate-500 mb-0">No trending products found. Click Add to feature trending products!</p>
+              <p className="text-slate-500 mb-0">No bestselling products found. Click Add to feature bestselling products!</p>
             </div>
           ) : (
             <div className="table-responsive border-table mt-4">
@@ -173,7 +173,7 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {trendingList.map((item, index) => (
+                  {bestsellingList.map((item, index) => (
                     <tr key={item.id}>
                       <td className="sm-width">{index + 1}</td>
                       <td className="sm-width">
@@ -197,7 +197,7 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
                           <button
                             type="button"
                             className="btn btn-light btn-xs p-1"
-                            disabled={index === trendingList.length - 1}
+                            disabled={index === bestsellingList.length - 1}
                             onClick={() => handleMove(index, "down")}
                           >
                             <RiArrowDownLine />
@@ -223,7 +223,7 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
       {/* Select Product Modal */}
       <ShowModal
         open={modalOpen}
-        title="Select Products to Trend"
+        title="Select Products for Bestselling"
         setModal={setModalOpen}
         modalAttr={{ className: "modal-lg" }}
         buttons={
@@ -301,4 +301,4 @@ const TrendingProductTable = ({ isCheck, setIsCheck }) => {
   );
 };
 
-export default TrendingProductTable;
+export default BestsellingProductTable;
