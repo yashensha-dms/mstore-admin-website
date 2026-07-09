@@ -46,7 +46,7 @@ const AttachmentNameObserver = ({ values, setFieldValue }) => {
 };
 
 const AttachmentModal = (props) => {
-    const { modal, setModal, setFieldValue, name, setSelectedImage, isattachment, multiple, values, showImage, redirectToTabs, noAPICall } = props;
+    const { modal, setModal, setFieldValue, name, setSelectedImage, isattachment, multiple, values, showImage, redirectToTabs, noAPICall, parentRefetch } = props;
     const [createPerm] = usePermissionCheck(["create"], "attachment");
     const [destroyPerm] = usePermissionCheck(["destroy"], "attachment");
     const { i18Lang } = useContext(I18NextContext);
@@ -63,6 +63,9 @@ const AttachmentModal = (props) => {
     const [deletingId, setDeletingId] = useState(null);
     const { mutate: deleteMutate, isLoading: isDeleting } = useDelete(attachment, '/attachment', () => {
         refetch();
+        if (parentRefetch) {
+            parentRefetch();
+        }
         setDeletingId(null);
         dispatch({ type: "SELECTEDIMAGE", payload: [] });
     });
@@ -97,6 +100,9 @@ const AttachmentModal = (props) => {
         () => {
             refetch();
             queryClient.invalidateQueries([attachment]);
+            if (parentRefetch) {
+                parentRefetch();
+            }
             if (!redirectToTabs) {
                 setModal(false);
             } else {

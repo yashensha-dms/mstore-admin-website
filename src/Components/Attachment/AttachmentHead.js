@@ -62,7 +62,7 @@ const AttachmentHead = ({ isattachment, state, dispatch, refetch }) => {
                     </ul>
                 </div>}
             </div>
-            <AttachmentModal modal={modal} setModal={setModal} isattachment={isattachment} noAPICall />
+            <AttachmentModal modal={modal} setModal={setModal} isattachment={isattachment} noAPICall parentRefetch={refetch} />
         </>
     );
 };
