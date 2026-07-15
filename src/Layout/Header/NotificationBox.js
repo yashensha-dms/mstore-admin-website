@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { RiNotificationLine, RiRecordCircleLine } from "react-icons/ri";
 import BadgeContext from "../../Helper/BadgeContext";
 import request from "../../Utils/AxiosUtils";
@@ -15,12 +15,20 @@ const NotificationBox = ({ isComponentVisible, setIsComponentVisible }) => {
   const { data, isLoading, refetch } = useQuery(['NotificationsAPI'], () => request({ url: NotificationsAPI }), { enabled: false, refetchOnWindowFocus: false, select: (res) => (res.data.data) }
   );
 
+  const prevCountRef = useRef(0);
   useEffect(() => {
     refetch();
   }, [isLoading])
 
   useEffect(() => {
-    setNotification(data?.filter(notification => notification.read_at === null))
+    const unread = data?.filter(notification => notification.read_at === null) || [];
+    setNotification(unread);
+    if (unread.length > prevCountRef.current) {
+      import("../../Utils/CustomFunctions/PlayNotificationSound").then((mod) => {
+        mod.playNotificationSound();
+      });
+    }
+    prevCountRef.current = unread.length;
   }, [data])
   if (data && data.length === 0) return null
   return (

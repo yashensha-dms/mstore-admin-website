@@ -15,10 +15,10 @@ const ReactstrapSelectInput = ({ field, form: { touched, errors, setFieldValue }
   const { ref, isComponentVisible, setIsComponentVisible } = useOutsideDropdown();
   let error = errors[field.name];
   let touch = touched[field.name];
-  // On initial mount setting options data
+  // Keep local list in sync with props options
   useEffect(() => {
     setList(props.inputprops.options);
-  }, []);
+  }, [props.inputprops.options]);
 
   useEffect(() => {
     setList(props.inputprops.options);
@@ -73,7 +73,7 @@ const ReactstrapSelectInput = ({ field, form: { touched, errors, setFieldValue }
     } else {
       !Array.isArray(field?.value) && setSelectedItems && setSelectedItems(list?.find((elem) => field?.value == elem[getValuesKey]))
     }
-  }, [])
+  }, [listOpt, list, field?.value])
 
   const RemoveSelectedItem = (id, item) => {
     if (props?.inputprops?.close) {

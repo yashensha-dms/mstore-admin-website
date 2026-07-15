@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import request from "../../Utils/AxiosUtils";
 import { product } from "../../Utils/AxiosUtils/API";
 import CheckBoxField from "../InputFields/CheckBoxField";
-import MultiSelectField from "../InputFields/MultiSelectField";
+import SearchableSelectInput from "../InputFields/SearchableSelectInput";
 import SimpleInputField from "../InputFields/SimpleInputField";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useContext } from "react";
@@ -19,9 +19,34 @@ const RestrictionTabContent = ({ values, setFieldValue, errors }) => {
       <CheckBoxField name="is_apply_all" title="ApplyToAllProducts" />
       {
         values["is_apply_all"] ?
-          <MultiSelectField errors={errors} setFieldValue={setFieldValue} values={values} name="exclude_products" data={productList} />
+          <SearchableSelectInput
+            nameList={[
+              {
+                name: "exclude_products",
+                title: "ExcludeProducts",
+                inputprops: {
+                  name: "exclude_products",
+                  id: "exclude_products",
+                  options: productList || [],
+                },
+              },
+            ]}
+          />
           :
-          <MultiSelectField errors={errors} setFieldValue={setFieldValue} values={values} name="products" title="IncludeProducts" data={productList} require="true" />
+          <SearchableSelectInput
+            nameList={[
+              {
+                name: "products",
+                title: "IncludeProducts",
+                require: "true",
+                inputprops: {
+                  name: "products",
+                  id: "products",
+                  options: productList || [],
+                },
+              },
+            ]}
+          />
       }
       <SimpleInputField
         nameList={[{ name: "min_spend", type: "number", placeholder: t("EnterMinimumSpend"), inputaddon: "true", title: "MinimumSpend", require: "true", helpertext: "*Define the minimum order value needed to utilize the coupon." }]} />

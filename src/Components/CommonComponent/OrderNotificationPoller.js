@@ -216,6 +216,10 @@ const OrderNotificationPoller = () => {
 
                 const toastId = `order-${latestOrderNumber}`;
 
+                import("../../Utils/CustomFunctions/PlayNotificationSound").then((mod) => {
+                  mod.playNotificationSound();
+                });
+
                 toast(
                   <OrderToastContent
                     orderNumber={latestOrderNumber}

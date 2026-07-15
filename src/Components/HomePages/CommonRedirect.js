@@ -6,6 +6,21 @@ import { useContext } from 'react';
 import I18NextContext from '@/Helper/I18NextContext';
 import { useTranslation } from '@/app/i18n/client';
 
+const flattenCategories = (data) => {
+    let result = [];
+    const recurse = (list, parentName = "") => {
+        list?.forEach((item) => {
+            const displayName = parentName ? `${parentName} → ${item.name}` : item.name;
+            result.push({ id: item.slug || item.id, name: displayName });
+            if (item.subcategories && item.subcategories.length > 0) {
+                recurse(item.subcategories, displayName);
+            }
+        });
+    };
+    recurse(data);
+    return result;
+};
+
 const CommonRedirect = ({ values, setFieldValue, productData, categoryData, nameList, setSearch }) => {
     const { selectNameKey, multipleNameKey } = nameList
     const { i18Lang } = useContext(I18NextContext);
@@ -57,7 +72,25 @@ const CommonRedirect = ({ values, setFieldValue, productData, categoryData, name
                                 },
                             ]} />
                     : values[selectNameKey] == 'collection' ?
-                        <MultiSelectField values={values} setFieldValue={setFieldValue} name={multipleNameKey} title="Collection" data={categoryData || []} key="Collection" getValuesKey='slug' />
+                        <SearchableSelectInput
+                            nameList={[
+                                {
+                                    name: multipleNameKey,
+                                    title: "Collection",
+                                    inputprops: {
+                                        name: multipleNameKey,
+                                        id: multipleNameKey,
+                                        options: flattenCategories(categoryData) || [],
+                                        value: flattenCategories(categoryData)?.find((elem) => elem.id == values[multipleNameKey])?.name || "",
+                                        close: true
+                                    },
+                                    store: "obj",
+                                    setvalue: (name, value) => {
+                                        setFieldValue(multipleNameKey, value?.id);
+                                    }
+                                }
+                            ]}
+                        />
                         : values[selectNameKey] == 'external_url' ?
                             <SimpleInputField nameList={[{ name: multipleNameKey, type: "url", placeholder: t("EnterRedirectLink"), title: "RedirectLink" }]} key="RedirectLink" />
                             : null

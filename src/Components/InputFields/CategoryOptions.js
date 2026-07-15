@@ -27,6 +27,15 @@ const CategoryOptions = ({ data, showList, setShowList, setFieldValue, setPath, 
           {item.image && <Image src={item.image} className="img-fluid category-image" alt={item.name} height={80} width={80}
           />}
           {item.name}
+          {Boolean(item.subcategories?.length) && (
+            <span 
+              className="badge bg-light text-dark ms-2 cursor-pointer" 
+              style={{ fontSize: '10px', padding: '3px 6px', border: '1px solid #ddd' }}
+              onClick={() => { setShowList(item.subcategories); setPath((prev) => [...prev, item]) }}
+            >
+              {item.subcategories.length} {t("Subcategories")}
+            </span>
+          )}
           <a className={`select-btn ${Array.isArray(values[name]) ? values[name]?.includes(item[getValuesKey]) ? "selected" : ""
             : item[getValuesKey] == values[name] ? "selected" : ""}`}
             onClick={() => handleSelect(item)}>
@@ -37,6 +46,7 @@ const CategoryOptions = ({ data, showList, setShowList, setFieldValue, setPath, 
           {Boolean(item.subcategories?.length) && (
             <a
               className="right-arrow"
+              title={t("ViewSubcategories")}
               onClick={() => { setShowList(item.subcategories); setPath((prev) => [...prev, item]) }}>
               <RiArrowRightSLine />
             </a>
