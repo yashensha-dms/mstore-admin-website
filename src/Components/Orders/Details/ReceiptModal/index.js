@@ -44,13 +44,16 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                 <head>
                     <title>Print Receipt</title>
                     <style>
+                        *, *:before, *:after {
+                            box-sizing: border-box;
+                        }
                         @page {
                             size: auto;
                             margin: 0;
                         }
                         body {
                             margin: 0;
-                            padding: 8px;
+                            padding: 0;
                             font-family: 'Arial', sans-serif;
                             width: 100%;
                             background: #fff;
@@ -83,21 +86,21 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                             padding: 4px 0;
                         }
                         .quantity {
-                            width: 10%;
+                            width: 15%;
                             text-align: left;
                         }
                         .description {
-                            width: 70%;
+                            width: 55%;
                             text-align: left;
                         }
                         .price {
-                            width: 20%;
+                            width: 30%;
                             text-align: right;
                         }
                     </style>
                 </head>
                 <body>
-                    <div style="width: 72mm; max-width: 72mm; margin: 0 auto; box-sizing: border-box;">
+                    <div style="display: flex; flex-direction: column; width: 100%; padding: 0 8px; box-sizing: border-box;">
                         ${printContent}
                     </div>
                 </body>
