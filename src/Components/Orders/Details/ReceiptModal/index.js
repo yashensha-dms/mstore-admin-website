@@ -97,7 +97,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                     </style>
                 </head>
                 <body>
-                    <div style="width: 100%; max-width: 100%;">
+                    <div style="width: 72mm; max-width: 72mm; margin: 0 auto; box-sizing: border-box;">
                         ${printContent}
                     </div>
                 </body>
@@ -140,7 +140,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
 
         try {
             const receiptData = await render(
-                <Printer type="epson" width={42}>
+                <Printer type="epson" width={36}>
                     <Text align="center" size={{ width: 2, height: 2 }}>Grabzo</Text>
                     <Text align="center">Retail Receipt</Text>
                     <Line />
