@@ -130,7 +130,7 @@ const ReactstrapSelectInput = ({ field, form: { touched, errors, setFieldValue }
         <div className={`box-content ${isComponentVisible ? "open" : ""}`}>
           <Input type="text" className="form-control" value={searchInput || ""} onChange={(e) => setSearchInput(e.target.value)} />
           <ul className="intl-tel-input">
-            {(props.inputprops?.setsearch ? listOpt : list)?.map((option, index) => (
+            {(props.inputprops?.setsearch ? listOpt : list)?.slice(0, 30)?.map((option, index) => (
               <Fragment key={index}>
                 {option?.data ?
                   <li onClick={() => {

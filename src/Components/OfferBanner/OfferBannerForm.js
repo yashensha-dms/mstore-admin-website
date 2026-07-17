@@ -20,6 +20,7 @@ const OfferBannerForm = ({ mutate, updateId, loading }) => {
   const { t } = useTranslation(i18Lang, 'common');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState([]);
+  const [targetSearch, setTargetSearch] = useState("");
 
   // Fetch product list
   const { data: productData } = useQuery([product], () => request({ url: product }), {
@@ -28,9 +29,22 @@ const OfferBannerForm = ({ mutate, updateId, loading }) => {
   });
 
   // Fetch category list
-  const { data: categoryData } = useQuery([Category], () => request({ url: Category, params: { type: "product" } }), {
+  const { data: categoryData } = useQuery([Category], () => request({ url: Category, params: { type: "product", status: 1 } }), {
     refetchOnWindowFocus: false,
-    select: (res) => res?.data?.data?.map((c) => ({ id: String(c.id), name: c.name })) || [],
+    select: (res) => {
+      let result = [];
+      const recurse = (list, parentName = "") => {
+          list?.forEach((item) => {
+              const displayName = parentName ? `${parentName} → ${item.name}` : item.name;
+              result.push({ id: String(item.id), name: displayName });
+              if (item.subcategories && item.subcategories.length > 0) {
+                  recurse(item.subcategories, displayName);
+              }
+          });
+      };
+      recurse(res?.data?.data);
+      return result;
+    },
   });
 
   // Fetch banner detail if editing
@@ -77,6 +91,7 @@ const OfferBannerForm = ({ mutate, updateId, loading }) => {
           box-shadow: 0 0 0 2px rgba(13, 168, 155, 0.1);
         }
         .premium-select-content {
+          width: var(--radix-select-trigger-width) !important;
           overflow: hidden;
           background-color: white;
           border-radius: 8px;
@@ -236,6 +251,7 @@ const OfferBannerForm = ({ mutate, updateId, loading }) => {
                   onValueChange={(val) => {
                     setFieldValue("redirect_type", val);
                     setFieldValue("redirect_id", "");
+                    setTargetSearch("");
                   }}
                 >
                   <Select.Trigger className="premium-select-trigger">
@@ -245,7 +261,7 @@ const OfferBannerForm = ({ mutate, updateId, loading }) => {
                     </Select.Icon>
                   </Select.Trigger>
                   <Select.Portal>
-                    <Select.Content className="premium-select-content">
+                    <Select.Content position="popper" sideOffset={4} className="premium-select-content">
                       <Select.Viewport className="premium-select-viewport">
                         <Select.Item value="product" className="premium-select-item">
                           <Select.ItemText>{t("Product")}</Select.ItemText>
@@ -254,7 +270,7 @@ const OfferBannerForm = ({ mutate, updateId, loading }) => {
                           </Select.ItemIndicator>
                         </Select.Item>
                         <Select.Item value="category" className="premium-select-item">
-                          <Select.ItemText>{t("SubCategory")}</Select.ItemText>
+                          <Select.ItemText>{t("Category") + " / " + t("SubCategory")}</Select.ItemText>
                           <Select.ItemIndicator className="premium-select-indicator">
                             <Check className="w-4 h-4 text-slate-800" />
                           </Select.ItemIndicator>
@@ -281,16 +297,29 @@ const OfferBannerForm = ({ mutate, updateId, loading }) => {
                     </Select.Icon>
                   </Select.Trigger>
                   <Select.Portal>
-                    <Select.Content className="premium-select-content max-h-[300px] overflow-y-auto">
+                    <Select.Content position="popper" sideOffset={4} className="premium-select-content max-h-[300px] overflow-y-auto">
+                      <div className="p-2 border-b border-slate-100 sticky top-0 bg-white z-10" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="text"
+                          placeholder={t("Search") + "..."}
+                          value={targetSearch}
+                          onChange={(e) => setTargetSearch(e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#0da89b]"
+                        />
+                      </div>
                       <Select.Viewport className="premium-select-viewport">
-                        {(values.redirect_type === "product" ? productData : categoryData)?.map((item) => (
-                          <Select.Item key={item.id} value={item.id} className="premium-select-item">
-                            <Select.ItemText>{item.name}</Select.ItemText>
-                            <Select.ItemIndicator className="premium-select-indicator">
-                              <Check className="w-4 h-4 text-slate-800" />
-                            </Select.ItemIndicator>
-                          </Select.Item>
-                        ))}
+                        {((values.redirect_type === "product" ? productData : categoryData) || [])
+                          ?.filter((item) => !targetSearch || item.name.toLowerCase().includes(targetSearch.toLowerCase()))
+                          ?.slice(0, 30)
+                          ?.map((item) => (
+                            <Select.Item key={item.id} value={item.id} className="premium-select-item">
+                              <Select.ItemText>{item.name}</Select.ItemText>
+                              <Select.ItemIndicator className="premium-select-indicator">
+                                <Check className="w-4 h-4 text-slate-800" />
+                              </Select.ItemIndicator>
+                            </Select.Item>
+                          ))}
                       </Select.Viewport>
                     </Select.Content>
                   </Select.Portal>
