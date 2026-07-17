@@ -39,10 +39,15 @@ const VariationsTab = ({ values, setFieldValue, errors, updateId }) => {
     const combinations = allPossibleCases(values["combination"]?.map((item) => item?.values?.map((elem) => elem))) || [];
 
     const temp_variations = variationOptions.map((opt, ind) => {
-      const att_vals = opt.map((val) => val.value);
-      let variant_val = variations_val.find(({ attribute_values }) => 
-        attribute_values?.every(({ value }) => att_vals.includes(value))
-      );
+      let variant_val = variations_val.find(({ attribute_values }) => {
+        if (!attribute_values) return false;
+        const variationIds = attribute_values.map(val => (val && typeof val === 'object') ? val.id : val);
+        const targetIds = combinations[ind] || [];
+        if (variationIds.length !== targetIds.length) return false;
+        const sortedVarIds = [...variationIds].sort();
+        const sortedTargetIds = [...targetIds].sort();
+        return sortedVarIds.every((id, i) => id == sortedTargetIds[i]);
+      });
 
       // Clone or create new variant object
       const newVariant = variant_val ? { ...variant_val } : {};
