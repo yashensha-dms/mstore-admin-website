@@ -95,6 +95,7 @@ const SettingForm = ({ mutate, loading, title }) => {
   // Fully initialize payment methods structure defensively
   if (!NewSettingsData.payment_methods) {
     NewSettingsData.payment_methods = {
+      cod: { status: true, title: "Cash on Delivery" },
       paypal: { sandbox_mode: false, client_id: "", client_secret: "", status: false, title: "" },
       stripe: { key: "", secret: "", status: false, title: "" },
       ccavenue: { title: "", status: false, access_code: "", merchant_id: "", sandbox_mode: false, working_key: "" },
@@ -104,6 +105,7 @@ const SettingForm = ({ mutate, loading, title }) => {
       phonepe: { merchant_id: "", salt_index: "", salt_key: "", sandbox_mode: false, status: false, title: "" },
     };
   } else {
+    NewSettingsData.payment_methods.cod = NewSettingsData.payment_methods.cod || { status: true, title: "Cash on Delivery" };
     NewSettingsData.payment_methods.paypal = NewSettingsData.payment_methods.paypal || { sandbox_mode: false, client_id: "", client_secret: "", status: false, title: "" };
     NewSettingsData.payment_methods.stripe = NewSettingsData.payment_methods.stripe || { key: "", secret: "", status: false, title: "" };
     NewSettingsData.payment_methods.ccavenue = NewSettingsData.payment_methods.ccavenue || { title: "", status: false, access_code: "", merchant_id: "", sandbox_mode: false, working_key: "" };
