@@ -87,9 +87,14 @@ const SettingForm = ({ mutate, loading, title }) => {
     NewSettingsData.newsletter = {};
   }
   if (!NewSettingsData.delivery) {
-    NewSettingsData.delivery = { same_day_intervals: [] };
-  } else if (!NewSettingsData.delivery.same_day_intervals) {
-    NewSettingsData.delivery.same_day_intervals = [];
+    NewSettingsData.delivery = { same_day_intervals: [], default_delivery: 1 };
+  } else {
+    if (!NewSettingsData.delivery.same_day_intervals) {
+      NewSettingsData.delivery.same_day_intervals = [];
+    }
+    if (NewSettingsData.delivery.default_delivery === undefined) {
+      NewSettingsData.delivery.default_delivery = 1;
+    }
   }
 
   // Fully initialize payment methods structure defensively
