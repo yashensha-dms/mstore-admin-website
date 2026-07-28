@@ -25,6 +25,20 @@ const GeneralTab1 = () => {
           { name: "[values][general][product_sku_prefix]", title: "StorePrefix", placeholder: t("EnterStorePrefix") }]}
       />
 
+      <SearchableSelectInput
+        nameList={[
+          {
+            name: "[values][general][default_currency_id]",
+            title: "DefaultCurrency",
+            inputprops: {
+              name: "[values][general][default_currency_id]",
+              id: "[values][general][default_currency_id]",
+              options: CurrencyData || [],
+            },
+          },
+        ]}
+      />
+
       <SimpleInputField
         nameList={[{ name: "[values][general][copyright]", title: "Copyright", placeholder: t("EnterCopyright") },
         ]}

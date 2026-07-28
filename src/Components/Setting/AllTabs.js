@@ -20,15 +20,12 @@ const AllTabs = ({ values, activeTab, setFieldValue, errors, touched }) => {
                     <TabPane tabId="1"><GeneralTab values={values} setFieldValue={setFieldValue} errors={errors} /></TabPane>
                     <TabPane tabId="2"><ActivationTab /></TabPane>
                     <TabPane tabId="3"><WalletPointTab /></TabPane>
-                    <TabPane tabId="4"><EmailTab values={values} /></TabPane>
-                    <TabPane tabId="5"><VendorCommissionTab values={values} /></TabPane>
-                    <TabPane tabId="6"><RefundTab values={values} /></TabPane>
-                    <TabPane tabId="7"><NewsLetterTab /></TabPane>
-                    <TabPane tabId="8"><DeliveyTab values={values} setFieldValue={setFieldValue} /></TabPane>
-                    <TabPane tabId="9"><PaymentMethodsTab errors={errors} touched={touched} /></TabPane>
-                    <TabPane tabId="10"><AnalyticsTab errors={errors} touched={touched} /> </TabPane>
-                    <TabPane tabId="11"><GoogleReCaptcha /></TabPane>
-                    <TabPane tabId="12"><MaintenanceTab values={values} setFieldValue={setFieldValue} errors={errors} /></TabPane>
+                    <TabPane tabId="4"><RefundTab values={values} /></TabPane>
+                    <TabPane tabId="5"><DeliveyTab values={values} setFieldValue={setFieldValue} /></TabPane>
+                    <TabPane tabId="6"><PaymentMethodsTab errors={errors} touched={touched} /></TabPane>
+                    <TabPane tabId="7"><AnalyticsTab errors={errors} touched={touched} /> </TabPane>
+                    <TabPane tabId="8"><GoogleReCaptcha /></TabPane>
+                    <TabPane tabId="9"><MaintenanceTab values={values} setFieldValue={setFieldValue} errors={errors} /></TabPane>
                 </TabContent>
             </Col>
         </>

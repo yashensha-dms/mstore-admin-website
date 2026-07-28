@@ -13,15 +13,6 @@ const GeneralTab = ({ values, setFieldValue, errors }) => {
   const { t } = useTranslation(i18Lang, 'common');
   return (
     <>
-      <FileUploadField name="light_logo_image_id" uniquename={values?.values?.general?.light_logo_image} title="LightLogo" errors={errors} id="light_logo_image_id" type="file" values={values} setFieldValue={setFieldValue} helpertext={getHelperText('180x50px')} />
-
-      <FileUploadField name="dark_logo_image_id" title="DarkLogo" uniquename={values?.values?.general?.dark_logo_image} id="dark_logo_image_id" type="file" values={values} setFieldValue={setFieldValue} errors={errors} helpertext={getHelperText('180x50px')} />
-
-      <FileUploadField name="tiny_logo_image_id" title="TinyLogo" uniquename={values?.values?.general?.tiny_logo_image} id="tiny_logo_image_id" type="file" values={values} setFieldValue={setFieldValue} errors={errors} helpertext={getHelperText('50x30px')} />
-
-      <FileUploadField name="favicon_image_id" title="Favicon" uniquename={values?.values?.general?.favicon_image} id="favicon_image_id" type="file" values={values} setFieldValue={setFieldValue} errors={errors} helpertext={getHelperText('16x16px')} />
-
-
       <SearchableSelectInput
         nameList={[
           {
