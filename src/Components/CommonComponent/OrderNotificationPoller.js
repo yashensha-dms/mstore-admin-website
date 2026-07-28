@@ -171,6 +171,11 @@ const OrderNotificationPoller = () => {
   useEffect(() => {
     if (!cookies.uat) return;
 
+    // Request browser notification permission if not already decided
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(err => console.error("Error requesting notification permission:", err));
+    }
+
     const checkForNewOrders = async () => {
       if (isFetchingRef.current) return;
       isFetchingRef.current = true;
@@ -219,6 +224,22 @@ const OrderNotificationPoller = () => {
                 import("../../Utils/CustomFunctions/PlayNotificationSound").then((mod) => {
                   mod.playNotificationSound();
                 });
+
+                // Trigger standard browser desktop notification
+                if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+                  try {
+                    const notification = new Notification("New Order Received!", {
+                      body: `Order #${latestOrderNumber} has been placed.`,
+                      icon: "/assets/images/logo/logo.png",
+                    });
+                    notification.onclick = () => {
+                      window.focus();
+                      window.location.href = `/${lng}/order`;
+                    };
+                  } catch (e) {
+                    console.error("Failed to create browser notification:", e);
+                  }
+                }
 
                 toast(
                   <OrderToastContent
