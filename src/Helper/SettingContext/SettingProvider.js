@@ -33,12 +33,14 @@ const SettingProvider = (props) => {
         }
     }, [data])
 
-    // Convert Currency as per Exchange Rate
     const convertCurrency = useCallback((value) => {
         let position = settingObj?.general?.default_currency?.symbol_position || 'before_price';
-        let symbol = settingObj?.general?.default_currency?.symbol || '$'
-        let amount = Number(value)
-        amount = amount * settingObj?.general?.default_currency?.exchange_rate
+        let symbol = settingObj?.general?.default_currency?.symbol || '$';
+        let exchangeRate = settingObj?.general?.default_currency?.exchange_rate !== undefined ? Number(settingObj.general.default_currency.exchange_rate) : 1;
+        if (isNaN(exchangeRate) || exchangeRate === 0) exchangeRate = 1;
+        let amount = Number(value);
+        if (isNaN(amount)) amount = 0;
+        amount = amount * exchangeRate;
         if (position == 'before_price') {
             return `${symbol} ${amount.toFixed(2)}`
         } else return `${amount.toFixed(2)} ${symbol}`
@@ -50,7 +52,7 @@ const SettingProvider = (props) => {
         }
         if (data) {
             data?.values?.general['mode'] == "dark-only" ? document.body.classList.add("dark-only") : document.body.classList.remove("dark-only")
-            data?.values?.general['admin_site_language_direction'] == 'ltr' ? (document.documentElement.dir = "ltr") : (document.documentElement.dir = "rtl");
+            document.documentElement.dir = "ltr";
             dispatch({
                 type: "SETTINGIMAGE",
                 darkLogo: data?.values?.general?.dark_logo_image,

@@ -16,6 +16,10 @@ const ReceiptModal = ({ open, setOpen, data }) => {
     const { t } = useTranslation(i18Lang, 'common');
     const { settingObj } = useContext(SettingContext);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [showIpInput, setShowIpInput] = useState(false);
+    const [inputIp, setInputIp] = useState(
+        typeof window !== "undefined" ? localStorage.getItem("printer_ip") || "" : ""
+    );
     const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
     // Format address cleanly with commas and spacing
@@ -133,6 +137,27 @@ const ReceiptModal = ({ open, setOpen, data }) => {
         }
     };
 
+    const handleConnectNetworkPrinter = async () => {
+        if (!inputIp) {
+            toast.error("Please enter a valid IP address first.");
+            setShowIpInput(true);
+            return;
+        }
+        try {
+            toast.info(`Connecting to WiFi printer at ${inputIp}...`);
+            const result = await UsbPrinterService.pingNetworkPrinter(inputIp);
+            if (result?.online) {
+                UsbPrinterService.setNetworkPrinter(inputIp);
+                toast.success(`WiFi printer connected successfully!`);
+                setShowIpInput(false);
+            } else {
+                toast.error(`Printer offline at ${inputIp}. Check connection.`);
+            }
+        } catch (error) {
+            toast.error(error.message || "Cannot reach WiFi printer.");
+        }
+    };
+
     const handleThermalPrint = async () => {
         const type = typeof window !== "undefined" ? localStorage.getItem("printer_type") : null;
         if (!type) {
@@ -193,8 +218,13 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                             {t("Setup Printer")}
                         </DropdownToggle>
                         <DropdownMenu>
+                            <DropdownItem header>USB / Serial</DropdownItem>
                             <DropdownItem onClick={handlePairSerial}>{t("Pair Serial Port")}</DropdownItem>
                             <DropdownItem onClick={handlePairUsb}>{t("Pair USB Device")}</DropdownItem>
+                            <DropdownItem divider />
+                            <DropdownItem header>WiFi / Network</DropdownItem>
+                            <DropdownItem onClick={() => setShowIpInput(!showIpInput)}>&#128225; {t("Configure WiFi Printer")}</DropdownItem>
+                            <DropdownItem divider />
                             <DropdownItem onClick={handlePrint}>{t("Open Print Dialog")}</DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
@@ -203,6 +233,31 @@ const ReceiptModal = ({ open, setOpen, data }) => {
             }
             close={false}
         >
+            {showIpInput && (
+                <div className="mb-3 p-3 bg-light rounded border">
+                    <label className="form-label fw-bold small mb-2 text-dark">WiFi Printer IP Address</label>
+                    <div className="d-flex gap-2">
+                        <input 
+                            type="text" 
+                            className="form-control form-control-sm" 
+                            placeholder="e.g. 192.168.18.186" 
+                            value={inputIp} 
+                            onChange={(e) => setInputIp(e.target.value)} 
+                        />
+                        <button 
+                            className="btn btn-sm btn-primary py-1 px-3 text-nowrap" 
+                            onClick={handleConnectNetworkPrinter}
+                        >
+                            Connect
+                        </button>
+                    </div>
+                    {localStorage.getItem("printer_ip") && (
+                        <div className="mt-2 text-success small">
+                            Active: {localStorage.getItem("printer_ip")}
+                        </div>
+                    )}
+                </div>
+            )}
             <div id="printable-receipt-content">
                 <div className="ticket">
                     <div className="title-text text-center">

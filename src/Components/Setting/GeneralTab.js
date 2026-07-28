@@ -21,13 +21,7 @@ const GeneralTab = ({ values, setFieldValue, errors }) => {
 
       <FileUploadField name="favicon_image_id" title="Favicon" uniquename={values?.values?.general?.favicon_image} id="favicon_image_id" type="file" values={values} setFieldValue={setFieldValue} errors={errors} helpertext={getHelperText('16x16px')} />
 
-      <SimpleInputField
-        nameList={[
-          { name: "[values][general][site_title]", title: "SiteTitle", placeholder: t("EnterSiteTitle"), require: "true", errormsg: "SiteTitle" },
-          { name: "[values][general][site_name]", title: "SiteName", placeholder: t("EnterSiteName"),errormsg:"SiteName" },
-          { name: "[values][general][site_url]", title: "SiteUrl", placeholder: t("EnterSiteUrl"),errormsg:"SiteUrl" },
-          { name: "[values][general][site_tagline]", title: "siteTagline", placeholder: t("EnterSiteTagline") },]}
-      />
+
       <SearchableSelectInput
         nameList={[
           {

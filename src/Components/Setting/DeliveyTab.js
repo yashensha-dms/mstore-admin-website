@@ -20,8 +20,8 @@ const DeliveyTab = ({ values, setFieldValue }) => {
                 <Row className='mb-4 align-items-center g-2'>
                     <Col sm="3"><Label className='col-form-label form-label-title form-label'> {t("DefaultDelivery")}</Label></Col>
                     <Col sm="10">
-                        {values['values']['delivery']?.['same_day_intervals'].length > 0 &&
-                            values['values']['delivery']['same_day_intervals'].map((elem, i) => (
+                        {(values['values']['delivery']?.['same_day_intervals'] || []).length > 0 &&
+                            (values['values']['delivery']['same_day_intervals'] || []).map((elem, i) => (
                                 <div className='mb-3' key={i}>
                                     <Row>
                                         <Col sm="10">
@@ -36,13 +36,13 @@ const DeliveyTab = ({ values, setFieldValue }) => {
                                         </Col>
                                         <Col sm="2" className='px-sm-0'>
                                             <a className="mt-custom d-block invalid-feedback cursor-pointer"
-                                                onClick={() => setFieldValue("[values][delivery][same_day_intervals]", values['values']['delivery']['same_day_intervals'].filter((item, index) => index !== i),)}>{t('Remove')}</a>
+                                                onClick={() => setFieldValue("[values][delivery][same_day_intervals]", (values['values']['delivery']['same_day_intervals'] || []).filter((item, index) => index !== i),)}>{t('Remove')}</a>
                                         </Col>
                                     </Row>
                                 </div>
 
                             ))}
-                        <Btn className="btn-theme mt-4" onClick={() => setFieldValue("[values][delivery][same_day_intervals]", [...values['values']['delivery']['same_day_intervals'], { title: "", description: "" }])} title="AddIntervals" />
+                        <Btn className="btn-theme mt-4" onClick={() => setFieldValue("[values][delivery][same_day_intervals]", [...(values['values']['delivery']?.['same_day_intervals'] || []), { title: "", description: "" }])} title="AddIntervals" />
                     </Col>
                 </Row>
 

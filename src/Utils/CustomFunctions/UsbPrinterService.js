@@ -1,3 +1,5 @@
+import request from "../AxiosUtils";
+
 class UsbPrinterService {
     static async connectSerial() {
         if (typeof window === "undefined" || !navigator.serial) {
@@ -94,6 +96,60 @@ class UsbPrinterService {
         await device.close();
     }
 
+    /**
+     * Send raw ESC/POS bytes to the WiFi/LAN network printer via the backend API.
+     * The backend opens a raw TCP socket to the printer IP:9100 and forwards the data.
+     *
+     * @param {Uint8Array} data  Raw ESC/POS byte array from react-thermal-printer render()
+     */
+    static async printToNetworkPrinter(data) {
+        // Retrieve the stored IP address from localStorage
+        const ip = typeof window !== "undefined" ? localStorage.getItem("printer_ip") : null;
+        if (!ip) {
+            throw new Error("No network printer IP address set. Please configure one in Setup Printer.");
+        }
+
+        // Convert Uint8Array → Base64 string for JSON transport
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(data)));
+
+        const response = await request({
+            url: '/printer/print',
+            method: 'POST',
+            data: { data: base64, ip: ip },
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 10000,
+        });
+
+        if (!response?.data?.success) {
+            throw new Error(response?.data?.error || 'Network printer did not acknowledge the job.');
+        }
+        return response.data;
+    }
+
+    /**
+     * Set this printer as the active network printer and save the IP to localStorage.
+     */
+    static setNetworkPrinter(ip) {
+        if (!ip) return;
+        localStorage.setItem('printer_type', 'network');
+        localStorage.setItem('printer_ip', ip);
+    }
+
+    /**
+     * Test connectivity to the network printer at the specified IP.
+     * @param {string} ip
+     * @returns {Promise<{online: boolean, printer: string}>}
+     */
+    static async pingNetworkPrinter(ip) {
+        const response = await request({
+            url: '/printer/ping',
+            method: 'GET',
+            params: { ip: ip },
+            timeout: 8000
+        });
+        return response?.data;
+    }
+
     static async print(data) {
         if (typeof window === "undefined") return;
         const type = localStorage.getItem("printer_type");
@@ -101,6 +157,8 @@ class UsbPrinterService {
             await this.printToSerial(data);
         } else if (type === "usb") {
             await this.printToUsb(data);
+        } else if (type === "network") {
+            await this.printToNetworkPrinter(data);
         } else {
             await this.printToSerial(data);
         }

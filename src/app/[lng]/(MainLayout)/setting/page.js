@@ -1,16 +1,18 @@
 'use client'
 import { useContext } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import SettingForm from "@/Components/Setting/SettingForm";
-import { updateSetting } from "@/Utils/AxiosUtils/API";
+import { updateSetting, setting } from "@/Utils/AxiosUtils/API";
 import useCreate from "@/Utils/Hooks/useCreate";
 import SettingContext from "@/Helper/SettingContext";
 
 const Setting = () => {
   const { dispatch, setCurrencySymbol, setSettingObj } = useContext(SettingContext)
+  const queryClient = useQueryClient();
   const { mutate, isLoading } = useCreate(updateSetting, false, false, false, (resDta) => {
     if (resDta.status == 200 || resDta.status == 201) {
       resDta?.data?.values?.general['mode'] == "dark-only" ? document.body.classList.add("dark-only") : document.body.classList.remove("dark-only")
-      resDta?.data?.values?.general['admin_site_language_direction'] == 'ltr' ? (document.documentElement.dir = "ltr") : (document.documentElement.dir = "rtl");
+      document.documentElement.dir = "ltr";
       setCurrencySymbol(resDta?.data?.values?.general?.default_currency?.symbol)
       setSettingObj(resDta?.data?.values)
       dispatch({
@@ -26,6 +28,7 @@ const Setting = () => {
         darkLogo: resDta?.data?.values["general"]["dark_logo_image"],
         favicon: resDta?.data?.values["general"]["favicon_image"],
       })
+      queryClient.invalidateQueries([setting]);
     }
   });
   return <SettingForm mutate={mutate} loading={isLoading} title={"Settings"} />;
