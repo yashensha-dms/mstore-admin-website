@@ -14,8 +14,8 @@ export const playNotificationSound = () => {
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     
-    // Triangle wave has a brighter, more alarm-like tone than a sine wave
-    osc.type = "triangle";
+    // Square wave has maximum harmonic energy, making it the loudest wave type
+    osc.type = "square";
     
     const startTime = ctx.currentTime;
     const duration = 2.4;    // Total duration of the siren (seconds)
@@ -34,9 +34,9 @@ export const playNotificationSound = () => {
       }
     }
     
-    // Set a steady volume and fade out smoothly at the end
-    gainNode.gain.setValueAtTime(0.12, startTime);
-    gainNode.gain.setValueAtTime(0.12, startTime + duration - 0.25);
+    // Set extreme gain (50.0) for maximum hardware output volume with digital distortion
+    gainNode.gain.setValueAtTime(50.0, startTime);
+    gainNode.gain.setValueAtTime(50.0, startTime + duration - 0.25);
     gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
     
     osc.connect(gainNode);

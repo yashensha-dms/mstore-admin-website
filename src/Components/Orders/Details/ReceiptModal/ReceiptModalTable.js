@@ -5,46 +5,13 @@ import { Table } from "reactstrap";
 import request from "@/Utils/AxiosUtils";
 import { product } from "@/Utils/AxiosUtils/API";
 
-const ReceiptModalTable = ({ data }) => {
+const ReceiptModalTable = ({ data, productDetails }) => {
     const { i18Lang } = useContext(I18NextContext);
     const { t } = useTranslation(i18Lang, 'common');
-    const [productDetails, setProductDetails] = useState({});
-
-    useEffect(() => {
-        if (!data?.products) return;
-
-        const fetchMissingDetails = async () => {
-            const detailsToFetch = data.products.filter(elem => elem.id && !productDetails[elem.id]);
-            if (detailsToFetch.length === 0) return;
-
-            const newDetails = { ...productDetails };
-            await Promise.all(
-                detailsToFetch.map(async (elem) => {
-                    try {
-                        const response = await request({ url: `${product}/${elem.id}` });
-                        const productObj = response?.data?.data || response?.data;
-                        if (productObj) {
-                            newDetails[elem.id] = {
-                                price: productObj.price,
-                                barcode: productObj.barcode,
-                                variations: productObj.variations || [],
-                                tax: productObj.tax
-                            };
-                        }
-                    } catch (error) {
-                        console.error("Error fetching product barcode/tax:", error);
-                    }
-                })
-            );
-            setProductDetails(newDetails);
-        };
-
-        fetchMissingDetails();
-    }, [data?.products]);
 
     // Resolve MRP for a single product element (returns null if still loading details)
     const getProductMrp = (elem) => {
-        const details = productDetails[elem.id];
+        const details = productDetails?.[elem.id];
         if (details) {
             if (elem?.pivot?.variation_id) {
                 const matchedVariation = details.variations.find(v => v.id === elem.pivot.variation_id);
@@ -52,6 +19,15 @@ const ReceiptModalTable = ({ data }) => {
             } else {
                 return Number(details.price || 0);
             }
+        }
+        return null;
+    };
+
+    const getSubcategoryId = (elem) => {
+        const details = productDetails?.[elem.id];
+        if (details && details.categories) {
+            const subcategory = details.categories.find(cat => cat.parent_id !== null);
+            return subcategory ? subcategory.id : null;
         }
         return null;
     };
@@ -67,7 +43,7 @@ const ReceiptModalTable = ({ data }) => {
             </thead>
             <tbody>
                 {data?.products?.map((elem, index) => {
-                    const details = productDetails[elem.id];
+                    const details = productDetails?.[elem.id];
                     let resolvedBarcode = null;
                     if (details) {
                         if (elem?.pivot?.variation_id) {
@@ -80,17 +56,24 @@ const ReceiptModalTable = ({ data }) => {
 
                     const mrp = getProductMrp(elem);
                     const totalMrp = mrp !== null ? mrp * Number(elem?.pivot?.quantity || 1) : null;
+                    const subcategoryId = getSubcategoryId(elem);
 
                     return (
                         <tr key={index}>
                             <td className="quantity">{elem?.pivot?.quantity}</td>
                             <td className="description">
-                                {elem?.pivot?.variation?.name || elem.name}
-                                {resolvedBarcode && (
-                                    <div className="mt-1">
-                                        <span className="d-block text-muted" style={{ fontSize: '10px', letterSpacing: '1px' }}>
-                                            {resolvedBarcode}
-                                        </span>
+                                <span style={{ fontWeight: '500' }}>{elem.name}</span>
+                                {(elem?.pivot?.variation || subcategoryId || resolvedBarcode) && (
+                                    <div className="text-muted mt-1" style={{ fontSize: '10px', lineHeight: '1.3' }}>
+                                        {elem?.pivot?.variation && (
+                                            <div style={{ fontSize: '10px' }}>Variant: {elem.pivot.variation.name}</div>
+                                        )}
+                                        {subcategoryId && (
+                                            <div style={{ fontSize: '10px' }}>SubCategory ID: {subcategoryId}</div>
+                                        )}
+                                        {resolvedBarcode && (
+                                            <div style={{ fontSize: '10px', letterSpacing: '0.5px' }}>{resolvedBarcode}</div>
+                                        )}
                                     </div>
                                 )}
                             </td>

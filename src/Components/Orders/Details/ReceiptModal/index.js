@@ -1,7 +1,7 @@
 import ShowModal from "@/Elements/Alerts&Modals/Modal";
 import SettingContext from "@/Helper/SettingContext";
 import { dateFormate } from "@/Utils/CustomFunctions/DateFormate";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import ReceiptModalTable from "./ReceiptModalTable";
 import Btn from "@/Elements/Buttons/Btn";
 import { useTranslation } from "@/app/i18n/client";
@@ -10,6 +10,8 @@ import { render, Printer, Text, Row, Line, Cut } from 'react-thermal-printer';
 import UsbPrinterService from "@/Utils/CustomFunctions/UsbPrinterService";
 import { toast } from "react-toastify";
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
+import request from "@/Utils/AxiosUtils";
+import { product } from "@/Utils/AxiosUtils/API";
 
 const ReceiptModal = ({ open, setOpen, data }) => {
     const { i18Lang } = useContext(I18NextContext);
@@ -20,6 +22,50 @@ const ReceiptModal = ({ open, setOpen, data }) => {
     const [inputIp, setInputIp] = useState(
         typeof window !== "undefined" ? localStorage.getItem("printer_ip") || "" : ""
     );
+    const [productDetails, setProductDetails] = useState({});
+
+    useEffect(() => {
+        if (!data?.products) return;
+
+        const fetchMissingDetails = async () => {
+            const detailsToFetch = data.products.filter(elem => elem.id && !productDetails[elem.id]);
+            if (detailsToFetch.length === 0) return;
+
+            const newDetails = { ...productDetails };
+            await Promise.all(
+                detailsToFetch.map(async (elem) => {
+                    try {
+                        const response = await request({ url: `${product}/${elem.id}` });
+                        const productObj = response?.data?.data || response?.data;
+                        if (productObj) {
+                            newDetails[elem.id] = {
+                                price: productObj.price,
+                                barcode: productObj.barcode,
+                                variations: productObj.variations || [],
+                                tax: productObj.tax,
+                                categories: productObj.categories || []
+                            };
+                        }
+                    } catch (error) {
+                        console.error("Error fetching product barcode/tax/categories:", error);
+                    }
+                })
+            );
+            setProductDetails(newDetails);
+        };
+
+        fetchMissingDetails();
+    }, [data?.products]);
+
+    const getSubcategoryId = (elem) => {
+        const details = productDetails?.[elem.id];
+        if (details && details.categories) {
+            const subcategory = details.categories.find(cat => cat.parent_id !== null);
+            return subcategory ? subcategory.id : null;
+        }
+        return null;
+    };
+
     const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
     // Format address cleanly with commas and spacing
@@ -30,6 +76,10 @@ const ReceiptModal = ({ open, setOpen, data }) => {
         data?.shipping_address?.country?.name,
         data?.shipping_address?.pincode
     ].filter(Boolean).join(', ');
+
+    const deliverySlot = data?.delivery_interval && data?.delivery_description 
+        ? `${data.delivery_description} (${data.delivery_interval})`
+        : (data?.delivery_interval || data?.delivery_description);
 
     const handlePrint = () => {
         const printContent = document.getElementById("printable-receipt-content").innerHTML;
@@ -174,6 +224,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                     <Line />
                     <Row left="Order Number:" right={`#${data.order_number}`} />
                     <Row left="Date:" right={dateFormate(data.created_at)} />
+                    {deliverySlot && <Row left="Delivery Slot:" right={deliverySlot} />}
                     {data?.consumer?.name && <Row left="Customer:" right={data.consumer.name} />}
                     {data?.consumer?.email && <Row left="Email:" right={data.consumer.email} />}
                     {data?.shipping_address?.phone && <Row left="Phone:" right={data.shipping_address.phone} />}
@@ -181,11 +232,22 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                     <Row left="QTY ITEM" right="PRICE" />
                     <Line />
                     {data?.products?.map((elem, idx) => {
-                        const name = elem?.pivot?.variation?.name || elem.name;
                         const qty = elem?.pivot?.quantity || 1;
+                        const baseName = elem.name;
+                        const variationName = elem?.pivot?.variation?.name;
+                        const subcategoryId = getSubcategoryId(elem);
+                        
+                        let displayName = baseName;
+                        if (variationName) {
+                            displayName += ` (${variationName})`;
+                        }
+                        if (subcategoryId) {
+                            displayName += ` [SC:${subcategoryId}]`;
+                        }
+
                         const price = (elem?.pivot?.variation?.price || elem.price || 0) * qty;
                         return (
-                            <Row key={idx} left={`${qty}x ${name}`} right={`₹${Number(price).toFixed(2)}`} />
+                            <Row key={idx} left={`${qty}x ${displayName}`} right={`₹${Number(price).toFixed(2)}`} />
                         );
                     })}
                     <Line />
@@ -279,6 +341,12 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                                     <td className="text-muted py-1">{t("Date")}:</td>
                                     <td className="fw-medium text-end py-1">{dateFormate(data.created_at)}</td>
                                 </tr>
+                                {deliverySlot && (
+                                    <tr>
+                                        <td className="text-muted py-1">{t("DeliverySlot")}:</td>
+                                        <td className="fw-medium text-end py-1">{deliverySlot}</td>
+                                    </tr>
+                                )}
                                 {data?.consumer?.name && (
                                     <tr>
                                         <td className="text-muted py-1">{t("Customer")}:</td>
@@ -307,7 +375,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                         </table>
                     </div>
                 </div>
-                <ReceiptModalTable data={data} />
+                <ReceiptModalTable data={data} productDetails={productDetails} />
             </div>
         </ShowModal>
     )
