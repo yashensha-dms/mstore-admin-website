@@ -32,6 +32,26 @@ const ReceiptModalTable = ({ data, productDetails }) => {
         return null;
     };
 
+    const getVariantName = (elem) => {
+        if (elem?.pivot?.variation?.attribute_values?.length > 0) {
+            return elem.pivot.variation.attribute_values.map(attr => attr.value).join(', ');
+        }
+        const details = productDetails?.[elem.id];
+        if (details && elem?.pivot?.variation_id) {
+            const matchedVariation = details.variations?.find(v => v.id === elem.pivot.variation_id);
+            if (matchedVariation?.attribute_values?.length > 0) {
+                return matchedVariation.attribute_values.map(attr => attr.value).join(', ');
+            }
+            if (matchedVariation?.name) {
+                return matchedVariation.name;
+            }
+        }
+        if (elem?.pivot?.variation?.name) {
+            return elem.pivot.variation.name;
+        }
+        return null;
+    };
+
     return (
         <Table>
             <thead>
@@ -57,16 +77,17 @@ const ReceiptModalTable = ({ data, productDetails }) => {
                     const mrp = getProductMrp(elem);
                     const totalMrp = mrp !== null ? mrp * Number(elem?.pivot?.quantity || 1) : null;
                     const subcategoryId = getSubcategoryId(elem);
+                    const variantName = getVariantName(elem);
 
                     return (
                         <tr key={index}>
                             <td className="quantity">{elem?.pivot?.quantity}</td>
                             <td className="description">
                                 <span style={{ fontWeight: '500' }}>{elem.name}</span>
-                                {(elem?.pivot?.variation || subcategoryId || resolvedBarcode) && (
+                                {(variantName || subcategoryId || resolvedBarcode) && (
                                     <div className="text-muted mt-1" style={{ fontSize: '10px', lineHeight: '1.3' }}>
-                                        {elem?.pivot?.variation && (
-                                            <div style={{ fontSize: '10px' }}>Variant: {elem.pivot.variation.name}</div>
+                                        {variantName && (
+                                            <div style={{ fontSize: '10px' }}>Variant: {variantName}</div>
                                         )}
                                         {subcategoryId && (
                                             <div style={{ fontSize: '10px' }}>SubCategory ID: {subcategoryId}</div>

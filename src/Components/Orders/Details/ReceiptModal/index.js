@@ -66,6 +66,26 @@ const ReceiptModal = ({ open, setOpen, data }) => {
         return null;
     };
 
+    const getVariantName = (elem) => {
+        if (elem?.pivot?.variation?.attribute_values?.length > 0) {
+            return elem.pivot.variation.attribute_values.map(attr => attr.value).join(', ');
+        }
+        const details = productDetails?.[elem.id];
+        if (details && elem?.pivot?.variation_id) {
+            const matchedVariation = details.variations?.find(v => v.id === elem.pivot.variation_id);
+            if (matchedVariation?.attribute_values?.length > 0) {
+                return matchedVariation.attribute_values.map(attr => attr.value).join(', ');
+            }
+            if (matchedVariation?.name) {
+                return matchedVariation.name;
+            }
+        }
+        if (elem?.pivot?.variation?.name) {
+            return elem.pivot.variation.name;
+        }
+        return null;
+    };
+
     const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
     // Format address cleanly with commas and spacing
@@ -234,7 +254,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                     {data?.products?.map((elem, idx) => {
                         const qty = elem?.pivot?.quantity || 1;
                         const baseName = elem.name;
-                        const variationName = elem?.pivot?.variation?.name;
+                        const variationName = getVariantName(elem);
                         const subcategoryId = getSubcategoryId(elem);
                         
                         let displayName = baseName;
@@ -251,7 +271,14 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                         );
                     })}
                     <Line />
-                    <Row left="Total:" right={`₹${Number(data.total_amount || data.total || 0).toFixed(2)}`} />
+                    <Row left="Subtotal:" right={`₹${Number(data.amount || 0).toFixed(2)}`} />
+                    {data?.shipping_total > 0 && <Row left="Shipping:" right={`₹${Number(data.shipping_total).toFixed(2)}`} />}
+                    {data?.tax_total > 0 && <Row left="Tax:" right={`₹${Number(data.tax_total).toFixed(2)}`} />}
+                    {data?.coupon_total_discount > 0 && <Row left="Discount:" right={`-₹${Number(data.coupon_total_discount).toFixed(2)}`} />}
+                    {data?.points_amount > 0 && <Row left="Points:" right={`-₹${Number(data.points_amount).toFixed(2)}`} />}
+                    {data?.wallet_balance > 0 && <Row left="Wallet:" right={`-₹${Number(data.wallet_balance).toFixed(2)}`} />}
+                    <Line />
+                    <Row left="Total:" right={`₹${Number(data.total || data.total_amount || 0).toFixed(2)}`} />
                     <Line />
                     <Text align="center">Thank you for shopping!</Text>
                     <Cut />
@@ -376,6 +403,50 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                     </div>
                 </div>
                 <ReceiptModalTable data={data} productDetails={productDetails} />
+                <div style={{ borderTop: '1px dashed rgba(74, 85, 104, 0.25)', paddingTop: '10px', marginTop: '10px' }}>
+                    <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+                        <tbody>
+                            <tr>
+                                <td className="text-muted py-1">{t("Subtotal")}:</td>
+                                <td className="fw-medium text-end py-1">₹{Number(data?.amount || 0).toFixed(2)}</td>
+                            </tr>
+                            {data?.shipping_total > 0 && (
+                                <tr>
+                                    <td className="text-muted py-1">{t("Shipping")}:</td>
+                                    <td className="fw-medium text-end py-1">₹{Number(data.shipping_total).toFixed(2)}</td>
+                                </tr>
+                            )}
+                            {data?.tax_total > 0 && (
+                                <tr>
+                                    <td className="text-muted py-1">{t("Tax")}:</td>
+                                    <td className="fw-medium text-end py-1">₹{Number(data.tax_total).toFixed(2)}</td>
+                                </tr>
+                            )}
+                            {data?.coupon_total_discount > 0 && (
+                                <tr>
+                                    <td className="text-muted py-1">{t("Discount")}:</td>
+                                    <td className="fw-medium text-end py-1">-₹{Number(data.coupon_total_discount).toFixed(2)}</td>
+                                </tr>
+                            )}
+                            {data?.points_amount > 0 && (
+                                <tr>
+                                    <td className="text-muted py-1">{t("Points")}:</td>
+                                    <td className="fw-medium text-end py-1">-₹{Number(data.points_amount).toFixed(2)}</td>
+                                </tr>
+                            )}
+                            {data?.wallet_balance > 0 && (
+                                <tr>
+                                    <td className="text-muted py-1">{t("WalletBalance")}:</td>
+                                    <td className="fw-medium text-end py-1">-₹{Number(data.wallet_balance).toFixed(2)}</td>
+                                </tr>
+                            )}
+                            <tr style={{ borderTop: '1px dashed #000' }}>
+                                <td className="fw-bold py-2" style={{ fontSize: '13px' }}>{t("Total")}:</td>
+                                <td className="fw-bold text-end py-2" style={{ fontSize: '13px' }}>₹{Number(data?.total || data?.total_amount || 0).toFixed(2)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </ShowModal>
     )
