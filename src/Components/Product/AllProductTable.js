@@ -59,7 +59,7 @@ const AllProductTable = ({ url, moduleName, isCheck, setIsCheck, isReplicate, im
   const [deleteModal, setDeleteModal] = useState(false);
   const [categorySearch, setCategorySearch] = useState("");
 
-  // Restore pagination state on mount
+  // Restore table state (page, filters, search, sort, scroll position) on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedPage = sessionStorage.getItem("product-table-page");
@@ -70,10 +70,34 @@ const AllProductTable = ({ url, moduleName, isCheck, setIsCheck, isReplicate, im
       if (storedPaginate) {
         setPaginate(Number(storedPaginate));
       }
+      const storedSearch = sessionStorage.getItem("product-table-search");
+      if (storedSearch !== null) {
+        setSearch(storedSearch);
+      }
+      const storedSortBy = sessionStorage.getItem("product-table-sortby");
+      if (storedSortBy) {
+        try {
+          setSortBy(JSON.parse(storedSortBy));
+        } catch (e) {}
+      }
+      const storedCategories = sessionStorage.getItem("product-table-categories");
+      if (storedCategories) {
+        try {
+          setSelectedCategories(JSON.parse(storedCategories));
+        } catch (e) {}
+      }
+
+      // Restore scroll position after data/table renders
+      const storedScrollY = sessionStorage.getItem("product-table-scroll-y");
+      if (storedScrollY !== null) {
+        setTimeout(() => {
+          window.scrollTo(0, Number(storedScrollY));
+        }, 100);
+      }
     }
   }, []);
 
-  // Save pagination state changes
+  // Save table state changes
   useEffect(() => {
     if (typeof window !== "undefined") {
       sessionStorage.setItem("product-table-page", page);
@@ -85,6 +109,32 @@ const AllProductTable = ({ url, moduleName, isCheck, setIsCheck, isReplicate, im
       sessionStorage.setItem("product-table-paginate", paginate);
     }
   }, [paginate]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("product-table-search", search);
+    }
+  }, [search]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("product-table-sortby", JSON.stringify(sortBy));
+    }
+  }, [sortBy]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("product-table-categories", JSON.stringify(selectedCategories));
+    }
+  }, [selectedCategories]);
+
+  // Save scroll position when navigating to edit page
+  const handleEditProduct = useCallback((id) => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("product-table-scroll-y", window.scrollY);
+    }
+    router.push(`/${i18Lang}/${pathname.split("/")[2]}/update/${id}`);
+  }, [i18Lang, pathname, router]);
 
   // Fetch role on mount
   useEffect(() => {
@@ -369,7 +419,7 @@ const AllProductTable = ({ url, moduleName, isCheck, setIsCheck, isReplicate, im
                   {edit && (
                     <DropdownMenu.Item 
                       className="radix-dropdown-item"
-                      onSelect={() => router.push(`/${i18Lang}/${pathname.split("/")[2]}/update/${item.id}`)}
+                      onSelect={() => handleEditProduct(item.id)}
                     >
                       <RiPencilLine className="w-4.5 h-4.5 text-slate-400 mr-2.5" />
                       <span>{t("Edit")}</span>
@@ -433,7 +483,7 @@ const AllProductTable = ({ url, moduleName, isCheck, setIsCheck, isReplicate, im
     }
 
     return cols;
-  }, [productList, isCheck, sortBy, role, page, paginate, edit, destroy, t, i18Lang, pathname, router, singleDeleteMutate, setIsCheck, convertCurrency, setDeleteId, setDeleteModal]);
+  }, [productList, isCheck, sortBy, role, page, paginate, edit, destroy, t, i18Lang, pathname, router, singleDeleteMutate, setIsCheck, convertCurrency, setDeleteId, setDeleteModal, handleEditProduct]);
 
   // TanStack Table Instance
   const table = useReactTable({
