@@ -58,12 +58,81 @@ const FileUploadBrowser = ({ values, setFieldValue, dispatch, onlyPreview, small
         ) : null;
     }
 
-    const onSelect = (event) => {
-        if (event.currentTarget.files.length + (values[props.name]?.length || 0) > 10) {
-            return ToastNotification('error', `Maximum 10 files allowed.`)
-        } else {
-            setFieldValue(props.name, props.multiple ? addFileFromFileList(event.currentTarget.files) : event.currentTarget.files[0], props.index);
+    const compressImage = async (file) => {
+        // Only compress raster images
+        if (!file.type.startsWith("image/") || file.type.includes("svg") || file.type.includes("gif")) {
+            return file;
         }
+        
+        const targetSizeBytes = 1.5 * 1024 * 1024; // 1.5 MB target
+        if (file.size <= targetSizeBytes) {
+            return file;
+        }
+
+        return new Promise((resolve) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                const canvas = document.createElement("canvas");
+                let { width, height } = img;
+                
+                // Scale down max dimension to 2048px if larger
+                const maxDim = 2048;
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Compress quality to 0.82
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob && blob.size < file.size) {
+                            const compressedFile = new File([blob], file.name, {
+                                type: file.type === "image/png" ? "image/jpeg" : file.type,
+                                lastModified: Date.now(),
+                            });
+                            resolve(compressedFile);
+                        } else {
+                            resolve(file);
+                        }
+                    },
+                    file.type === "image/png" ? "image/jpeg" : file.type,
+                    0.82
+                );
+            };
+            img.onerror = () => resolve(file);
+            img.src = url;
+        });
+    };
+
+    const onSelect = async (event) => {
+        const rawFiles = Array.from(event.currentTarget.files);
+        const maxSizeBytes = 3 * 1024 * 1024;
+        const oversizedFiles = rawFiles.filter(file => file.size > maxSizeBytes);
+        
+        if (oversizedFiles.length > 0) {
+            return ToastNotification('error', `File size exceeds 3MB limit: ${oversizedFiles.map(f => f.name).join(', ')}`);
+        }
+
+        if (rawFiles.length + (values[props.name]?.length || 0) > 10) {
+            return ToastNotification('error', `Maximum 10 files allowed.`);
+        }
+
+        // Compress images > 1.5MB automatically
+        const processedFiles = await Promise.all(rawFiles.map(file => compressImage(file)));
+
+        setFieldValue(props.name, props.multiple ? addFileFromFileList(processedFiles) : processedFiles[0], props.index);
     }
 
     if (onlyPreview) {
