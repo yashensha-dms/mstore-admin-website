@@ -84,6 +84,7 @@ export const checkout = "/checkout";
 export const attachment = "/attachment";
 export const createAttachment = "/attachment";
 export const attachmentDelete = "/attachment/deleteAll";
+export const syncCloudinaryAttachment = "/attachment/sync-cloudinary";
 
 // Commissions
 export const commissions = '/commissionHistory';
