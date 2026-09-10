@@ -75,6 +75,19 @@ const AllOrdersTable = ({ url, moduleName, dateRange, isCheck, setIsCheck, ...pr
     setIsCheck && setIsCheck([]);
   }, [page, paginate, search, sortBy, date, setIsCheck]);
 
+  // Live refetch table when a new order is received via the poller
+  useEffect(() => {
+    const handleNewOrder = () => {
+      if (page === 1 && !search) {
+        refetch();
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("new-order-received", handleNewOrder);
+      return () => window.removeEventListener("new-order-received", handleNewOrder);
+    }
+  }, [page, search, refetch]);
+
   // Handle column sorting
   const handleSort = (field) => {
     setSortBy((prev) => ({
