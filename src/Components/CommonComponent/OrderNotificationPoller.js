@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { useCookies } from "react-cookie";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import request from "../../Utils/AxiosUtils";
-import { OrderAPI } from "../../Utils/AxiosUtils/API";
+import { OrderAPI, NotificationsAPI, BadgeApi } from "../../Utils/AxiosUtils/API";
 
 // Primary brand color
 const PRIMARY = "#172B4D";
@@ -166,6 +167,7 @@ const OrderToastContent = ({ orderNumber, onView }) => (
 
 const OrderNotificationPoller = () => {
   const [cookies] = useCookies(["uat"]);
+  const queryClient = useQueryClient();
   const isFetchingRef = useRef(false);
 
   useEffect(() => {
@@ -183,7 +185,18 @@ const OrderNotificationPoller = () => {
         const response = await request({
           url: OrderAPI,
           method: "get",
-          params: { paginate: 10, page: 1, sort: "desc", field: "created_at" }
+          params: {
+            paginate: 10,
+            page: 1,
+            sort: "desc",
+            field: "created_at",
+            _t: Date.now(), // Prevent browser/proxy 304 or disk cache
+          },
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
         });
 
         const responseData = response?.data;
@@ -199,20 +212,20 @@ const OrderNotificationPoller = () => {
         }
 
         if (orders.length > 0) {
-          const sortedOrders = [...orders].sort((a, b) => b.id - a.id);
+          // Sort by database primary key ID descending
+          const sortedOrders = [...orders].sort((a, b) => (b.id || 0) - (a.id || 0));
           const latestOrder = sortedOrders[0];
-          const latestOrderNumber = latestOrder?.order_number;
+          const latestId = latestOrder?.id;
+          const latestOrderNumber = latestOrder?.order_number || latestId;
 
-          if (latestOrderNumber) {
-            const storedLatest = localStorage.getItem("latest_order_number");
+          if (latestId) {
+            const storedIdStr = localStorage.getItem("last_seen_order_id");
 
-            if (storedLatest) {
-              const storedNumVal = parseInt(storedLatest, 10);
-              const newNumVal = parseInt(latestOrderNumber, 10);
+            if (storedIdStr) {
+              const storedId = parseInt(storedIdStr, 10);
+              const currentId = parseInt(latestId, 10);
 
-              const isNewOrder =
-                (!isNaN(newNumVal) && !isNaN(storedNumVal) && newNumVal > storedNumVal) ||
-                (isNaN(newNumVal) && latestOrderNumber.toString() !== storedLatest.toString());
+              const isNewOrder = !isNaN(currentId) && !isNaN(storedId) ? currentId > storedId : false;
 
               if (isNewOrder) {
                 // Detect current locale from pathname (e.g. /en/... -> "en")
@@ -221,11 +234,12 @@ const OrderNotificationPoller = () => {
 
                 const toastId = `order-${latestOrderNumber}`;
 
+                // 1. Play siren alert
                 import("../../Utils/CustomFunctions/PlayNotificationSound").then((mod) => {
                   mod.playNotificationSound();
                 });
 
-                // Trigger standard browser desktop notification
+                // 2. Trigger standard browser desktop notification
                 if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
                   try {
                     const notification = new Notification("New Order Received!", {
@@ -241,6 +255,7 @@ const OrderNotificationPoller = () => {
                   }
                 }
 
+                // 3. Trigger Sonner rich toast
                 toast(
                   <OrderToastContent
                     orderNumber={latestOrderNumber}
@@ -266,11 +281,29 @@ const OrderNotificationPoller = () => {
                   }
                 );
 
-                localStorage.setItem("latest_order_number", latestOrderNumber.toString());
+                // 4. Invalidate React Query caches so all open views (Order table, Notifications, Badges) update automatically without refresh
+                try {
+                  queryClient.invalidateQueries([OrderAPI]);
+                  queryClient.invalidateQueries([NotificationsAPI]);
+                  queryClient.invalidateQueries(["NotificationsAPI"]);
+                  queryClient.invalidateQueries([BadgeApi]);
+                } catch (qErr) {
+                  console.warn("Could not invalidate queries:", qErr);
+                }
+
+                // 5. Dispatch window custom event for page-level reactivity
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("new-order-received", { detail: latestOrder }));
+                }
+
+                // 6. Update local storage pointer and clear old legacy key
+                localStorage.setItem("last_seen_order_id", currentId.toString());
+                localStorage.removeItem("latest_order_number");
               }
             } else {
-              // Initial load — store silently, no toast
-              localStorage.setItem("latest_order_number", latestOrderNumber.toString());
+              // Initial load — record latest ID silently without triggering siren
+              localStorage.setItem("last_seen_order_id", latestId.toString());
+              localStorage.removeItem("latest_order_number");
             }
           }
         }
@@ -288,7 +321,7 @@ const OrderNotificationPoller = () => {
     const interval = setInterval(checkForNewOrders, 5000);
 
     return () => clearInterval(interval);
-  }, [cookies.uat]);
+  }, [cookies.uat, queryClient]);
 
   return null;
 };
