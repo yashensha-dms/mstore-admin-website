@@ -1,0 +1,66 @@
+import allPossibleCases from "../../Utils/CustomFunctions/AllPossibleCases";
+
+const ProductSubmitFunction = (mutate, value, updateId) => {
+  if (value["type"] == "classified") {
+    delete value["stock_status"]
+    delete value["quantity"]
+    delete value["sku"]
+  }
+  if (value["is_random_related_products"]) {
+    value['related_products'] = []
+  }
+  value["is_sale_enable"] = Number(value["is_sale_enable"]);
+  value["is_random_related_products"] = Number(value["is_random_related_products"]);
+  value["is_free_shipping"] = Number(value["is_free_shipping"]);
+  value["is_approved"] = Number(value["is_approved"]);
+  value['is_featured'] = Number(value['is_featured'])
+  value['safe_checkout'] = Number(value['safe_checkout'])
+  value['secure_checkout'] = Number(value['secure_checkout'])
+  value['social_share'] = Number(value['social_share'])
+  value['encourage_order'] = Number(value['encourage_order'])
+  value['encourage_view'] = Number(value['encourage_view'])
+  value['is_trending'] = Number(value['is_trending'])
+  value['is_return'] = Number(value['is_return'])
+  value['status'] = Number(value['status'])
+
+  value['unit'] = value['unit'] || '1';
+  value['variations'] = value?.variations?.map((elem, ind) => {
+    return {
+      ...elem,
+      status: elem?.status ? 1 : 0,
+      variation_image_id: elem.variation_image_id ? elem.variation_image_id : null,
+      attribute_values: elem.attribute_values ? elem.attribute_values.map(el => {
+        return el?.id ? el.id : el
+      }).filter(id => id !== undefined && id !== null) : allPossibleCases(
+        value["combination"]?.map((item) => item?.values?.map((elem) => elem)))?.[ind] || []
+    }
+  })
+  // Handle Default Variation (Grocery feature)
+  if (value['type'] === 'classified' && value['default_variation_id'] !== undefined) {
+    const variations = value['variations'] || [];
+    const selectedVal = value['default_variation_id'];
+    
+    // Check if the selected value is an index or an ID
+    // If it matches an existing variation's ID, we send it as default_variation_id
+    const selectedVariationById = variations.find(v => v.id === selectedVal);
+    
+    if (selectedVariationById) {
+      value['default_variation_id'] = selectedVal;
+    } else {
+      // If not found by ID, it's likely an index (for a new product or a newly added variation)
+      value['default_variation_index'] = selectedVal;
+      delete value['default_variation_id'];
+    }
+  }
+
+  // Cost: send null if empty, send actual number (including 0) otherwise
+  if (value['cost'] === '' || value['cost'] === null || value['cost'] === undefined) {
+    value['cost'] = null;
+  } else {
+    value['cost'] = parseFloat(value['cost']);
+  }
+
+  mutate(value);
+};
+
+export default ProductSubmitFunction;
