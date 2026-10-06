@@ -31,6 +31,7 @@ const MENUITEMS = [
       { title: "Featured Products", path: "/featured-product", displayTitle: "Featured Products", permission: ["product.create"] },
       { title: "Trending Products", path: "/trending-product", displayTitle: "Trending Products", permission: ["product.create"] },
       { title: "Bestselling Products", path: "/bestselling-product", displayTitle: "Bestselling Products", permission: ["product.create"] },
+      { title: "OutOfStock Products", path: "/out-of-stock-product", displayTitle: "Out Of Stock Products", permission: ["product.index", "product.create"] },
       { title: "BulkUpload", path: "/product/bulk-import", displayTitle: "Bulk Upload", permission: ["product.create"] },
       { title: "Attributes", path: "/attribute", displayTitle: "All Attributes", permission: ["attribute.index", "attribute.create"] },
       { title: "Categories", path: "/category", displayTitle: "Categories", permission: ["category.index"] },

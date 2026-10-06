@@ -66,6 +66,7 @@ export const Approved = '/approve';
 export const featuredProduct = "/featured-product";
 export const trendingProduct = "/trending-product";
 export const bestsellingProduct = "/bestselling-product";
+export const outOfStockProduct = "/out-of-stock-product";
 
 // Pearl XP staged product updates (MRP / price / stock review & accept flow)
 export const pearlXpProductUpdate = "/pearl-xp/product-updates";
