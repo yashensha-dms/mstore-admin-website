@@ -55,6 +55,9 @@ export const tax = "/tax";
 // offer banner api
 export const offerBanner = "/offer-banner";
 
+// push broadcast api (Zomato-style push notifications to the mobile app)
+export const pushBroadcast = "/push-broadcast";
+
 // coupon api
 export const coupon = "/coupon";
 
