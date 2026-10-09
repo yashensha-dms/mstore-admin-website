@@ -48,12 +48,14 @@ const MENUITEMS = [
     type: "link"
   },
   {
-    title: "PushBroadcasts",
+    title: "Notifications",
     displayTitle: "Notifications",
     icon: <RiNotification3Line />,
-    path: "/push-broadcast",
-    permission: ["push_broadcast.index"],
-    type: "link"
+    type: "sub",
+    children: [
+      { title: "AllNotifications", path: "/push-broadcast", displayTitle: "All Notifications", permission: ["push_broadcast.index"] },
+      { title: "CreateNotification", path: "/push-broadcast/create", displayTitle: "Create Notification", permission: ["push_broadcast.create"] },
+    ],
   },
   // {
   //   title: "Stores",
