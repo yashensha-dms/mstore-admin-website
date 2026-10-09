@@ -189,6 +189,11 @@ const ShowModal = ({ open = false, buttons, title, close = true, modalAttr, setM
         
         <Dialog.Overlay className="radix-dialog-overlay" />
         <Dialog.Content className={`radix-dialog-content ${modalAttr?.className || ""}`}>
+          {/* Accessible name when no visible title is shown */}
+          {!title && (
+            <Dialog.Title className="sr-only">{t("Confirmation")}</Dialog.Title>
+          )}
+          <Dialog.Description className="sr-only">{t("DialogDescription")}</Dialog.Description>
           
           {/* Header */}
           {(title || close) && (
