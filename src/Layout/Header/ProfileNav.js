@@ -11,6 +11,7 @@ import Btn from "../../Elements/Buttons/Btn";
 import AccountContext from "../../Helper/AccountContext";
 import { LogoutAPI } from "../../Utils/AxiosUtils/API";
 import useCreate from "../../Utils/Hooks/useCreate";
+import StoreSwitcher from "./StoreSwitcher";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 
@@ -19,7 +20,7 @@ const ProfileNav = () => {
   const { t } = useTranslation(i18Lang, 'common');
   const [modal, setModal] = useState(false);
   const router = useRouter();
-  const { accountData, accountContextData } = useContext(AccountContext);
+  const { accountData, accountContextData, activeStore, clearActiveStore } = useContext(AccountContext);
   
   const displayName = accountContextData.name !== "" ? accountContextData.name : (accountData?.name || "Admin");
   const displayRole = accountData ? accountData?.role?.name : t("Account");
@@ -33,8 +34,10 @@ const ProfileNav = () => {
     Cookies.remove("uat");
     Cookies.remove("ue");
     Cookies.remove("account");
+    Cookies.remove("active_store_id");
     localStorage.removeItem("account");
     localStorage.removeItem("role");
+    clearActiveStore?.();
     router.push(`/auth/login`);
     setModal(false);
   });
@@ -292,6 +295,11 @@ const ProfileNav = () => {
               <div className="radix-profile-header">
                 <span className="radix-profile-header-name">{displayName}</span>
                 <span className="radix-profile-header-role">{displayRole}</span>
+                {activeStore?.store_name && (
+                  <span className="radix-profile-header-role" style={{ color: "#0da89b", fontWeight: 700 }}>
+                    {activeStore.store_name}
+                  </span>
+                )}
               </div>
               
               <DropdownMenu.Item className="radix-profile-item" asChild>
@@ -307,6 +315,8 @@ const ProfileNav = () => {
                   <span>{t("Settings")}</span>
                 </Link>
               </DropdownMenu.Item>
+
+              <StoreSwitcher />
 
               <DropdownMenu.Item className="radix-profile-item radix-profile-item-danger" onSelect={() => setModal(true)}>
                 <div className="flex items-center gap-[10px] w-full">

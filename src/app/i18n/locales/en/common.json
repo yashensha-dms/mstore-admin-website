@@ -1050,5 +1050,8 @@
   "ShortDescriptionRule": "Brief product summary overview.",
   "TypeRule": "Product type classification (either 'simple' or 'classified').",
   "SkuRule": "Unique stock keeping unit ID (Required for simple type).",
-  "PriceRule": "Numeric retail list price (Required for simple type)."
+  "PriceRule": "Numeric retail list price (Required for simple type).",
+  "SwitchStore": "Switch Store",
+  "StoreSwitched": "Store switched successfully",
+  "CurrentStore": "Current Store"
 }

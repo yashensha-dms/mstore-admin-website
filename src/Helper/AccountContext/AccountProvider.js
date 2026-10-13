@@ -18,6 +18,38 @@ const AccountProvider = (props) => {
         name: "",
         image: {}
     })
+    // Active store for the "Switch Store" dropdown in ProfileNav.
+    // Persisted so refresh / navigation keeps the switched store, and sent
+    // as X-Store-Id on every API call (see Utils/AxiosUtils).
+    const [activeStore, setActiveStoreState] = useState(() => {
+        if (typeof window === "undefined") return null;
+        try {
+            const raw = localStorage.getItem("active_store");
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    });
+
+    const setActiveStore = (storeObj) => {
+        setActiveStoreState(storeObj || null);
+        try {
+            if (storeObj?.id) {
+                localStorage.setItem("active_store", JSON.stringify(storeObj));
+                localStorage.setItem("active_store_id", String(storeObj.id));
+                setCookie("active_store_id", String(storeObj.id), {
+                    path: "/",
+                    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                });
+            } else {
+                localStorage.removeItem("active_store");
+                localStorage.removeItem("active_store_id");
+                setCookie("active_store_id", "", { path: "/", expires: new Date(0) });
+            }
+        } catch (e) {}
+    };
+
+    const clearActiveStore = () => setActiveStore(null);
 
     useEffect(() => {
         cookies.uat && refetch()
@@ -38,7 +70,7 @@ const AccountProvider = (props) => {
     }, [data, cookies.uat])
 
     return (
-        <AccountContext.Provider value={{ ...props, accountData, setAccountData, accountContextData, setAccountContextData, role, setRole }}>
+        <AccountContext.Provider value={{ ...props, accountData, setAccountData, accountContextData, setAccountContextData, role, setRole, activeStore, setActiveStore, clearActiveStore }}>
             {props.children}
         </AccountContext.Provider>
     )

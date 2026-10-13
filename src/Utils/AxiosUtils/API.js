@@ -39,6 +39,7 @@ export const theme = "/theme";
 
 // store api
 export const store = "/store";
+export const switchStore = "/switch-store";
 
 // country api
 export const country = "/country";
