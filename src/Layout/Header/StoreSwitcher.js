@@ -87,8 +87,23 @@ const StoreSwitcher = () => {
     );
   }
 
-  // Hide section when there is nothing to switch between
-  if (!stores || stores.length < 2) return null;
+  // If stores list is empty or unavailable, render a disabled notice or single store
+  if (!stores || stores.length === 0) {
+    return (
+      <>
+        <DropdownMenu.Separator className="radix-profile-separator" />
+        <DropdownMenu.Label className="radix-profile-label">
+          <span className="inline-flex items-center gap-1.5">
+            <ArrowRightLeft className="w-3 h-3" />
+            {t("SwitchStore") || "Switch Store"}
+          </span>
+        </DropdownMenu.Label>
+        <div className="px-3 py-2 text-xs text-slate-400 italic">
+          {t("NoStoresFound") || "No stores available"}
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
