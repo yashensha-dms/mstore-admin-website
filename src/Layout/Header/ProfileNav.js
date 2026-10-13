@@ -293,7 +293,10 @@ const ProfileNav = () => {
           <DropdownMenu.Portal>
             <DropdownMenu.Content className="radix-profile-content" align="end" sideOffset={5}>
               <div className="radix-profile-header">
-                <span className="radix-profile-header-name">{displayName}</span>
+                <div className="flex items-center justify-between">
+                  <span className="radix-profile-header-name">{displayName}</span>
+                  <span style={{ fontSize: "10px", color: "#94a3b8", fontWeight: 500 }}>v1.2</span>
+                </div>
                 <span className="radix-profile-header-role">{displayRole}</span>
                 {activeStore?.store_name && (
                   <span className="radix-profile-header-role" style={{ color: "#0da89b", fontWeight: 700 }}>
@@ -324,6 +327,10 @@ const ProfileNav = () => {
                   <span>{t("Logout")}</span>
                 </div>
               </DropdownMenu.Item>
+
+              <div style={{ textAlign: "center", padding: "6px 0 2px", fontSize: "10px", color: "#94a3b8" }}>
+                v1.2
+              </div>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
