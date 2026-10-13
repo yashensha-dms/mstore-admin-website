@@ -81,23 +81,21 @@ const StoreSwitcher = () => {
   if (isLoading) {
     return (
       <>
-        <DropdownMenu.Separator className="radix-profile-separator" />
+        <div className="radix-profile-separator" />
         <div className="radix-profile-label">{t("SwitchStore") || "Switch Store"}…</div>
       </>
     );
   }
 
-  // If stores list is empty or unavailable, render a disabled notice or single store
+  // If stores list is empty or unavailable, render notice
   if (!stores || stores.length === 0) {
     return (
       <>
-        <DropdownMenu.Separator className="radix-profile-separator" />
-        <DropdownMenu.Label className="radix-profile-label">
-          <span className="inline-flex items-center gap-1.5">
-            <ArrowRightLeft className="w-3 h-3" />
-            {t("SwitchStore") || "Switch Store"}
-          </span>
-        </DropdownMenu.Label>
+        <div className="radix-profile-separator" />
+        <div className="radix-profile-label flex items-center gap-1.5">
+          <ArrowRightLeft className="w-3 h-3" />
+          <span>{t("SwitchStore") || "Switch Store"}</span>
+        </div>
         <div className="px-3 py-2 text-xs text-slate-400 italic">
           {t("NoStoresFound") || "No stores available"}
         </div>
@@ -108,21 +106,19 @@ const StoreSwitcher = () => {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
-        .radix-profile-separator { height: 1px; background: #f1f5f9; margin: 6px 4px; }
-        .radix-profile-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #94a3b8; padding: 8px 14px 4px; }
-        .radix-store-list { max-height: 220px; overflow-y: auto; }
+        .radix-profile-separator { height: 1px; background: #f1f5f9; margin: 6px 0; }
+        .radix-profile-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #94a3b8; padding: 6px 14px 2px; }
+        .radix-store-list { max-height: 200px; overflow-y: auto; padding: 2px 0; }
         .radix-store-check { margin-left: auto; color: #0da89b; }
         .radix-store-logo { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         .radix-store-fallback { width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .radix-store-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
       `}} />
-      <DropdownMenu.Separator className="radix-profile-separator" />
-      <DropdownMenu.Label className="radix-profile-label">
-        <span className="inline-flex items-center gap-1.5">
-          <ArrowRightLeft className="w-3 h-3" />
-          {t("SwitchStore") || "Switch Store"}
-        </span>
-      </DropdownMenu.Label>
+      <div className="radix-profile-separator" />
+      <div className="radix-profile-label flex items-center gap-1.5">
+        <ArrowRightLeft className="w-3 h-3" />
+        <span>{t("SwitchStore") || "Switch Store"}</span>
+      </div>
       <div className="radix-store-list">
         {stores.map((item) => {
           const id = item?.id;
