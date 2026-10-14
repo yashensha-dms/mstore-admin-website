@@ -93,7 +93,9 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
       <SimpleInputField nameList={[
         { name: "hsn_code", title: "HSNCode", placeholder: t("EnterHSNCode") },
         { name: "unit", placeholder: t("EnterUnit(e.g10pieces)"), helpertext: "*Specify the measurement unit, such as 10 Pieces, 1 KG, 1 Ltr, etc." }, 
-        { name: "weight", type: "number", placeholder: t("EnterweightGms(e.g100)"), helpertext: "*Specify the weight of this product in Gms." }
+        { name: "weight", type: "number", placeholder: t("EnterweightGms(e.g100)"), helpertext: "*Specify the weight of this product in Gms." },
+        { name: "minimum_purchase_limit", title: "MinimumPurchaseLimit", placeholder: t("MinUnits"), type: "number", min: "1", helpertext: "*Minimum units required per order (leave blank for no limit)" },
+        { name: "maximum_purchase_limit", title: "MaximumPurchaseLimit", placeholder: t("MaxUnits"), type: "number", min: "1", helpertext: "*Maximum units allowed per order (leave blank for no limit)" }
       ]} />
       {values["type"] === "simple" && <SearchableSelectInput
         nameList={[
@@ -116,8 +118,6 @@ const InventoryTab = ({ values, setFieldValue, errors, updateId }) => {
         { name: "barcode", title: "Barcode", placeholder: t("EnterBarcode") },
         { name: "sku", title: "SKU", require: "true", placeholder: t("EnterSKU") }, 
         { name: "quantity", title: "StockQuantity", placeholder: t("EnterQuantity"), type: "number", require: "true" },
-        { name: "minimum_purchase_limit", title: "MinimumPurchaseLimit", placeholder: t("MinUnits"), type: "number", helpertext: "*Minimum units required per order (leave blank for no limit)" },
-        { name: "maximum_purchase_limit", title: "MaximumPurchaseLimit", placeholder: t("MaxUnits"), type: "number", helpertext: "*Maximum units allowed per order (leave blank for no limit)" }, 
         { name: "cost", title: "PurchasePrice", type: "number", inputaddon: "true", placeholder: t("EnterPurchasePrice") },
         { name: "price", title: "MRP", type: "number", inputaddon: "true", placeholder: t("EnterPrice"), require: "true" }, 
         { name: "sale_price", title: "SellingPrice", type: "number", inputaddon: "true" }, 

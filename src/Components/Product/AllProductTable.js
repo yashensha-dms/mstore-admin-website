@@ -400,6 +400,23 @@ const AllProductTable = ({ url, moduleName, isCheck, setIsCheck, isReplicate, im
       cell: ({ row }) => row.original.quantity,
     });
 
+    // Purchase Limit column
+    cols.push({
+      id: "purchase_limit",
+      header: t("PurchaseLimit"),
+      cell: ({ row }) => {
+        const min = row.original.minimum_purchase_limit;
+        const max = row.original.maximum_purchase_limit;
+        if (!min && !max) return <span className="text-gray-400">-</span>;
+        return (
+          <div className="text-xs whitespace-nowrap">
+            {min ? <div><span className="text-slate-400">Min:</span> <span className="font-semibold text-slate-700">{min}</span></div> : null}
+            {max ? <div><span className="text-slate-400">Max:</span> <span className="font-semibold text-slate-700">{max}</span></div> : null}
+          </div>
+        );
+      },
+    });
+
     // Action Column
     if (edit || destroy) {
       cols.push({

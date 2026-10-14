@@ -31,7 +31,7 @@ import themeOption7 from "../../public/assets/images/theme-option/shop/07.jpg"
 
 export const ProductTabTitleListData = [
   { title: "General", icon: <RiSettingsLine />, inputs: ["name", "description", "short_description", 'description', "store_id"] },
-  { title: "Inventory", icon: <RiFileListLine />, inputs: ["type", "stock_status", "sku", "quantity", "price", "sale_price", 'show_stock_quantity', "discount", "visible_time", "variations"] },
+  { title: "Inventory", icon: <RiFileListLine />, inputs: ["type", "stock_status", "sku", "quantity", "price", "sale_price", 'show_stock_quantity', "discount", "visible_time", "variations", "minimum_purchase_limit", "maximum_purchase_limit"] },
   { title: "Setup", icon: <RiToolsLine />, inputs: ["tags", "categories", "cross_sell_product_id"] },
   { title: "Images", icon: <RiImageLine />, inputs: ["product_thumbnail", "product_images"] },
   { title: "SEO", icon: <RiEarthLine />, inputs: ["meta_title", "meta_description ", "product_meta_image"] },
