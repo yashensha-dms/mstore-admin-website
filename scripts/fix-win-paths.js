@@ -24,12 +24,13 @@ let files = 0, repl = 0;
     if (f.isDirectory()) walk(p);
     else if (p.endsWith('.js')) {
       let s = fs.readFileSync(p, 'utf8');
-      let n = 0;
-      for (const [a, b] of fixes) {
-        const c = s.split(a).length - 1;
-        if (c) { s = s.split(a).join(b); n += c; }
+      const original = s;
+      s = s.replace(/next[\\\/]dist[\\\/]client[\\\/]components[\\\/]([a-zA-Z0-9_\.-]+)/g, 'next/dist/client/components/$1');
+      if (s !== original) {
+        fs.writeFileSync(p, s);
+        files++;
+        repl++;
       }
-      if (n) { fs.writeFileSync(p, s); files++; repl += n; }
     }
   }
 })(dir);
