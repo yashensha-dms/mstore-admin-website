@@ -48,6 +48,8 @@ export function ProductInitValues(oldData, updateId) {
     show_stock_quantity: updateId ? oldData?.show_stock_quantity == 1 ? true : false : false,
     sku: updateId ? oldData?.sku || "" : "",
     quantity: updateId ? (oldData?.quantity ?? "") : "",
+    maximum_purchase_limit: updateId ? (oldData?.maximum_purchase_limit ?? "") : "",
+    minimum_purchase_limit: updateId ? (oldData?.minimum_purchase_limit ?? "") : "",
     price: updateId ? (oldData?.price ?? "") : "",
     cost: updateId ? (oldData?.cost != null ? String(oldData.cost) : "") : "",
     sale_price: updateId ? (oldData?.sale_price ?? "") : "",

@@ -60,6 +60,19 @@ const ProductSubmitFunction = (mutate, value, updateId) => {
     value['cost'] = parseFloat(value['cost']);
   }
 
+  // Purchase limits: send null if empty, send actual number otherwise
+  if (value['maximum_purchase_limit'] === '' || value['maximum_purchase_limit'] === null || value['maximum_purchase_limit'] === undefined) {
+    value['maximum_purchase_limit'] = null;
+  } else {
+    value['maximum_purchase_limit'] = parseInt(value['maximum_purchase_limit'], 10);
+  }
+
+  if (value['minimum_purchase_limit'] === '' || value['minimum_purchase_limit'] === null || value['minimum_purchase_limit'] === undefined) {
+    value['minimum_purchase_limit'] = null;
+  } else {
+    value['minimum_purchase_limit'] = parseInt(value['minimum_purchase_limit'], 10);
+  }
+
   mutate(value);
 };
 

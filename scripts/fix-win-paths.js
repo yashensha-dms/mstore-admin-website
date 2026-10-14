@@ -6,9 +6,9 @@ const fs = require('fs');
 const path = require('path');
 
 const fixes = [
-  ['next/dist\\\\client\\\\components\\\\action-async-storage.external.js', 'next/dist/client/components/action-async-storage.external.js'],
-  ['next/dist\\\\client\\\\components\\\\request-async-storage.external.js', 'next/dist/client/components/request-async-storage.external.js'],
-  ['next/dist\\\\client\\\\components\\\\static-generation-async-storage.external.js', 'next/dist/client/components/static-generation-async-storage.external.js'],
+  ['next/dist\\client\\\\components\\\\action-async-storage.external.js', 'next/dist/client/components/action-async-storage.external.js'],
+  ['next/dist\\client\\\\components\\\\request-async-storage.external.js', 'next/dist/client/components/request-async-storage.external.js'],
+  ['next/dist\\client\\\\components\\\\static-generation-async-storage.external.js', 'next/dist/client/components/static-generation-async-storage.external.js'],
 ];
 
 const dir = path.join(__dirname, '..', '.next', 'server');
