@@ -8,19 +8,27 @@ import request from "../../Utils/AxiosUtils";
 import { pearlXpProductUpdate } from "../../Utils/AxiosUtils/API";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
+import AccountContext from "@/Helper/AccountContext";
 
 const PearlXpPendingBanner = () => {
   const router = useRouter();
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, "common");
+  const { activeStore } = useContext(AccountContext);
+
+  // Pearl XP updates belong strictly to the Grocery store
+  const isGrocery =
+    !activeStore?.id ||
+    Number(activeStore.id) === 3 ||
+    (activeStore.store_name || "").toLowerCase().includes("grocer");
 
   const { data: total } = useQuery(
-    [pearlXpProductUpdate, "pending-count"],
-    () => request({ url: pearlXpProductUpdate, method: "get", params: { status: "pending", paginate: 1 } }, router),
-    { refetchOnWindowFocus: false, refetchInterval: 60000, select: (res) => res?.data?.total || 0 }
+    [pearlXpProductUpdate, "pending-count", isGrocery],
+    () => isGrocery ? request({ url: pearlXpProductUpdate, method: "get", params: { status: "pending", paginate: 1 } }, router) : Promise.resolve({ data: { total: 0 } }),
+    { enabled: isGrocery, refetchOnWindowFocus: false, refetchInterval: 60000, select: (res) => res?.data?.total || 0 }
   );
 
-  if (!total) return null;
+  if (!isGrocery || !total) return null;
 
   return (
     <div

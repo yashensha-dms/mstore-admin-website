@@ -153,12 +153,24 @@ const BulkUploadForm = () => {
     if (!taxData) return {};
     const map = {};
     taxData.forEach((tItem) => {
-      if (tItem.name) {
-        map[tItem.name.trim().toLowerCase()] = tItem.id;
+      const rateNum = parseFloat(tItem.rate);
+      if (!isNaN(rateNum)) {
+        map[rateNum] = tItem.id;
+        map[String(rateNum)] = tItem.id;
+        map[`${rateNum}%`] = tItem.id;
+        map[rateNum.toFixed(2)] = tItem.id;
+        map[`${rateNum.toFixed(2)}%`] = tItem.id;
       }
-      if (tItem.rate !== undefined && tItem.rate !== null) {
-        map[String(tItem.rate)] = tItem.id;
-        map[String(tItem.rate) + "%"] = tItem.id;
+      if (tItem.name) {
+        const cleanName = tItem.name.trim().toLowerCase();
+        map[cleanName] = tItem.id;
+        map[cleanName.replace(/\s+/g, "")] = tItem.id;
+        const nameRate = parseFloat(cleanName.replace(/[^0-9.]/g, ""));
+        if (!isNaN(nameRate)) {
+          map[nameRate] = tItem.id;
+          map[String(nameRate)] = tItem.id;
+          map[`${nameRate}%`] = tItem.id;
+        }
       }
     });
     return map;
@@ -326,44 +338,51 @@ const BulkUploadForm = () => {
         // 1.5 Resolve Tax ID
         let resolvedTaxId = null;
         const mappedTaxCol = mapping["tax_id"];
-        if (mappedTaxCol && row[mappedTaxCol]) {
+        if (mappedTaxCol && row[mappedTaxCol] !== undefined && row[mappedTaxCol] !== null && String(row[mappedTaxCol]).trim() !== "") {
           const taxValStr = String(row[mappedTaxCol]).trim();
-          if (taxValStr) {
-            const taxValLower = taxValStr.toLowerCase();
-            if (taxCache[taxValLower]) {
-              resolvedTaxId = taxCache[taxValLower];
-              addLog(`[Row ${rowNum}] Resolved tax "${taxValStr}" to ID ${taxCache[taxValLower]}`);
+          const taxValLower = taxValStr.toLowerCase();
+          const cleanVal = taxValLower.replace(/\s+/g, "");
+          const parsedRate = parseFloat(taxValStr.replace(/[^0-9.]/g, ""));
+
+          // Check all permutations in cache: raw, lowercase, clean, numeric rate, fixed 2-dec, percent format
+          if (taxCache[taxValLower]) {
+            resolvedTaxId = taxCache[taxValLower];
+            addLog(`[Row ${rowNum}] Resolved tax "${taxValStr}" to ID ${resolvedTaxId}`);
+          } else if (taxCache[cleanVal]) {
+            resolvedTaxId = taxCache[cleanVal];
+            addLog(`[Row ${rowNum}] Resolved tax "${taxValStr}" to ID ${resolvedTaxId}`);
+          } else if (!isNaN(parsedRate) && taxCache[parsedRate] !== undefined) {
+            resolvedTaxId = taxCache[parsedRate];
+            addLog(`[Row ${rowNum}] Resolved tax rate ${parsedRate}% to ID ${resolvedTaxId}`);
+          } else if (!isNaN(parsedRate) && taxCache[parsedRate.toFixed(2)] !== undefined) {
+            resolvedTaxId = taxCache[parsedRate.toFixed(2)];
+            addLog(`[Row ${rowNum}] Resolved tax rate ${parsedRate}% to ID ${resolvedTaxId}`);
+          } else if (!isNaN(parsedRate)) {
+            // Truly new tax rate — create or reuse existing via API
+            addLog(`[Row ${rowNum}] Resolving tax rate ${parsedRate}% via API...`);
+            const taxRes = await request({
+              url: "/tax",
+              method: "post",
+              data: {
+                name: `${parsedRate}%`,
+                rate: parsedRate,
+                status: 1,
+              },
+            });
+            const taxObj = taxRes?.data?.data || taxRes?.data;
+            const newTaxId = taxObj?.id;
+            if (newTaxId) {
+              taxCache[taxValLower] = newTaxId;
+              taxCache[cleanVal] = newTaxId;
+              taxCache[parsedRate] = newTaxId;
+              taxCache[String(parsedRate)] = newTaxId;
+              taxCache[`${parsedRate}%`] = newTaxId;
+              taxCache[parsedRate.toFixed(2)] = newTaxId;
+              taxCache[`${parsedRate.toFixed(2)}%`] = newTaxId;
+              resolvedTaxId = newTaxId;
+              addLog(`[Row ${rowNum}] Linked tax ${parsedRate}% to ID ${newTaxId}`);
             } else {
-              // Try parsing numeric rate e.g. "5%" -> 5, "8" -> 8
-              const parsedRate = parseFloat(taxValStr.replace(/%/g, ""));
-              if (!isNaN(parsedRate)) {
-                const rateStr = String(parsedRate);
-                if (taxCache[rateStr]) {
-                  resolvedTaxId = taxCache[rateStr];
-                  addLog(`[Row ${rowNum}] Resolved tax rate ${parsedRate}% to ID ${taxCache[rateStr]}`);
-                } else {
-                  addLog(`[Row ${rowNum}] Tax "${taxValStr}" (Rate: ${parsedRate}%) not found. Creating new tax...`);
-                  const taxRes = await request({
-                    url: "/tax",
-                    method: "post",
-                    data: {
-                      name: taxValStr.includes("%") ? taxValStr : `${taxValStr}%`,
-                      rate: parsedRate,
-                      status: 1
-                    }
-                  });
-                  if (taxRes?.status === 200 || taxRes?.status === 201) {
-                    const newTaxId = taxRes.data.id;
-                    taxCache[taxValLower] = newTaxId;
-                    taxCache[rateStr] = newTaxId;
-                    taxCache[rateStr + "%"] = newTaxId;
-                    resolvedTaxId = newTaxId;
-                    addLog(`[Row ${rowNum}] Created tax "${taxValStr}" (ID: ${newTaxId})`);
-                  } else {
-                    addLog(`[Row ${rowNum}] WARNING: Could not create tax "${taxValStr}". Saving without tax.`);
-                  }
-                }
-              }
+              addLog(`[Row ${rowNum}] WARNING: Could not resolve tax "${taxValStr}". Saving without tax.`);
             }
           }
         }

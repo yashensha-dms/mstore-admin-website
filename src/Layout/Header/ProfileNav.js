@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,11 @@ import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 
 const ProfileNav = () => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
   const [modal, setModal] = useState(false);
@@ -298,8 +303,8 @@ const ProfileNav = () => {
                   <span style={{ fontSize: "10px", color: "#94a3b8", fontWeight: 500 }}>v1.2</span>
                 </div>
                 <span className="radix-profile-header-role">{displayRole}</span>
-                {activeStore?.store_name && (
-                  <span className="radix-profile-header-role" style={{ color: "#0da89b", fontWeight: 700 }}>
+                {mounted && activeStore?.store_name && (
+                  <span className="radix-profile-header-role" style={{ color: "var(--theme-color, #0da89b)", fontWeight: 700 }}>
                     {activeStore.store_name}
                   </span>
                 )}

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { RiFullscreenExitLine, RiFullscreenFill, RiGlobalLine, RiMoonLine, RiSearchLine } from "react-icons/ri";
 import { Col } from "reactstrap";
@@ -11,10 +11,19 @@ import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 import QuickLinks from "./QuickLinks";
 import SettingContext from "@/Helper/SettingContext";
+import AccountContext from "@/Helper/AccountContext";
+import { getStoreTheme } from "../../Utils/StoreTheme";
 
 const RightNav = ({ setMode, setOpenSearchBar }) => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
+  const { activeStore } = useContext(AccountContext);
+  const storeTheme = getStoreTheme(activeStore);
   const [isOrderCreate] = usePermissionCheck(["create"], "order");
   const { ref, isComponentVisible, setIsComponentVisible } = useOutsideDropdown();
   const { settingObj } = useContext(SettingContext);
@@ -81,6 +90,29 @@ const RightNav = ({ setMode, setOpenSearchBar }) => {
             <RiMoonLine className="ri-moon-line" onClick={() => setMode((prev) => !prev)} />
           </div>
         </li> */}
+        {mounted && (
+          <li className="d-none d-sm-inline-flex align-items-center me-2">
+            <span
+              className="store-header-pill"
+              style={{
+                padding: "4px 12px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: storeTheme.colorLight,
+                color: storeTheme.color,
+                border: `1px solid ${storeTheme.borderColor}`,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              }}
+            >
+              <span>{storeTheme.icon}</span>
+              <span>{activeStore?.store_name || "Grocery"}</span>
+            </span>
+          </li>
+        )}
         <ProfileNav isComponentVisible={isComponentVisible} setIsComponentVisible={setIsComponentVisible} />
       </ul>
     </Col>
