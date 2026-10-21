@@ -52,6 +52,8 @@ export const blog = "/blog";
 
 // tax api
 export const tax = "/tax";
+export const gstReport = "/gst-report";
+
 
 // offer banner api
 export const offerBanner = "/offer-banner";
