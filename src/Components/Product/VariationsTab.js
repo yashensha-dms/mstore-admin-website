@@ -55,8 +55,11 @@ const VariationsTab = ({ values, setFieldValue, errors, updateId }) => {
       // Batch sync: Ensure attribute_values are correctly set for this index
       newVariant['attribute_values'] = combinations[ind];
       
+      // Default new variations to enabled; existing ones keep their value.
       if (newVariant.status !== undefined) {
         newVariant['status'] = Boolean(newVariant.status);
+      } else {
+        newVariant['status'] = true;
       }
       return newVariant;
     });
