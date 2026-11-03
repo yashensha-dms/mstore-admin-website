@@ -248,7 +248,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
         try {
             const receiptData = await render(
                 <Printer type="epson" width={36}>
-                    <Text align="center" size={{ width: 2, height: 2 }}>{settingObj?.general?.site_title || "Bismi Hypermall"}</Text>
+                    <Text align="center" size={{ width: 2, height: 2 }}>{settingObj?.general?.site_title || "Grabzo"}</Text>
                     <Text align="center">Retail Receipt</Text>
                     <Line />
                     <Row left="Order Number:" right={`#${data.order_number}`} />
@@ -367,7 +367,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                 <div className="ticket">
                     <div className="title-text text-center">
                         <h4 className="fw-bold mb-1" style={{ color: '#222', fontSize: '24px' }}>
-                            {settingObj?.general?.site_title || "Bismi Hypermall"}
+                            {settingObj?.general?.site_title || "Grabzo"}
                         </h4>
                         <p className="text-muted uppercase fw-medium mb-3" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>
                             Retail Receipt
