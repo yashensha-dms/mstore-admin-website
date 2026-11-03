@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import request from "../../Utils/AxiosUtils";
-// import CheckBoxField from '../../Components/InputFields/CheckBoxField.js'
+import CheckBoxField from "../InputFields/CheckBoxField";
 import { Category, tag } from "../../Utils/AxiosUtils/API";
 import MultiSelectField from "../InputFields/MultiSelectField";
 // import placeHolderImage from "../../../public/assets/images/placeholder.png";
@@ -59,6 +59,8 @@ const SetupTab = ({ values, setFieldValue, errors, updateId }) => {
       <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="tags" data={tagData} />
 
       <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="categories" data={categoryData} />
+
+      <CheckBoxField name="is_category_top" title="AppearOnTopOfCategory" helpertext="*When enabled, this product will appear at the top of its assigned category page in the mobile app." />
 
       {/* RandomRelatedProduct — disabled: always ON by default (forced in ProductObjects.js)
       <CheckBoxField name="is_random_related_products" title="RandomRelatedProduct" helpertext="*Enabling this option allows the backend to randomly select 6 products for display." />
