@@ -63,7 +63,23 @@ const ReactstrapSelectInput = ({ field, form: { touched, errors, setFieldValue }
   useEffect(() => {
     // Setting variables for type Array datas
     if (props.inputprops?.setsearch) {
-      (Array.isArray(field?.value) && setSelectedItems) && setSelectedItems(listOpt?.filter((elem) => field?.value?.includes(elem[getValuesKey])))
+      if (Array.isArray(field?.value) && setSelectedItems) {
+        setSelectedItems((prevSelected) => {
+          const prevArr = Array.isArray(prevSelected) ? prevSelected : [];
+          const map = new Map();
+          prevArr.forEach((item) => {
+            if (item && item[getValuesKey] && field.value.includes(item[getValuesKey])) {
+              map.set(item[getValuesKey], item);
+            }
+          });
+          (listOpt || []).forEach((item) => {
+            if (item && item[getValuesKey] && field.value.includes(item[getValuesKey])) {
+              map.set(item[getValuesKey], item);
+            }
+          });
+          return Array.from(map.values());
+        });
+      }
     } else {
       (Array.isArray(field?.value) && setSelectedItems) && setSelectedItems(list?.filter((elem) => field?.value?.includes(elem[getValuesKey])))
     }
