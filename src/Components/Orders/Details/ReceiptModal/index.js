@@ -6,7 +6,7 @@ import ReceiptModalTable from "./ReceiptModalTable";
 import Btn from "@/Elements/Buttons/Btn";
 import { useTranslation } from "@/app/i18n/client";
 import I18NextContext from "@/Helper/I18NextContext";
-import { render, Printer, Text, Row, Line, Cut } from 'react-thermal-printer';
+import { render, Printer, Text, Row, Line, Cut, QRCode } from 'react-thermal-printer';
 import UsbPrinterService from "@/Utils/CustomFunctions/UsbPrinterService";
 import { toast } from "react-toastify";
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
@@ -96,6 +96,15 @@ const ReceiptModal = ({ open, setOpen, data }) => {
         data?.shipping_address?.country?.name,
         data?.shipping_address?.pincode
     ].filter(Boolean).join(', ');
+
+    // Delivery location Google Maps URL for QR code scanning
+    const mapQuery = (data?.shipping_address?.latitude && data?.shipping_address?.longitude)
+        ? `${data.shipping_address.latitude},${data.shipping_address.longitude}`
+        : addressString;
+
+    const mapUrl = mapQuery 
+        ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`
+        : null;
 
     const deliverySlot = data?.delivery_interval && data?.delivery_description 
         ? `${data.delivery_description} (${data.delivery_interval})`
@@ -239,7 +248,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
         try {
             const receiptData = await render(
                 <Printer type="epson" width={36}>
-                    <Text align="center" size={{ width: 2, height: 2 }}>Grabzo</Text>
+                    <Text align="center" size={{ width: 2, height: 2 }}>{settingObj?.general?.site_title || "Bismi Hypermall"}</Text>
                     <Text align="center">Retail Receipt</Text>
                     <Line />
                     <Row left="Order Number:" right={`#${data.order_number}`} />
@@ -280,6 +289,13 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                     <Line />
                     <Row left="Total:" right={`₹${Number(data.total || data.total_amount || 0).toFixed(2)}`} />
                     <Line />
+                    {mapUrl && (
+                        <>
+                            <Text align="center" bold>SCAN FOR DELIVERY LOCATION</Text>
+                            <QRCode align="center" content={mapUrl} />
+                            <Line />
+                        </>
+                    )}
                     <Text align="center">Thank you for shopping!</Text>
                     <Cut />
                 </Printer>
@@ -351,7 +367,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                 <div className="ticket">
                     <div className="title-text text-center">
                         <h4 className="fw-bold mb-1" style={{ color: '#222', fontSize: '24px' }}>
-                            Grabzo
+                            {settingObj?.general?.site_title || "Bismi Hypermall"}
                         </h4>
                         <p className="text-muted uppercase fw-medium mb-3" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>
                             Retail Receipt
@@ -447,6 +463,21 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                         </tbody>
                     </table>
                 </div>
+                {mapUrl && (
+                    <div style={{ borderTop: '1px dashed #000', paddingTop: '10px', marginTop: '10px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            {t("Scan for Delivery Location")}
+                        </div>
+                        <img 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(mapUrl)}`}
+                            alt="Delivery Location Map QR" 
+                            style={{ width: '115px', height: '115px', margin: '0 auto', display: 'block' }} 
+                        />
+                        <div style={{ fontSize: '9px', color: '#666', marginTop: '4px' }}>
+                            {t("Scan with phone camera to open Google Maps")}
+                        </div>
+                    </div>
+                )}
             </div>
         </ShowModal>
     )
