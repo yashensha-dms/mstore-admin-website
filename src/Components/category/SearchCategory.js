@@ -6,7 +6,7 @@ import I18NextContext from '@/Helper/I18NextContext';
 import { useTranslation } from '@/app/i18n/client';
 import NoCategoryImage from '../../../public/assets/svg/no-category.svg'
 
-const SearchCategory = ({ data, setActive, active, setSearch, search, type, mutate, deleteLoading }) => {
+const SearchCategory = ({ data, setActive, active, setSearch, search, type, mutate, deleteLoading, refetch }) => {
     const { i18Lang } = useContext(I18NextContext);
     const { t } = useTranslation(i18Lang, 'common');
     const [tc, setTc] = useState(null);
@@ -25,7 +25,7 @@ const SearchCategory = ({ data, setActive, active, setSearch, search, type, muta
                         <i className="tree-icon folder-icon cursor" role="presentation"></i>
                         {t("Category")}
                     </div>
-                    <TreeLine data={data} level={0} setActive={setActive} mutate={mutate} active={active} search={search} type={type} loading={deleteLoading} />
+                    <TreeLine data={data} level={0} setActive={setActive} mutate={mutate} active={active} search={search} type={type} loading={deleteLoading} refetch={refetch} />
                 </li>
             </ul> : <NoDataFound customImage={NoCategoryImage} />}
         </div>

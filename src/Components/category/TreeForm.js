@@ -39,7 +39,7 @@ const TreeForm = forwardRef(({ type, isLoading: loading }, ref) => {
 
   if (isLoading) return <Loader />
   return (
-    <SearchCategory mutate={deleteMutate} deleteLoading={deleteLoading} setSearch={setSearch} data={data} active={active} setActive={setActive} type={type} />
+    <SearchCategory mutate={deleteMutate} deleteLoading={deleteLoading} setSearch={setSearch} data={data} active={active} setActive={setActive} type={type} refetch={refetch} />
   );
 });
 
