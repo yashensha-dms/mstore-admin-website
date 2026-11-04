@@ -54,6 +54,14 @@ const ProductSubmitFunction = (mutate, value, updateId) => {
     }
   }
 
+  // Store scoping: assign to active store if store_id not explicitly selected
+  if (!value["store_id"] && typeof window !== "undefined") {
+    const activeStoreId = localStorage.getItem("active_store_id");
+    if (activeStoreId) {
+      value["store_id"] = Number(activeStoreId);
+    }
+  }
+
   // Cost: send null if empty, send actual number (including 0) otherwise
   if (value['cost'] === '' || value['cost'] === null || value['cost'] === undefined) {
     value['cost'] = null;
