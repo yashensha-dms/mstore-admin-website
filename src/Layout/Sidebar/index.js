@@ -30,12 +30,13 @@ const Sidebar = () => {
 
   // Modify the the sidebar as per permissions
   const filterSidebar = (sidebarItems) => {
+    const isAdmin = (role || "").toLowerCase() === "admin" || (storePermission?.role?.name || "").toLowerCase() === "admin";
     return sidebarItems.reduce((filteredItems, item) => {
       const clonedItem = { ...item };
       if (ignoreList.includes(item.title)) {
         filteredItems.push(item);
       }
-      if (clonedItem.permission) {
+      if (clonedItem.permission && !isAdmin) {
         clonedItem.permission = clonedItem.permission.filter(perm => {
           return storePermission?.permissions?.some(p => p.name === perm);
         });

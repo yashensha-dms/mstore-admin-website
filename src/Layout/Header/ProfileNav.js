@@ -14,6 +14,7 @@ import useCreate from "../../Utils/Hooks/useCreate";
 import StoreSwitcher from "./StoreSwitcher";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
+import { DISPLAY_VERSION, FULL_VERSION, BUILD_DATE, GIT_COMMIT } from "@/Utils/appVersion";
 
 const ProfileNav = () => {
   const [mounted, setMounted] = useState(false);
@@ -300,7 +301,21 @@ const ProfileNav = () => {
               <div className="radix-profile-header">
                 <div className="flex items-center justify-between">
                   <span className="radix-profile-header-name">{displayName}</span>
-                  <span style={{ fontSize: "10px", color: "#94a3b8", fontWeight: 500 }}>v1.2</span>
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      color: "#64748b",
+                      background: "#f1f5f9",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      fontWeight: 600,
+                      letterSpacing: "0.3px",
+                      cursor: "default"
+                    }}
+                    title={FULL_VERSION}
+                  >
+                    {DISPLAY_VERSION}
+                  </span>
                 </div>
                 <span className="radix-profile-header-role">{displayRole}</span>
                 {mounted && activeStore?.store_name && (
@@ -333,8 +348,23 @@ const ProfileNav = () => {
                 </div>
               </DropdownMenu.Item>
 
-              <div style={{ textAlign: "center", padding: "6px 0 2px", fontSize: "10px", color: "#94a3b8" }}>
-                v1.2
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "8px 12px 4px",
+                  fontSize: "10px",
+                  color: "#94a3b8",
+                  borderTop: "1px solid #f1f5f9",
+                  marginTop: "4px"
+                }}
+                title={FULL_VERSION}
+              >
+                <div>Grabzo Admin {DISPLAY_VERSION}</div>
+                {BUILD_DATE && (
+                  <div style={{ fontSize: "9px", color: "#cbd5e1" }}>
+                    Build {GIT_COMMIT} • {BUILD_DATE}
+                  </div>
+                )}
               </div>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>

@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
+let versionInfo = { version: "1.3.0", displayVersion: "v1.3.0", fullVersion: "v1.3.0" };
+try {
+  versionInfo = require("./src/version.json");
+} catch (e) {}
+
 const nextConfig = {
   output: "standalone",
   basePath: "/admin",
@@ -9,6 +14,11 @@ const nextConfig = {
     API_PROD_URL: "https://mstore.primeads.ai/api/",
     // API_PROD_URL: "http://127.0.0.1:8000/api",
     // API_PROD_URL: "https://laravel.pixelstrap.net/Mstore/api/",
+    NEXT_PUBLIC_APP_VERSION: versionInfo.version,
+    NEXT_PUBLIC_APP_DISPLAY_VERSION: versionInfo.displayVersion,
+    NEXT_PUBLIC_APP_FULL_VERSION: versionInfo.fullVersion,
+    NEXT_PUBLIC_APP_BUILD_DATE: versionInfo.buildDate || "",
+    NEXT_PUBLIC_APP_GIT_COMMIT: versionInfo.gitCommit || "",
   },
   redirects: async () => {
     return [
