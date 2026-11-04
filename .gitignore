@@ -1,3 +1,54 @@
-node_modules
-/.next
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Next.js Build Output
+/.next/
+/out/
+/build
+/dist
+
+# Production Bundles & Archives
+*.tar.gz
+*.tar
+*.zip
+*.tgz
 admin-standalone.tar.gz
+
+# Shell & Deployment Scripts
+bundle.sh
+*.sh.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+build_output.txt
+*.log
+
+# Environment Variables & Secrets
+.env
+.env*.local
+.env.production
+.env.staging
+*.pem
+*.key
+
+# Operating System & Editor Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
