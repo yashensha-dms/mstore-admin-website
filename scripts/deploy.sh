@@ -21,7 +21,7 @@ git reset --hard origin/main
 # 2. Install dependencies
 echo ""
 echo "--> 2/5 Checking and installing npm dependencies..."
-npm install --no-audit --prefer-offline
+npm install --legacy-peer-deps --no-audit --prefer-offline
 
 # 3. Build Next.js application (with auto-versioning)
 echo ""
@@ -55,3 +55,4 @@ echo ""
 echo "========================================================"
 echo "  [Deploy] Deployment Complete! New changes are LIVE."
 echo "========================================================"
+
