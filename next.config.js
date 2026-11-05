@@ -5,7 +5,7 @@ try {
 } catch (e) {}
 
 const nextConfig = {
-  output: "standalone",
+  // output: "standalone",
   basePath: "/admin",
   reactStrictMode: false,
   swcMinify: true,
