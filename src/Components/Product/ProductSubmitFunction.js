@@ -7,7 +7,13 @@ const ProductSubmitFunction = (mutate, value, updateId) => {
     delete value["sku"]
   }
   if (value["is_random_related_products"]) {
-    value['related_products'] = []
+    delete value['related_products'];
+  } else if (Array.isArray(value['related_products']) && value['related_products'].length === 0) {
+    delete value['related_products'];
+  }
+
+  if (Array.isArray(value['cross_sell_products']) && value['cross_sell_products'].length === 0) {
+    delete value['cross_sell_products'];
   }
   value["is_sale_enable"] = Number(value["is_sale_enable"]);
   value["is_random_related_products"] = Number(value["is_random_related_products"]);
