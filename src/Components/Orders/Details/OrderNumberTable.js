@@ -1,18 +1,53 @@
-import React from 'react'
-import { Card, CardBody, Col, Container, Row, Button } from 'reactstrap'
+import React, { useState } from 'react'
+import { Card, CardBody, Col, Container, Row, Button, Spinner } from 'reactstrap'
 import UpdateStatus from './UpdateStatus'
 import { Form, Formik } from 'formik'
 import NumberTable from './NumberTable'
+import request from '../../../Utils/AxiosUtils'
+import { OrderAPI } from '../../../Utils/AxiosUtils/API'
 
 const OrderNumberTable = ({ moduleName, data, orderStatusData, setOrderStatus, orderStatus, mutate, orderStatusUpdate, edit, refetch }) => {
-    const handleStatusChange = (statusSlug) => {
+    const [updating, setUpdating] = useState(false);
+
+    const handleStatusChange = async (statusSlug) => {
         const newStatus = orderStatusData?.find(s => s.slug === statusSlug);
-        if (newStatus) {
+        if (!newStatus) return;
+
+        setOrderStatus(newStatus);
+
+        // If parent order has sub-orders, update parent AND each sub-order simultaneously
+        if (data?.sub_orders?.length > 0) {
+            setUpdating(true);
+            try {
+                const updatePromises = [
+                    // Update parent order
+                    request({
+                        url: `${OrderAPI}/${data.id}`,
+                        data: { _method: "put", order_status_id: newStatus.id },
+                        method: "post"
+                    }),
+                    // Update all sub-orders
+                    ...data.sub_orders.map(subOrder => 
+                        request({
+                            url: `${OrderAPI}/${subOrder.id}`,
+                            data: { _method: "put", order_status_id: newStatus.id },
+                            method: "post"
+                        })
+                    )
+                ];
+                await Promise.allSettled(updatePromises);
+                refetch && refetch();
+            } catch (err) {
+                console.error("Error updating order statuses:", err);
+            } finally {
+                setUpdating(false);
+            }
+        } else {
+            // Single order
             mutate({
                 _method: "put",
                 order_status_id: newStatus.id
             });
-            setOrderStatus(newStatus);
         }
     }
 
@@ -41,11 +76,37 @@ const OrderNumberTable = ({ moduleName, data, orderStatusData, setOrderStatus, o
         { label: 'Failed', slug: 'FAILED', color: 'danger' },
     ];
 
-    const handlePaymentStatusChange = (status) => {
-        mutate({
-            _method: "put",
-            payment_status: status
-        });
+    const handlePaymentStatusChange = async (status) => {
+        if (data?.sub_orders?.length > 0) {
+            setUpdating(true);
+            try {
+                const updatePromises = [
+                    request({
+                        url: `${OrderAPI}/${data.id}`,
+                        data: { _method: "put", payment_status: status },
+                        method: "post"
+                    }),
+                    ...data.sub_orders.map(subOrder =>
+                        request({
+                            url: `${OrderAPI}/${subOrder.id}`,
+                            data: { _method: "put", payment_status: status },
+                            method: "post"
+                        })
+                    )
+                ];
+                await Promise.allSettled(updatePromises);
+                refetch && refetch();
+            } catch (err) {
+                console.error("Error updating payment statuses:", err);
+            } finally {
+                setUpdating(false);
+            }
+        } else {
+            mutate({
+                _method: "put",
+                payment_status: status
+            });
+        }
     }
 
     return (
@@ -57,18 +118,22 @@ const OrderNumberTable = ({ moduleName, data, orderStatusData, setOrderStatus, o
                             <div className="title-header">
                                 <div className="d-flex align-items-center">
                                     <h5>{moduleName}</h5>
+                                    {updating && <Spinner size="sm" color="primary" className="ms-2" />}
                                 </div>
                                 <div className="d-flex flex-column gap-3 w-100">
-                                    {edit && !data?.sub_orders?.length && (
+                                    {edit && (
                                         <div className="status-button-bar d-flex flex-column gap-3 w-100">
                                             <div className="d-flex align-items-center gap-2 flex-wrap">
-                                                <span className="fw-bold me-2 text-muted" style={{ fontSize: '12px' }}>Order Status:</span>
+                                                <span className="fw-bold me-2 text-muted" style={{ fontSize: '12px' }}>
+                                                    {data?.sub_orders?.length > 0 ? "Order Status (All Products):" : "Order Status:"}
+                                                </span>
                                                 {statusActions.map((action) => (
                                                     <Button 
                                                         key={action.slug}
                                                         color={orderStatus?.slug === action.slug ? action.color : action.color}
                                                         outline={orderStatus?.slug !== action.slug}
                                                         size="sm"
+                                                        disabled={updating}
                                                         onClick={() => handleStatusChange(action.slug)}
                                                         className="text-capitalize"
                                                     >
@@ -82,6 +147,7 @@ const OrderNumberTable = ({ moduleName, data, orderStatusData, setOrderStatus, o
                                                             color={orderStatus?.slug === action.slug ? action.color : action.color}
                                                             outline={orderStatus?.slug !== action.slug}
                                                             size="sm"
+                                                            disabled={updating}
                                                             onClick={() => handleStatusChange(action.slug)}
                                                             className="text-capitalize"
                                                         >
@@ -92,13 +158,16 @@ const OrderNumberTable = ({ moduleName, data, orderStatusData, setOrderStatus, o
                                             </div>
                                             
                                             <div className="d-flex align-items-center gap-2 flex-wrap border-top pt-2">
-                                                <span className="fw-bold me-2 text-muted" style={{ fontSize: '12px' }}>Payment Status:</span>
+                                                <span className="fw-bold me-2 text-muted" style={{ fontSize: '12px' }}>
+                                                    {data?.sub_orders?.length > 0 ? "Payment Status (All Products):" : "Payment Status:"}
+                                                </span>
                                                 {paymentActions.map((action) => (
                                                     <Button 
                                                         key={action.slug}
                                                         color={data?.payment_status === action.slug ? action.color : action.color}
                                                         outline={data?.payment_status !== action.slug}
                                                         style={{ padding: '2px 10px', fontSize: '11px' }}
+                                                        disabled={updating}
                                                         onClick={() => handlePaymentStatusChange(action.slug)}
                                                         className="text-capitalize"
                                                     >

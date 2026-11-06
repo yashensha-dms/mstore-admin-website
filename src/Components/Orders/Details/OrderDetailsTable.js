@@ -4,7 +4,7 @@ import I18NextContext from '@/Helper/I18NextContext';
 import { useContext } from 'react';
 import { useTranslation } from '@/app/i18n/client';
 
-const OrderDetailsTable = ({ moduleName, data }) => {
+const OrderDetailsTable = ({ moduleName, data, orderStatusData, refetch }) => {
     const { i18Lang } = useContext(I18NextContext);
     const { t } = useTranslation(i18Lang, 'common');
     return (
@@ -16,7 +16,7 @@ const OrderDetailsTable = ({ moduleName, data }) => {
                             <div className="title-header">
                                 <div className="d-flex align-items-center"><h5 >{t(moduleName)}</h5></div>
                             </div>
-                            <DetailTable data={data} />
+                            <DetailTable data={data} orderStatusData={orderStatusData} refetch={refetch} />
                         </CardBody>
                     </Card>
                 </Col>

@@ -42,17 +42,17 @@ const OrderDetailsContain = ({ updateId }) => {
     return (
         <Row>
             <Col xxl="9">
-                {!data?.sub_orders?.length > 0 && <div className="mb-4">
+                <div className="mb-4">
                     <div className="tracking-panel">
                         <TrackingPanel orderStatusData={orderStatusData} orderStatus={orderStatus} mutate={mutate} />
                     </div>
-                </div>}
+                </div>
                 <Col sm="12">
                     <OrderNumberTable moduleName={`${t('OrderNumber')}: #${data?.order_number}`} data={data} orderStatusData={orderStatusData} setOrderStatus={setOrderStatus} orderStatus={orderStatus} mutate={mutate} orderStatusUpdate={orderStatusUpdate} edit={edit} refetch={refetch} />
                 </Col>
                 {data?.sub_orders?.length > 0 &&
                     <Col sm="12">
-                        <OrderDetailsTable moduleName={`OrderDetails`} data={data} />
+                        <OrderDetailsTable moduleName={`OrderDetails`} data={data} orderStatusData={orderStatusData} refetch={refetch} />
                     </Col>
                 }
             </Col >
