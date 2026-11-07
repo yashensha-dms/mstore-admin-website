@@ -291,6 +291,45 @@ const SimpleGstReport = () => {
     }
   );
 
+  // Helper to accurately resolve a product's tax rate
+  const getProductTaxRate = (prod) => {
+    // 1. Direct tax relation object
+    if (prod?.tax && prod.tax.rate !== undefined && prod.tax.rate !== null) {
+      const r = Number(prod.tax.rate);
+      if (!isNaN(r)) return r;
+    }
+    // 2. Direct tax_id matched against storeTaxes
+    if (prod?.tax_id && Array.isArray(storeTaxes)) {
+      const found = storeTaxes.find((t) => Number(t.id) === Number(prod.tax_id));
+      if (found && found.rate !== undefined && found.rate !== null) {
+        const r = Number(found.rate);
+        if (!isNaN(r)) return r;
+      }
+    }
+    // 3. Rate attached directly to product
+    if (prod?.tax_rate !== undefined && prod?.tax_rate !== null) {
+      const r = Number(prod.tax_rate);
+      if (!isNaN(r)) return r;
+    }
+    // 4. Rate calculated from pivot tax and subtotal
+    const pivot = prod?.pivot || {};
+    const pTax = Number(pivot.tax || 0);
+    const pSubtotal = Number(pivot.subtotal || 0);
+    if (pTax > 0 && pSubtotal > 0) {
+      // Common GST rates in India: 0, 3, 5, 12, 18, 28, 40
+      const standardRates = [0, 3, 5, 12, 18, 28, 40];
+      const rawRate = (pTax / pSubtotal) * 100;
+      const nearest = standardRates.reduce((prev, curr) =>
+        Math.abs(curr - rawRate) < Math.abs(prev - rawRate) ? curr : prev
+      );
+      if (Math.abs(nearest - rawRate) < 1.0) {
+        return nearest;
+      }
+      return Number(rawRate.toFixed(2));
+    }
+    return 0;
+  };
+
   const [r1OrderDetailsMap, setR1OrderDetailsMap] = useState({});
   const [r1FetchingDetails, setR1FetchingDetails] = useState(false);
 
@@ -311,7 +350,8 @@ const SimpleGstReport = () => {
 
       if (missing.length > 0 && !r1FetchingDetails) {
         setR1FetchingDetails(true);
-        const batch = missing.slice(0, 40);
+        // Process up to 50 at a time, and the effect will recursively continue until missing is empty
+        const batch = missing.slice(0, 50);
         Promise.all(
           batch.map((o) => {
             const num = o.order_number || o.id;
@@ -404,7 +444,7 @@ const SimpleGstReport = () => {
 
       if (missing.length > 0 && !r2FetchingDetails) {
         setR2FetchingDetails(true);
-        const batch = missing.slice(0, 40);
+        const batch = missing.slice(0, 50);
         Promise.all(
           batch.map((o) => {
             const num = o.order_number || o.id;
@@ -432,7 +472,8 @@ const SimpleGstReport = () => {
   // REPORT 1: SLABS CALCULATION (GSTR-3B B2C STATEMENT)
   // =========================================================================
   const processedR1 = useMemo(() => {
-    const ratesSet = new Set([0, 3, 5, 18, 40]);
+    // Include all standard Indian GST tax rates (0, 3, 5, 12, 18, 28, 40)
+    const ratesSet = new Set([0, 3, 5, 12, 18, 28, 40]);
     if (Array.isArray(storeTaxes)) {
       storeTaxes.forEach((t) => {
         const r = parseFloat(t.rate);
@@ -524,18 +565,28 @@ const SimpleGstReport = () => {
             const price = Number(pivot.single_price || prod.sale_price || prod.price || 0);
             const lineSale = Number(pivot.subtotal ? Number(pivot.subtotal) + Number(pivot.tax || 0) : price * qty);
 
-            let r = 0;
-            if (prod.tax && prod.tax.rate !== undefined) {
-              r = Number(prod.tax.rate);
-            }
+            const r = getProductTaxRate(prod);
             salesByRate[r] = (salesByRate[r] || 0) + lineSale;
             ratesSet.add(r);
             if (lineSale > 0) hasConcreteSales = true;
           });
         } else {
+          // If product items haven't arrived yet for this order, check order-level tax
           const orderTotal = Number(o.total || o.amount || 0);
+          const orderTax = Number(o.tax_total || o.tax || 0);
           if (orderTotal > 0) {
-            salesByRate[0] = (salesByRate[0] || 0) + orderTotal;
+            let r = 0;
+            if (orderTax > 0 && orderTotal > orderTax) {
+              const taxablePart = orderTotal - orderTax;
+              const approxRate = (orderTax / taxablePart) * 100;
+              const standardRates = [0, 3, 5, 12, 18, 28, 40];
+              const nearest = standardRates.reduce((prev, curr) =>
+                Math.abs(curr - approxRate) < Math.abs(prev - approxRate) ? curr : prev
+              );
+              r = Math.abs(nearest - approxRate) < 1.0 ? nearest : Number(approxRate.toFixed(2));
+            }
+            salesByRate[r] = (salesByRate[r] || 0) + orderTotal;
+            ratesSet.add(r);
             hasConcreteSales = true;
           }
         }
@@ -666,10 +717,7 @@ const SimpleGstReport = () => {
           const price = Number(pivot.single_price || prod.sale_price || prod.price || 0);
           const lineSale = Number(pivot.subtotal ? Number(pivot.subtotal) + Number(pivot.tax || 0) : price * qty);
 
-          let rate = 0;
-          if (prod.tax && prod.tax.rate !== undefined) {
-            rate = Number(prod.tax.rate);
-          }
+          const rate = getProductTaxRate(prod);
 
           let subcat = "General";
           if (Array.isArray(prod.categories) && prod.categories.length > 0) {
