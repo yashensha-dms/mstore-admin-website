@@ -289,16 +289,6 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
                   <span className="text-xs text-slate-400">{t("ClickToBrowse")}</span>
                 </div>
               )}
-              {!values.image_id && (
-                <input
-                  name="image_url"
-                  type="text"
-                  value={values.image_url}
-                  onChange={(e) => setFieldValue("image_url", e.target.value)}
-                  placeholder={t("EnterImageUrl")}
-                  className={inputCls(false)}
-                />
-              )}
             </div>
 
                                     {/* Tap action */}
