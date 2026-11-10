@@ -98,13 +98,21 @@ const ReceiptModal = ({ open, setOpen, data }) => {
     ].filter(Boolean).join(', ');
 
     // Delivery location Google Maps URL for QR code scanning
-    const mapQuery = (data?.shipping_address?.latitude && data?.shipping_address?.longitude)
-        ? `${data.shipping_address.latitude},${data.shipping_address.longitude}`
-        : addressString;
+    let lat = data?.shipping_address?.latitude || data?.shipping_address?.lat || data?.latitude || null;
+    let lng = data?.shipping_address?.longitude || data?.shipping_address?.lng || data?.longitude || null;
 
-    const mapUrl = mapQuery 
-        ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`
-        : null;
+    if ((!lat || !lng) && (data?.shipping_address?.screen_geo_coordinates || data?.shipping_address?.geo_coordinates || data?.screen_geo_coordinates)) {
+        const coordStr = data?.shipping_address?.screen_geo_coordinates || data?.shipping_address?.geo_coordinates || data?.screen_geo_coordinates;
+        if (coordStr && coordStr.includes(',')) {
+            const parts = coordStr.split(',');
+            lat = parts[0]?.trim();
+            lng = parts[1]?.trim();
+        }
+    }
+
+    const mapUrl = (lat && lng)
+        ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+        : (addressString ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressString)}` : null);
 
     const deliverySlot = data?.delivery_interval && data?.delivery_description 
         ? `${data.delivery_description} (${data.delivery_interval})`
