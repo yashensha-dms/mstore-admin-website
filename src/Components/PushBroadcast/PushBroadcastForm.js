@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Form, Formik } from "formik";
 import React, { useContext, useEffect, useState } from "react";
-import { AlertCircle, Image as ImageIcon, X } from "lucide-react";
+import { AlertCircle, Image as ImageIcon, X, ChevronDown, Check } from "lucide-react";
+import * as Select from "@radix-ui/react-select";
 import FormBtn from "../../Elements/Buttons/FormBtn";
 import request from "../../Utils/AxiosUtils";
-import { pushBroadcast } from "../../Utils/AxiosUtils/API";
+import { pushBroadcast, product, Category } from "../../Utils/AxiosUtils/API";
 import Loader from "../CommonComponent/Loader";
 import AttachmentModal from "../Attachment/AttachmentModal";
 import I18NextContext from "@/Helper/I18NextContext";
@@ -39,6 +40,32 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
   const { t } = useTranslation(i18Lang, "common");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState([]);
+  const [targetSearch, setTargetSearch] = useState("");
+
+  // Fetch product list
+  const { data: productData } = useQuery([product], () => request({ url: product }), {
+    refetchOnWindowFocus: false,
+    select: (res) => res?.data?.data?.map((p) => ({ id: String(p.id), name: p.name })) || [],
+  });
+
+  // Fetch category list
+  const { data: categoryData } = useQuery([Category], () => request({ url: Category, params: { type: "product", status: 1 } }), {
+    refetchOnWindowFocus: false,
+    select: (res) => {
+      let result = [];
+      const recurse = (list, parentName = "") => {
+        list?.forEach((item) => {
+          const displayName = parentName ? `${parentName} → ${item.name}` : item.name;
+          result.push({ id: String(item.id), name: displayName });
+          if (item.subcategories && item.subcategories.length > 0) {
+            recurse(item.subcategories, displayName);
+          }
+        });
+      };
+      recurse(res?.data?.data);
+      return result;
+    },
+  });
 
   const { data: oldData, isLoading, refetch } = useQuery(
     [updateId],
@@ -61,7 +88,68 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
   const old = oldData?.data;
 
   return (
-    <Formik
+    <>
+      {/* Styles for Radix components */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .premium-select-trigger {
+          display: inline-flex;
+          align-items: center;
+          justify-content: space-between;
+          border-radius: 8px;
+          padding: 10px 14px;
+          font-size: 14px;
+          background-color: white;
+          color: #1e293b;
+          border: 1px solid #cbd5e1;
+          outline: none;
+          transition: all 150ms ease;
+          width: 100%;
+          cursor: pointer;
+        }
+        .premium-select-trigger:focus {
+          border-color: #0da89b;
+          box-shadow: 0 0 0 2px rgba(13, 168, 155, 0.1);
+        }
+        .premium-select-content {
+          width: var(--radix-select-trigger-width) !important;
+          overflow: hidden;
+          background-color: white;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0px 10px 38px -10px rgba(22, 23, 24, 0.2), 0px 10px 20px -15px rgba(22, 23, 24, 0.1);
+          z-index: 1000;
+        }
+        .premium-select-viewport {
+          padding: 6px;
+        }
+        .premium-select-item {
+          font-size: 13px;
+          color: #334155;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          padding: 8px 28px 8px 12px;
+          position: relative;
+          user-select: none;
+          outline: none;
+          cursor: pointer;
+        }
+        .premium-select-item[data-highlighted] {
+          background-color: #f1f5f9;
+          color: #0f172a;
+        }
+        .premium-select-indicator {
+          position: absolute;
+          right: 8px;
+          width: 16px;
+          height: 16px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+      `}} />
+
+      <Formik
       enableReinitialize
       initialValues={{
         title: updateId ? old?.title || "" : "",
@@ -213,27 +301,75 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
               )}
             </div>
 
-            {/* Tap action */}
+                                    {/* Tap action */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-slate-700">{t("TapAction")}</label>
-                <select value={values.redirect_type} onChange={(e) => setFieldValue("redirect_type", e.target.value)} className={inputCls(false)}>
-                  <option value="">—</option>
+                <select
+                  value={values.redirect_type}
+                  onChange={(e) => {
+                    setFieldValue("redirect_type", e.target.value);
+                    setFieldValue("redirect_target", "");
+                    setTargetSearch("");
+                  }}
+                  className={inputCls(false)}
+                >
+                  <option value="">None</option>
                   <option value="product">Product</option>
                   <option value="category">Category</option>
-                  <option value="url">URL</option>
                 </select>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-slate-700">{t("TapTarget")}</label>
-                <input
-                  name="redirect_target"
-                  type="text"
-                  value={values.redirect_target}
-                  onChange={(e) => setFieldValue("redirect_target", e.target.value)}
-                  placeholder={t("EnterTapTarget")}
-                  className={inputCls(false)}
-                />
+                {values.redirect_type === "product" || values.redirect_type === "category" ? (
+                  <Select.Root
+                    value={values.redirect_target}
+                    onValueChange={(val) => setFieldValue("redirect_target", val)}
+                  >
+                    <Select.Trigger className="premium-select-trigger">
+                      <Select.Value placeholder={values.redirect_type === "product" ? "Select Product..." : "Select Category..."} />
+                      <Select.Icon>
+                        <ChevronDown className="w-4 h-4 text-slate-500" />
+                      </Select.Icon>
+                    </Select.Trigger>
+                    <Select.Portal>
+                      <Select.Content position="popper" sideOffset={4} className="premium-select-content max-h-[300px] overflow-y-auto">
+                        <div className="p-2 border-b border-slate-100 sticky top-0 bg-white z-10" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="text"
+                            placeholder={t("Search") + "..."}
+                            value={targetSearch}
+                            onChange={(e) => setTargetSearch(e.target.value)}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#0da89b]"
+                          />
+                        </div>
+                        <Select.Viewport className="premium-select-viewport">
+                          {((values.redirect_type === "product" ? productData : categoryData) || [])
+                            ?.filter((item) => !targetSearch || item.name.toLowerCase().includes(targetSearch.toLowerCase()))
+                            ?.slice(0, 50)
+                            ?.map((item) => (
+                              <Select.Item key={item.id} value={item.id} className="premium-select-item">
+                                <Select.ItemText>{item.name}</Select.ItemText>
+                                <Select.ItemIndicator className="premium-select-indicator">
+                                  <Check className="w-4 h-4 text-slate-800" />
+                                </Select.ItemIndicator>
+                              </Select.Item>
+                            ))}
+                        </Select.Viewport>
+                      </Select.Content>
+                    </Select.Portal>
+                  </Select.Root>
+                ) : (
+                  <input
+                    name="redirect_target"
+                    type="text"
+                    disabled
+                    value=""
+                    placeholder="Select Product or Category above"
+                    className="w-full px-4 py-2.5 border rounded-lg text-sm bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
+                  />
+                )}
               </div>
             </div>
 
@@ -349,6 +485,7 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
         );
       }}
     </Formik>
+    </>
   );
 };
 
