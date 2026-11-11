@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Form, Formik } from "formik";
-import React, { useContext, useEffect, useState } from "react";
-import { AlertCircle, Image as ImageIcon, X, ChevronDown, Check } from "lucide-react";
-import * as Select from "@radix-ui/react-select";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { AlertCircle, Image as ImageIcon, X, ChevronDown, Check, Search } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import FormBtn from "../../Elements/Buttons/FormBtn";
 import request from "../../Utils/AxiosUtils";
 import { pushBroadcast, product, Category } from "../../Utils/AxiosUtils/API";
@@ -41,31 +41,69 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState([]);
   const [targetSearch, setTargetSearch] = useState("");
+  const [debouncedProductSearch, setDebouncedProductSearch] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Fetch product list
-  const { data: productData } = useQuery([product], () => request({ url: product }), {
-    refetchOnWindowFocus: false,
-    select: (res) => res?.data?.data?.map((p) => ({ id: String(p.id), name: p.name })) || [],
-  });
+  // Debounce product search for backend API query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedProductSearch(targetSearch);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [targetSearch]);
 
-  // Fetch category list
-  const { data: categoryData } = useQuery([Category], () => request({ url: Category, params: { type: "product", status: 1 } }), {
-    refetchOnWindowFocus: false,
-    select: (res) => {
-      let result = [];
-      const recurse = (list, parentName = "") => {
-        list?.forEach((item) => {
-          const displayName = parentName ? `${parentName} → ${item.name}` : item.name;
-          result.push({ id: String(item.id), name: displayName });
-          if (item.subcategories && item.subcategories.length > 0) {
-            recurse(item.subcategories, displayName);
-          }
-        });
-      };
-      recurse(res?.data?.data);
-      return result;
-    },
-  });
+  // Fetch product list (dynamic search with paginate: 100)
+  const { data: productData, isLoading: isProductsLoading } = useQuery(
+    [product, debouncedProductSearch],
+    () =>
+      request({
+        url: product,
+        params: {
+          status: 1,
+          paginate: 100,
+          search: debouncedProductSearch || undefined,
+        },
+      }),
+    {
+      refetchOnWindowFocus: false,
+      select: (res) =>
+        (res?.data?.data || []).map((p) => ({
+          id: String(p.id),
+          name: p.name,
+        })),
+    }
+  );
+
+  // Fetch category list (supports nested data structures)
+  const { data: categoryData, isLoading: isCategoriesLoading } = useQuery(
+    [Category],
+    () => request({ url: Category, params: { type: "product", status: 1 } }),
+    {
+      refetchOnWindowFocus: false,
+      select: (res) => {
+        const rawList = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+        let result = [];
+        const recurse = (list, parentName = "") => {
+          if (!Array.isArray(list)) return;
+          list.forEach((item) => {
+            if (!item) return;
+            const displayName = parentName ? `${parentName} → ${item.name}` : item.name;
+            result.push({ id: String(item.id), name: displayName });
+            const subs = item.subcategories || item.child || item.children;
+            if (Array.isArray(subs) && subs.length > 0) {
+              recurse(subs, displayName);
+            }
+          });
+        };
+        recurse(rawList);
+        return result;
+      },
+    }
+  );
 
   const { data: oldData, isLoading, refetch } = useQuery(
     [updateId],
@@ -106,46 +144,37 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
           width: 100%;
           cursor: pointer;
         }
-        .premium-select-trigger:focus {
+        .premium-select-trigger:focus, .premium-select-trigger:focus-visible {
           border-color: #0da89b;
           box-shadow: 0 0 0 2px rgba(13, 168, 155, 0.1);
         }
-        .premium-select-content {
-          width: var(--radix-select-trigger-width) !important;
-          overflow: hidden;
+        .target-dropdown-content {
+          width: var(--radix-dropdown-menu-trigger-width) !important;
+          min-width: 260px;
+          max-width: 95vw;
           background-color: white;
           border-radius: 8px;
           border: 1px solid #e2e8f0;
           box-shadow: 0px 10px 38px -10px rgba(22, 23, 24, 0.2), 0px 10px 20px -15px rgba(22, 23, 24, 0.1);
           z-index: 1000;
+          overflow: hidden;
         }
-        .premium-select-viewport {
-          padding: 6px;
-        }
-        .premium-select-item {
+        .target-dropdown-item {
           font-size: 13px;
           color: #334155;
           border-radius: 6px;
           display: flex;
           align-items: center;
-          padding: 8px 28px 8px 12px;
-          position: relative;
+          justify-content: space-between;
+          padding: 8px 12px;
           user-select: none;
           outline: none;
           cursor: pointer;
+          transition: background-color 100ms ease;
         }
-        .premium-select-item[data-highlighted] {
+        .target-dropdown-item:hover, .target-dropdown-item:focus {
           background-color: #f1f5f9;
           color: #0f172a;
-        }
-        .premium-select-indicator {
-          position: absolute;
-          right: 8px;
-          width: 16px;
-          height: 16px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
         }
       `}} />
 
@@ -312,44 +341,102 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-slate-700">{t("TapTarget")}</label>
                 {values.redirect_type === "product" || values.redirect_type === "category" ? (
-                  <Select.Root
-                    value={values.redirect_target}
-                    onValueChange={(val) => setFieldValue("redirect_target", val)}
+                  <DropdownMenu.Root
+                    open={dropdownOpen}
+                    onOpenChange={(open) => {
+                      setDropdownOpen(open);
+                      if (!open) setTargetSearch("");
+                    }}
                   >
-                    <Select.Trigger className="premium-select-trigger">
-                      <Select.Value placeholder={values.redirect_type === "product" ? "Select Product..." : "Select Category..."} />
-                      <Select.Icon>
-                        <ChevronDown className="w-4 h-4 text-slate-500" />
-                      </Select.Icon>
-                    </Select.Trigger>
-                    <Select.Portal>
-                      <Select.Content position="popper" sideOffset={4} className="premium-select-content max-h-[300px] overflow-y-auto">
-                        <div className="p-2 border-b border-slate-100 sticky top-0 bg-white z-10" onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenu.Trigger asChild>
+                      <button type="button" className="premium-select-trigger text-left">
+                        <span className="truncate">
+                          {(() => {
+                            if (!values.redirect_target) {
+                              return values.redirect_type === "product"
+                                ? "Select Product..."
+                                : "Select Category...";
+                            }
+                            const items = values.redirect_type === "product" ? productData : categoryData;
+                            const found = items?.find((item) => String(item.id) === String(values.redirect_target));
+                            return found ? found.name : `#${values.redirect_target}`;
+                          })()}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-slate-500 flex-shrink-0 ml-2" />
+                      </button>
+                    </DropdownMenu.Trigger>
+
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content
+                        position="popper"
+                        sideOffset={4}
+                        align="start"
+                        className="target-dropdown-content"
+                      >
+                        <div
+                          className="p-2 border-b border-slate-100 sticky top-0 bg-white z-10 flex items-center gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Search className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                           <input
                             type="text"
                             placeholder={t("Search") + "..."}
                             value={targetSearch}
                             onChange={(e) => setTargetSearch(e.target.value)}
                             onKeyDown={(e) => e.stopPropagation()}
-                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#0da89b]"
+                            autoFocus
+                            className="w-full px-2 py-1 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#0da89b]"
                           />
+                          {targetSearch && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTargetSearch("");
+                              }}
+                              className="text-slate-400 hover:text-slate-600 focus:outline-none"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
-                        <Select.Viewport className="premium-select-viewport">
-                          {((values.redirect_type === "product" ? productData : categoryData) || [])
-                            ?.filter((item) => !targetSearch || item.name.toLowerCase().includes(targetSearch.toLowerCase()))
-                            ?.slice(0, 50)
-                            ?.map((item) => (
-                              <Select.Item key={item.id} value={item.id} className="premium-select-item">
-                                <Select.ItemText>{item.name}</Select.ItemText>
-                                <Select.ItemIndicator className="premium-select-indicator">
-                                  <Check className="w-4 h-4 text-slate-800" />
-                                </Select.ItemIndicator>
-                              </Select.Item>
-                            ))}
-                        </Select.Viewport>
-                      </Select.Content>
-                    </Select.Portal>
-                  </Select.Root>
+
+                        <div className="max-h-[260px] overflow-y-auto p-1.5">
+                          {values.redirect_type === "product" && isProductsLoading ? (
+                            <div className="p-3 text-center text-xs text-slate-400">Loading products...</div>
+                          ) : values.redirect_type === "category" && isCategoriesLoading ? (
+                            <div className="p-3 text-center text-xs text-slate-400">Loading categories...</div>
+                          ) : (() => {
+                            const list = (values.redirect_type === "product" ? productData : categoryData) || [];
+                            const filtered = list.filter((item) =>
+                              !targetSearch || item.name.toLowerCase().includes(targetSearch.toLowerCase())
+                            );
+
+                            if (filtered.length === 0) {
+                              return <div className="p-3 text-center text-xs text-slate-400">No results found</div>;
+                            }
+
+                            return filtered.slice(0, 100).map((item) => {
+                              const isSelected = String(values.redirect_target) === String(item.id);
+                              return (
+                                <DropdownMenu.Item
+                                  key={item.id}
+                                  className="target-dropdown-item"
+                                  onSelect={() => {
+                                    setFieldValue("redirect_target", item.id);
+                                    setDropdownOpen(false);
+                                  }}
+                                >
+                                  <span className="truncate pr-2">{item.name}</span>
+                                  {isSelected && <Check className="w-4 h-4 text-[#0da89b] flex-shrink-0" />}
+                                </DropdownMenu.Item>
+                              );
+                            });
+                          })()}
+                        </div>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
                 ) : (
                   <input
                     name="redirect_target"
