@@ -88,23 +88,38 @@ const ReceiptModal = ({ open, setOpen, data }) => {
 
     const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
+    // Fallback to billing_address or consumer address if shipping_address is absent or empty
+    const activeAddress = (data?.shipping_address?.street || data?.shipping_address?.city || data?.shipping_address?.pincode)
+        ? data?.shipping_address
+        : (data?.billing_address || data?.consumer?.address || data?.shipping_address);
+
     // Format address cleanly with commas and spacing
     const addressString = [
-        data?.shipping_address?.street,
-        data?.shipping_address?.city,
-        data?.shipping_address?.state?.name,
-        data?.shipping_address?.country?.name,
-        data?.shipping_address?.pincode
+        activeAddress?.street,
+        activeAddress?.city,
+        typeof activeAddress?.state === 'object' ? activeAddress?.state?.name : activeAddress?.state,
+        typeof activeAddress?.country === 'object' ? activeAddress?.country?.name : activeAddress?.country,
+        activeAddress?.pincode
     ].filter(Boolean).join(', ');
 
-    // Delivery location Google Maps URL for QR code scanning
-    const mapQuery = (data?.shipping_address?.latitude && data?.shipping_address?.longitude)
-        ? `${data.shipping_address.latitude},${data.shipping_address.longitude}`
-        : addressString;
+    const phone = activeAddress?.phone || data?.shipping_address?.phone || data?.billing_address?.phone || data?.consumer?.phone;
 
-    const mapUrl = mapQuery 
-        ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`
-        : null;
+    // Delivery location Google Maps URL for QR code scanning
+    let lat = activeAddress?.latitude || activeAddress?.lat || data?.shipping_address?.latitude || data?.shipping_address?.lat || data?.billing_address?.latitude || data?.billing_address?.lat || data?.latitude || null;
+    let lng = activeAddress?.longitude || activeAddress?.lng || data?.shipping_address?.longitude || data?.shipping_address?.lng || data?.billing_address?.longitude || data?.billing_address?.lng || data?.longitude || null;
+
+    if ((!lat || !lng)) {
+        const coordStr = activeAddress?.screen_geo_coordinates || activeAddress?.geo_coordinates || data?.shipping_address?.screen_geo_coordinates || data?.shipping_address?.geo_coordinates || data?.billing_address?.screen_geo_coordinates || data?.billing_address?.geo_coordinates || data?.screen_geo_coordinates;
+        if (coordStr && typeof coordStr === 'string' && coordStr.includes(',')) {
+            const parts = coordStr.split(',');
+            lat = parts[0]?.trim();
+            lng = parts[1]?.trim();
+        }
+    }
+
+    const mapUrl = (lat && lng)
+        ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+        : (addressString ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressString)}` : null);
 
     const deliverySlot = data?.delivery_interval && data?.delivery_description 
         ? `${data.delivery_description} (${data.delivery_interval})`
@@ -256,7 +271,8 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                     {deliverySlot && <Row left="Delivery Slot:" right={deliverySlot} />}
                     {data?.consumer?.name && <Row left="Customer:" right={data.consumer.name} />}
                     {data?.consumer?.email && <Row left="Email:" right={data.consumer.email} />}
-                    {data?.shipping_address?.phone && <Row left="Phone:" right={data.shipping_address.phone} />}
+                    {phone && <Row left="Phone:" right={String(phone)} />}
+                    {addressString && <Text>{`Address: ${addressString}`}</Text>}
                     <Line />
                     <Row left="QTY ITEM" right="PRICE" />
                     <Line />
@@ -402,10 +418,10 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                                         <td className="fw-medium text-end py-1" style={{ textTransform: 'none' }}>{data.consumer.email}</td>
                                     </tr>
                                 )}
-                                {data?.shipping_address?.phone && (
+                                {phone && (
                                     <tr>
                                         <td className="text-muted py-1">{t("Phone")}:</td>
-                                        <td className="fw-medium text-end py-1">{data.shipping_address.phone}</td>
+                                        <td className="fw-medium text-end py-1">{phone}</td>
                                     </tr>
                                 )}
                                 {addressString && (
