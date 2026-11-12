@@ -8,7 +8,8 @@ const ConvertPermissionArr = (permissionsData) => {
     { name: "dashboard", permissionsArr: [{ type: "Dashboard" }] },
     { name: "notifications", permissionsArr: [{ type: "Notificaitons" }] },
     { name: "payment_account", permissionsArr: [{ type: "Payment Account" }] },
-    { name: "question_and_answer", permissionsArr: [{ type: "Q&A" }] }
+    { name: "question_and_answer", permissionsArr: [{ type: "Q&A" }] },
+    { name: "master-data", permissionsArr: [{ type: "Master Data" }] }
   ]
   permissionsData?.map((data) => {
     if (tempName == data.name.split(".")[0]) {

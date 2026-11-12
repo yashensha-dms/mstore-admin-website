@@ -1059,5 +1059,15 @@
   "PriceRule": "Numeric retail list price (Required for simple type).",
   "SwitchStore": "Switch Store",
   "StoreSwitched": "Store switched successfully",
-  "CurrentStore": "Current Store"
+  "CurrentStore": "Current Store",
+  "MasterData": "Master Data",
+  "UploadNormalize": "Upload & Normalize",
+  "MasterProducts": "Products",
+  "MasterCategories": "Categories",
+  "MasterDataUploadTitle": "Upload & Normalize Master Data",
+  "MasterDataUploadSubtitle": "Upload product and inventory CSV files (e.g. positive stock.csv), auto-normalize categories and products, and synchronize visibility.",
+  "MasterProductsTitle": "Master Products Catalog",
+  "MasterProductsSubtitle": "Manage product inventory and customer app visibility. Only active products are visible in the app.",
+  "MasterCategoriesTitle": "Master Categories",
+  "MasterCategoriesSubtitle": "Manage categories visibility. Only active categories appear in customer mobile app & website."
 }

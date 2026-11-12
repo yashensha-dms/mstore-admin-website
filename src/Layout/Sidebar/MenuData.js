@@ -1,4 +1,4 @@
-import { RiArticleLine, RiCoinsLine, RiContactsLine, RiCoupon2Line, RiCurrencyFill, RiExchangeDollarFill, RiHomeLine, RiImageLine, RiListUnordered, RiNotification3Line, RiPagesLine, RiPercentLine, RiQuestionnaireLine, RiRefund2Line, RiSettings3Line, RiStore2Line, RiStore3Line, RiTruckLine, RiWalletLine, RiWindowLine } from "react-icons/ri";
+import { RiArticleLine, RiCoinsLine, RiContactsLine, RiCoupon2Line, RiCurrencyFill, RiDatabase2Line, RiExchangeDollarFill, RiHomeLine, RiImageLine, RiListUnordered, RiNotification3Line, RiPagesLine, RiPercentLine, RiQuestionnaireLine, RiRefund2Line, RiSettings3Line, RiStore2Line, RiStore3Line, RiTruckLine, RiWalletLine, RiWindowLine } from "react-icons/ri";
 
 const MENUITEMS = [
   {
@@ -37,6 +37,17 @@ const MENUITEMS = [
       { title: "Categories", path: "/category", displayTitle: "Categories", permission: ["category.index"] },
       { title: "Tags", path: "/tag", displayTitle: "All Tag", permission: ["tag.index", "tag.create"] },
       { title: "Q&A", path: "/qna", displayTitle: "All Tag", permission: ["question_and_answer.index", "question_and_answer.create"] },
+    ],
+  },
+  {
+    title: "MasterData",
+    displayTitle: "Master Data",
+    icon: <RiDatabase2Line />,
+    type: "sub",
+    children: [
+      { title: "UploadNormalize", path: "/master-data/upload", displayTitle: "Upload & Normalize", permission: ["product.create", "product.index"] },
+      { title: "MasterProducts", path: "/master-data/products", displayTitle: "Products", permission: ["product.index"] },
+      { title: "MasterCategories", path: "/master-data/categories", displayTitle: "Categories", permission: ["category.index"] },
     ],
   },
   {
