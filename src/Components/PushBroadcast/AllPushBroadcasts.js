@@ -21,7 +21,7 @@ import {
   RiPlayLine,
 } from "react-icons/ri";
 import { ChevronLeft, ChevronRight, Check, MoreHorizontal } from "lucide-react";
-import { toast } from "react-toastify";
+import { ToastNotification } from "../../Utils/CustomFunctions/ToastNotification";
 import ShowModal from "../../Elements/Alerts&Modals/Modal";
 import Btn from "../../Elements/Buttons/Btn";
 
@@ -101,11 +101,15 @@ const AllPushBroadcasts = ({ url, moduleName, isCheck, setIsCheck, importExport,
   const actionMutate = useMutation(
     ({ id, action }) => request({ url: `${url}/${id}/${action}`, method: "post" }),
     {
-      onSuccess: () => {
+      onSuccess: (_res, variables) => {
         queryClient.invalidateQueries([url]);
-        toast.success(t("UpdatedSuccessfully") || "Done");
+        if (variables?.action === "send-now") {
+          ToastNotification("success", "Notification sent successfully");
+        } else {
+          ToastNotification("success", t("UpdatedSuccessfully") || "Done");
+        }
       },
-      onError: () => toast.error(t("SomethingWentWrong") || "Something went wrong"),
+      onError: () => ToastNotification("error", t("SomethingWentWrong") || "Something went wrong"),
     }
   );
 
