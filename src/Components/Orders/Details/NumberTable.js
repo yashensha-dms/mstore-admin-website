@@ -23,7 +23,17 @@ const NumberTable = ({ data }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {data?.products?.map((elem, index) => (
+                    {data?.products?.map((elem, index) => {
+                        const singlePrice = Number(elem?.pivot?.single_price ?? elem?.price ?? 0);
+                        const quantity = Number(elem?.pivot?.quantity ?? 1);
+                        const lineSubtotal = singlePrice * quantity;
+                        const pivotSubtotal = Number(elem?.pivot?.subtotal ?? 0);
+                        const pivotTax = Number(elem?.pivot?.tax ?? 0);
+                        // If GST was back-calculated, line total is single_price * quantity (or subtotal + tax)
+                        const finalSubtotal = lineSubtotal > 0 ? lineSubtotal : (pivotSubtotal + pivotTax || pivotSubtotal);
+                        const hasExtractedTax = pivotTax > 0 && Math.abs((pivotSubtotal + pivotTax) - finalSubtotal) < 0.1;
+
+                        return (
                         <tr key={index}>
                             <td className="product-image">
                                 <Avatar customeClass={'img-fluid'} data={elem?.product_thumbnail} placeHolder={placeHolderImage} name={elem?.name} />
@@ -32,16 +42,22 @@ const NumberTable = ({ data }) => {
                                 <h6>{elem?.pivot?.variation ? elem?.pivot?.variation?.name : elem?.name}</h6>
                             </td>
                             <td>
-                                <h6>{convertCurrency(elem?.pivot?.single_price)}</h6>
+                                <h6>{convertCurrency(singlePrice || elem?.pivot?.single_price)}</h6>
                             </td>
                             <td>
-                                <h6>{elem?.pivot.quantity}</h6>
+                                <h6>{quantity}</h6>
                             </td>
                             <td>
-                                <h6>{convertCurrency(elem?.pivot.subtotal)}</h6>
+                                <h6>{convertCurrency(finalSubtotal)}</h6>
+                                {hasExtractedTax && (
+                                    <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', fontWeight: 'normal' }}>
+                                        ({t("ExclTax") || "Excl. tax"}: {convertCurrency(pivotSubtotal)})
+                                    </span>
+                                )}
                             </td>
                         </tr>
-                    ))}
+                        );
+                    })}
                 </tbody>
             </Table>
         </div>
