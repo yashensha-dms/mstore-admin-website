@@ -44,10 +44,22 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
   const [debouncedProductSearch, setDebouncedProductSearch] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Debounce product search for backend API query
+  // Debounce product search for backend API query.
+  // Sends trimmed keyword (e.g. first word or trimmed prefix of >= 3 chars) to Laravel backend
+  // so searches like "milky mist" match backend names like "Milkymist".
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedProductSearch(targetSearch);
+      const clean = targetSearch.trim();
+      if (!clean) {
+        setDebouncedProductSearch("");
+        return;
+      }
+      // If user typed multi-word or space (e.g. "milky mist"), backend SQL `LIKE '%milky mist%'` fails
+      // because product name in DB is "Milkymist...". Using the first word / prefix allows backend
+      // to return candidate products which client then ranks by full fuzzy similarity!
+      const firstToken = clean.split(/\s+/)[0];
+      const termToSend = firstToken.length >= 3 ? firstToken : clean.slice(0, 3);
+      setDebouncedProductSearch(termToSend);
     }, 350);
     return () => clearTimeout(timer);
   }, [targetSearch]);
@@ -408,9 +420,53 @@ const PushBroadcastForm = ({ mutate, updateId, loading }) => {
                             <div className="p-3 text-center text-xs text-slate-400">Loading categories...</div>
                           ) : (() => {
                             const list = (values.redirect_type === "product" ? productData : categoryData) || [];
-                            const filtered = list.filter((item) =>
-                              !targetSearch || item.name.toLowerCase().includes(targetSearch.toLowerCase())
-                            );
+                            const query = targetSearch.trim().toLowerCase();
+                            const queryNoSpaces = query.replace(/\s+/g, "");
+
+                            // Relevance scoring helper
+                            const scoreItem = (name) => {
+                              if (!query) return 100;
+                              const lower = name.toLowerCase();
+                              const lowerNoSpaces = lower.replace(/\s+/g, "");
+
+                              // Exact match or exact start
+                              if (lower === query) return 1000;
+                              if (lowerNoSpaces === queryNoSpaces) return 900;
+                              if (lower.startsWith(query)) return 800;
+                              if (lowerNoSpaces.startsWith(queryNoSpaces)) return 750;
+
+                              // Contains exact phrase
+                              if (lower.includes(query)) return 600;
+
+                              // Contains spaceless phrase (e.g. "milky mist" in "Milkymist Butter...")
+                              if (queryNoSpaces.length >= 3 && lowerNoSpaces.includes(queryNoSpaces)) return 550;
+
+                              // Check multi-word tokens (all words present)
+                              const tokens = query.split(/\s+/).filter(Boolean);
+                              const matchedTokens = tokens.filter((t) => lower.includes(t) || lowerNoSpaces.includes(t.replace(/\s+/g, "")));
+                              if (tokens.length > 1 && matchedTokens.length === tokens.length) {
+                                return 400 + matchedTokens.length * 10;
+                              }
+
+                              // Partial token matches
+                              if (matchedTokens.length > 0) {
+                                return 200 + matchedTokens.length * 10;
+                              }
+
+                              // Prefix match of first 3 chars
+                              const prefix3 = queryNoSpaces.slice(0, 3);
+                              if (prefix3.length >= 3 && lowerNoSpaces.includes(prefix3)) {
+                                return 100;
+                              }
+
+                              return 0;
+                            };
+
+                            const filtered = list
+                              .map((item) => ({ item, score: scoreItem(item.name) }))
+                              .filter((entry) => entry.score > 0)
+                              .sort((a, b) => b.score - a.score || a.item.name.localeCompare(b.item.name))
+                              .map((entry) => entry.item);
 
                             if (filtered.length === 0) {
                               return <div className="p-3 text-center text-xs text-slate-400">No results found</div>;
