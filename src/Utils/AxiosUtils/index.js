@@ -48,6 +48,7 @@ const request = async ({ ...options }, router) => {
           "logout",
           "notifications",
           "push-broadcast",
+          "admin/rewards",
         ];
 
         const rawUrl = (options.url || "").split("?")[0].replace(/^\//, "");

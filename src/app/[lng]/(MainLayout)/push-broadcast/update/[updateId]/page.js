@@ -10,7 +10,12 @@ import I18NextContext from "@/Helper/I18NextContext";
 const PushBroadcastUpdate = ({ params }) => {
   const { i18Lang } = useContext(I18NextContext);
   const { t } = useTranslation(i18Lang, 'common');
-  const { mutate, isLoading } = useUpdate(pushBroadcast, params?.updateId, "/push-broadcast");
+  const { mutate, isLoading } = useUpdate(
+    pushBroadcast,
+    params?.updateId,
+    "/push-broadcast",
+    "Notification updated successfully"
+  );
   return (
     params?.updateId && (
       <Row>

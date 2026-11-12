@@ -116,10 +116,15 @@ export const VendorTransations = '/wallet/vendor';
 export const VendorWalletCredit = '/credit/vendorWallet';
 export const VendorWalletDebit = '/debit/vendorWallet';
 
-// Points
+// Points & Rewards
 export const PointUserTransations = '/points/consumer';
 export const PointCredit = '/credit/points';
 export const PointDebit = '/debit/points';
+export const RewardsOverviewAPI = '/admin/rewards/overview';
+export const RewardsCustomersAPI = '/admin/rewards/customers';
+export const RewardsTransactionsAPI = '/admin/rewards/transactions';
+export const RewardsSettingsAPI = '/admin/rewards/settings';
+export const RewardsExportAPI = '/admin/rewards/export';
 
 // Theme Option
 export const ThemeOptions = "/themeOptions"
