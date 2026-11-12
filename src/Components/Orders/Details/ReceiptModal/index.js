@@ -288,7 +288,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                         );
                     })}
                     <Line />
-                    <Row left="Subtotal:" right={`₹${Number(data.amount || 0).toFixed(2)}`} />
+                    <Row left={data?.tax_total > 0 ? "Subtotal (Excl. Tax):" : "Subtotal:"} right={`₹${Number(data.amount || 0).toFixed(2)}`} />
                     {data?.shipping_total > 0 && <Row left="Shipping:" right={`₹${Number(data.shipping_total).toFixed(2)}`} />}
                     {data?.tax_total > 0 && <Row left="Tax:" right={`₹${Number(data.tax_total).toFixed(2)}`} />}
                     {data?.coupon_total_discount > 0 && <Row left="Discount:" right={`-₹${Number(data.coupon_total_discount).toFixed(2)}`} />}
@@ -431,7 +431,7 @@ const ReceiptModal = ({ open, setOpen, data }) => {
                     <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
                         <tbody>
                             <tr>
-                                <td className="text-muted py-1">{t("Subtotal")}:</td>
+                                <td className="text-muted py-1">{data?.tax_total > 0 ? `${t("Subtotal")} (${t("ExclTax") || "Excl. Tax"})` : t("Subtotal")}:</td>
                                 <td className="fw-medium text-end py-1">₹{Number(data?.amount || 0).toFixed(2)}</td>
                             </tr>
                             {data?.shipping_total > 0 && (

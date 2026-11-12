@@ -26,9 +26,9 @@ const InvoiceSummary = ({ data }) => {
                 </div>
                 <div className="tracking-total tracking-wrapper">
                     <ul>
-                        <li>{t("Subtotal")} :<span>{convertCurrency(data?.amount)}</span></li>
+                        <li>{data?.tax_total > 0 ? `${t("Subtotal")} (${t("ExclTax") || "Excl. Tax"})` : t("Subtotal")} :<span>{convertCurrency(data?.amount)}</span></li>
                         <li>{t("Shipping")} :<span>{convertCurrency(data?.shipping_total ?? 0)}</span></li>
-                        <li>{t("Tax")} :<span>{convertCurrency(data?.tax_total ?? 0)}</span></li>
+                        <li>{t("Tax")} (GST) :<span>{convertCurrency(data?.tax_total ?? 0)}</span></li>
                         {data?.points_amount ? <li className="txt-primary fw-bold">{t("Points")} <span>{convertCurrency(data?.points_amount)}</span></li> : ""}
                         {data?.wallet_balance ? <li className="txt-primary fw-bold">{t("WalletBalance")} <span>{convertCurrency(data?.wallet_balance)}</span></li> : ""}
                         <li>{t("Total")} <span>{convertCurrency(data?.total ?? 0)}</span></li>
