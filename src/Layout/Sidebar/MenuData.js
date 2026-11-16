@@ -1,4 +1,5 @@
 import { RiArticleLine, RiCoinsLine, RiContactsLine, RiCoupon2Line, RiCurrencyFill, RiDatabase2Line, RiExchangeDollarFill, RiHomeLine, RiImageLine, RiListUnordered, RiNotification3Line, RiPagesLine, RiPercentLine, RiQuestionnaireLine, RiRefund2Line, RiSettings3Line, RiStore2Line, RiStore3Line, RiTruckLine, RiWalletLine, RiWindowLine } from "react-icons/ri";
+import { isBismi } from "../../Utils/isBismi";
 
 const MENUITEMS = [
   {
@@ -27,7 +28,7 @@ const MENUITEMS = [
     children: [
       { title: "AddProduct", path: "/product/create", displayTitle: "Add Product", permission: ["product.create"] },
       { title: "AllProducts", path: "/product", displayTitle: "All Product", badgeType: 'badge bg-warning text-dark ml-3', badgeValue: 0, permission: ["product.create"] },
-      { title: "PearlXPUpdates", path: "/pearl-xp-updates", displayTitle: "Pearl XP Updates", permission: ["product.index"] },
+      ...(!isBismi() ? [{ title: "PearlXPUpdates", path: "/pearl-xp-updates", displayTitle: "Pearl XP Updates", permission: ["product.index"] }] : []),
       { title: "Featured Products", path: "/featured-product", displayTitle: "Featured Products", permission: ["product.create"] },
       { title: "Trending Products", path: "/trending-product", displayTitle: "Trending Products", permission: ["product.create"] },
       { title: "Bestselling Products", path: "/bestselling-product", displayTitle: "Bestselling Products", permission: ["product.create"] },

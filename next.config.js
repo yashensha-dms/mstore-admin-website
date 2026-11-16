@@ -7,6 +7,7 @@ const nextConfig = {
   env: {
     // For Local Server
     API_PROD_URL: "https://mstore.bismihypermall.com/api/",
+    IS_BISMI: "true",
     // API_PROD_URL: "http://127.0.0.1:8000/api",
     // API_PROD_URL: "https://laravel.pixelstrap.net/Mstore/api/",
   },

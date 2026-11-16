@@ -9,6 +9,7 @@ import { pearlXpProductUpdate } from "../../Utils/AxiosUtils/API";
 import I18NextContext from "@/Helper/I18NextContext";
 import { useTranslation } from "@/app/i18n/client";
 import AccountContext from "@/Helper/AccountContext";
+import { isBismi } from "@/Utils/isBismi";
 
 const PearlXpPendingBanner = () => {
   const router = useRouter();
@@ -16,11 +17,14 @@ const PearlXpPendingBanner = () => {
   const { t } = useTranslation(i18Lang, "common");
   const { activeStore } = useContext(AccountContext);
 
-  // Pearl XP updates belong strictly to the Grocery store
+  const isBismiEnv = isBismi();
+
+  // Pearl XP updates belong strictly to the Grocery store (and not Bismi)
   const isGrocery =
-    !activeStore?.id ||
-    Number(activeStore.id) === 3 ||
-    (activeStore.store_name || "").toLowerCase().includes("grocer");
+    !isBismiEnv &&
+    (!activeStore?.id ||
+      Number(activeStore.id) === 3 ||
+      (activeStore.store_name || "").toLowerCase().includes("grocer"));
 
   const { data: total } = useQuery(
     [pearlXpProductUpdate, "pending-count", isGrocery],
@@ -28,7 +32,7 @@ const PearlXpPendingBanner = () => {
     { enabled: isGrocery, refetchOnWindowFocus: false, refetchInterval: 60000, select: (res) => res?.data?.total || 0 }
   );
 
-  if (!isGrocery || !total) return null;
+  if (isBismiEnv || !isGrocery || !total) return null;
 
   return (
     <div

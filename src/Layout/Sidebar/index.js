@@ -4,18 +4,27 @@ import LogoWrapper from "@/Components/CommonComponent/LogoWrapper";
 import MENUITEMS from "./MenuData";
 import AccountContext from "@/Helper/AccountContext";
 import SettingContext from "@/Helper/SettingContext";
+import { isBismi } from "@/Utils/isBismi";
 
 const MenuList = dynamic(() => import("./MenuList"), {
   ssr: false,
 })
 const Sidebar = () => {
   const [activeMenu, setActiveMenu] = useState([]);
-  const { role, setRole } = useContext(AccountContext);
+  const { role, setRole, accountData } = useContext(AccountContext);
   const { sidebarOpen, setSidebarOpen } = useContext(SettingContext)
 
   let storePermission = {};
   const ISSERVER = typeof window === "undefined";
-  if (!ISSERVER) storePermission = localStorage.getItem("account") && JSON.parse(localStorage.getItem("account"));
+  if (!ISSERVER) {
+    try {
+      storePermission = (localStorage.getItem("account") && JSON.parse(localStorage.getItem("account"))) || accountData || {};
+    } catch (e) {
+      storePermission = accountData || {};
+    }
+  }
+  const effectivePermissions = storePermission?.permissions || accountData?.permissions || [];
+
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
     if (storedRole) {
@@ -32,12 +41,15 @@ const Sidebar = () => {
   const filterSidebar = (sidebarItems) => {
     return sidebarItems.reduce((filteredItems, item) => {
       const clonedItem = { ...item };
+      if (isBismi() && (clonedItem.title === "PearlXPUpdates" || clonedItem.path === "/pearl-xp-updates")) {
+        return filteredItems;
+      }
       if (ignoreList.includes(item.title)) {
         filteredItems.push(item);
       }
       if (clonedItem.permission) {
         clonedItem.permission = clonedItem.permission.filter(perm => {
-          return storePermission?.permissions?.some(p => p.name === perm);
+          return effectivePermissions?.some(p => p.name === perm);
         });
       }
       if (clonedItem?.children && clonedItem.children.length > 0) {
