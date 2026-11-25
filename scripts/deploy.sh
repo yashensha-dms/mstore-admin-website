@@ -37,6 +37,15 @@ if [ -d ".next/standalone" ]; then
   cp -r .next/static/* .next/standalone/.next/static/ 2>/dev/null || true
   mkdir -p .next/standalone/public
   cp -r public/* .next/standalone/public/ 2>/dev/null || true
+
+  # If production service runs from /home/ubuntu/adminfrontend, copy there
+  if [ -d "/home/ubuntu/adminfrontend" ] && [ "$APP_DIR" != "/home/ubuntu/adminfrontend" ]; then
+    echo "--> Copying standalone files to service directory: /home/ubuntu/adminfrontend..."
+    cp -r .next/standalone/* /home/ubuntu/adminfrontend/
+    mkdir -p /home/ubuntu/adminfrontend/.next/static /home/ubuntu/adminfrontend/public
+    cp -r .next/static/* /home/ubuntu/adminfrontend/.next/static/
+    cp -r public/* /home/ubuntu/adminfrontend/public/ 2>/dev/null || true
+  fi
 fi
 
 # 5. Restart systemd / PM2 service
