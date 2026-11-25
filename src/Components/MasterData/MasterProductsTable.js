@@ -40,6 +40,7 @@ import request from "@/Utils/AxiosUtils";
 import { product, Category } from "@/Utils/AxiosUtils/API";
 import { ToastNotification } from "@/Utils/CustomFunctions/ToastNotification";
 import placeHolderImage from "../../../public/assets/images/placeholder.png";
+import CategorySearchDropdown from "./CategorySearchDropdown";
 
 const MasterProductsTable = () => {
   const router = useRouter();
@@ -60,6 +61,7 @@ const MasterProductsTable = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
+  const [updatingCategoryId, setUpdatingCategoryId] = useState(null);
 
   // Debounce search input
   React.useEffect(() => {
@@ -77,7 +79,7 @@ const MasterProductsTable = () => {
     { refetchOnWindowFocus: false, select: (res) => res?.data?.data || [] }
   );
 
-  // Flatten categories list for dropdown
+  // Flatten categories list for dropdown and sort alphabetically
   const categoryOptions = useMemo(() => {
     if (!categoriesData) return [];
     const list = [];
@@ -90,8 +92,51 @@ const MasterProductsTable = () => {
       });
     };
     traverse(categoriesData);
-    return list;
+    return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [categoriesData]);
+
+  // Update a single product's category immediately
+  const handleUpdateProductCategory = async (productItem, selectedCategory) => {
+    const categoryId = selectedCategory ? selectedCategory.id : null;
+    const categoryName = selectedCategory ? selectedCategory.name : "Uncategorized";
+    setUpdatingCategoryId(productItem.id);
+
+    try {
+      try {
+        await request({
+          url: `${product}/${productItem.id}`,
+          method: "put",
+          data: {
+            categories: categoryId ? [categoryId] : []
+          }
+        });
+      } catch (errPrimary) {
+        // Fallback with complete product attributes if backend requires full entity
+        await request({
+          url: `${product}/${productItem.id}`,
+          method: "put",
+          data: {
+            name: productItem.name,
+            store_id: productItem.store_id || 1,
+            type: productItem.type || "simple",
+            price: productItem.price,
+            sale_price: productItem.sale_price || productItem.price,
+            categories: categoryId ? [categoryId] : []
+          }
+        });
+      }
+
+      ToastNotification(
+        "success",
+        `Category for "${productItem.name}" updated to "${categoryName}"`
+      );
+      queryClient.invalidateQueries([product]);
+    } catch (err) {
+      ToastNotification("error", `Failed to update category: ${err.message}`);
+    } finally {
+      setUpdatingCategoryId(null);
+    }
+  };
 
   // Query Products
   const queryParams = useMemo(() => {
@@ -311,21 +356,16 @@ const MasterProductsTable = () => {
 
             {/* Category Filter */}
             <Col xl="3" md="6">
-              <Input
-                type="select"
-                value={selectedCategory}
-                onChange={(e) => {
-                  setSelectedCategory(e.target.value);
+              <CategorySearchDropdown
+                categories={categoryOptions}
+                selectedId={selectedCategory}
+                onSelect={(cat) => {
+                  setSelectedCategory(cat ? String(cat.id) : "");
                   setPage(1);
                 }}
-              >
-                <option value="">All Categories</option>
-                {categoryOptions.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </Input>
+                isFilter={true}
+                placeholder="All Categories"
+              />
             </Col>
 
             {/* Status Filter */}
@@ -475,14 +515,14 @@ const MasterProductsTable = () => {
                             </small>
                           )}
                         </td>
-                        <td>
-                          {item.categories && item.categories.length > 0 ? (
-                            <span className="badge bg-light text-dark border">
-                              {item.categories.map((c) => c.name).join(", ")}
-                            </span>
-                          ) : (
-                            <span className="text-muted text-xs">Uncategorized</span>
-                          )}
+                        <td style={{ position: "relative" }}>
+                          <CategorySearchDropdown
+                            currentCategories={item.categories}
+                            categories={categoryOptions}
+                            onSelect={(cat) => handleUpdateProductCategory(item, cat)}
+                            isUpdating={updatingCategoryId === item.id}
+                            placeholder="Select Category"
+                          />
                         </td>
                         <td className="text-end">
                           <div className="fw-bold text-slate-800">
