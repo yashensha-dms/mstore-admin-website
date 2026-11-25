@@ -431,7 +431,7 @@ const MasterProductsTable = () => {
           )}
 
           {/* Table */}
-          <div className="table-responsive" style={{ minHeight: "350px" }}>
+          <div className="table-responsive" style={{ minHeight: "500px", paddingBottom: "140px" }}>
             <Table className="table align-middle table-hover text-sm mb-0">
               <thead className="table-light">
                 <tr>
