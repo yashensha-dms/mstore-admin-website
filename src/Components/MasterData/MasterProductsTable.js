@@ -101,37 +101,53 @@ const MasterProductsTable = () => {
     const categoryName = selectedCategory ? selectedCategory.name : "Uncategorized";
     setUpdatingCategoryId(productItem.id);
 
-    // Optimistically update UI in tanstack query cache
-    queryClient.setQueryData([product, queryParams], (old) => {
-      if (!old?.data) return old;
-      return {
-        ...old,
-        data: old.data.map((p) => {
-          if (p.id === productItem.id) {
-            return {
-              ...p,
-              categories: selectedCategory ? [selectedCategory] : []
-            };
-          }
-          return p;
-        })
-      };
-    });
-
     try {
+      // 1. Safe optimistic update
       try {
-        // Dedicated endpoint (fast, lightweight, atomic)
-        await request({
-          url: `${product}/${productItem.id}/category`,
-          method: "put",
-          data: {
-            categories: categoryId ? [categoryId] : []
+        queryClient.setQueryData([product, queryParams], (old) => {
+          if (!old) return old;
+          // In AxiosUtils with Laravel API, old is { data: { data: [products] } } or { data: [products] }
+          const targetList = Array.isArray(old?.data?.data)
+            ? old.data.data
+            : Array.isArray(old?.data)
+            ? old.data
+            : null;
+
+          if (!targetList) return old;
+
+          const updatedList = targetList.map((p) => {
+            if (p.id === productItem.id) {
+              return {
+                ...p,
+                categories: selectedCategory ? [selectedCategory] : []
+              };
+            }
+            return p;
+          });
+
+          if (Array.isArray(old?.data?.data)) {
+            return { ...old, data: { ...old.data, data: updatedList } };
           }
+          return { ...old, data: updatedList };
         });
-      } catch (errPrimary) {
-        // Fallback to standard product update endpoint
-        await request({
-          url: `${product}/${productItem.id}`,
+      } catch (eOpt) {
+        // Ignore optimistic update errors
+      }
+
+      // 2. Call dedicated category endpoint
+      let res = await request({
+        url: `product/${productItem.id}/category`,
+        method: "put",
+        data: {
+          categories: categoryId ? [categoryId] : []
+        }
+      });
+
+      // 3. Fallback to standard product update endpoint if dedicated endpoint returned error
+      const isError = !res || res instanceof Error || (res?.response && res.response.status >= 400) || (res?.status && res.status >= 400);
+      if (isError) {
+        res = await request({
+          url: `product/${productItem.id}`,
           method: "put",
           data: {
             id: productItem.id,
@@ -141,15 +157,23 @@ const MasterProductsTable = () => {
         });
       }
 
-      ToastNotification(
-        "success",
-        `Category for "${productItem.name}" updated to "${categoryName}"`
-      );
-      queryClient.invalidateQueries([product]);
+      const finalError = !res || res instanceof Error || (res?.response && res.response.status >= 400) || (res?.status && res.status >= 400);
+      if (finalError) {
+        const errorMsg = res?.response?.data?.message || res?.message || "Failed to update category";
+        ToastNotification("error", errorMsg);
+      } else {
+        ToastNotification(
+          "success",
+          `Category for "${productItem.name}" updated to "${categoryName}"`
+        );
+      }
+
+      // Invalidate query to ensure full sync with database
+      await queryClient.invalidateQueries([product]);
     } catch (err) {
       ToastNotification("error", `Failed to update category: ${err.message}`);
-      queryClient.invalidateQueries([product]);
     } finally {
+      // Guaranteed reset so the button never stays in "Updating..." state
       setUpdatingCategoryId(null);
     }
   };
