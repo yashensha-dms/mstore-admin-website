@@ -101,26 +101,41 @@ const MasterProductsTable = () => {
     const categoryName = selectedCategory ? selectedCategory.name : "Uncategorized";
     setUpdatingCategoryId(productItem.id);
 
+    // Optimistically update UI in tanstack query cache
+    queryClient.setQueryData([product, queryParams], (old) => {
+      if (!old?.data) return old;
+      return {
+        ...old,
+        data: old.data.map((p) => {
+          if (p.id === productItem.id) {
+            return {
+              ...p,
+              categories: selectedCategory ? [selectedCategory] : []
+            };
+          }
+          return p;
+        })
+      };
+    });
+
     try {
       try {
+        // Dedicated endpoint (fast, lightweight, atomic)
         await request({
-          url: `${product}/${productItem.id}`,
+          url: `${product}/${productItem.id}/category`,
           method: "put",
           data: {
             categories: categoryId ? [categoryId] : []
           }
         });
       } catch (errPrimary) {
-        // Fallback with complete product attributes if backend requires full entity
+        // Fallback to standard product update endpoint
         await request({
           url: `${product}/${productItem.id}`,
           method: "put",
           data: {
+            id: productItem.id,
             name: productItem.name,
-            store_id: productItem.store_id || 1,
-            type: productItem.type || "simple",
-            price: productItem.price,
-            sale_price: productItem.sale_price || productItem.price,
             categories: categoryId ? [categoryId] : []
           }
         });
@@ -133,6 +148,7 @@ const MasterProductsTable = () => {
       queryClient.invalidateQueries([product]);
     } catch (err) {
       ToastNotification("error", `Failed to update category: ${err.message}`);
+      queryClient.invalidateQueries([product]);
     } finally {
       setUpdatingCategoryId(null);
     }
