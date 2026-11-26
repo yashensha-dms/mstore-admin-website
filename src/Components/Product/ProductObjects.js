@@ -99,6 +99,7 @@ export function ProductInitValues(oldData, updateId) {
     encourage_order: updateId ? Boolean(oldData?.encourage_order) : true,
     encourage_view: updateId ? Boolean(oldData?.encourage_view) : true,
     is_trending: updateId ? Boolean(oldData?.is_trending) : false,
+    is_bestselling: updateId ? Boolean(oldData?.is_bestselling || oldData?.bestselling) : false,
     is_return: updateId ? Boolean(oldData?.is_return) : true,
     status: updateId ? Boolean(oldData?.status) : true,
     hsn_code: updateId ? oldData?.hsn_code || "" : "",
