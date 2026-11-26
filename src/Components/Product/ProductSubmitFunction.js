@@ -27,7 +27,6 @@ const ProductSubmitFunction = (mutate, value, updateId) => {
   value['encourage_view'] = Number(value['encourage_view'])
   value['is_trending'] = Number(value['is_trending'] || 0)
   value['is_bestselling'] = Number(value['is_bestselling'] || 0)
-  value['bestselling'] = Number(value['is_bestselling'] || 0)
   value['is_category_top'] = Number(value['is_category_top'] || 0)
   value['is_return'] = Number(value['is_return'])
   value['status'] = Number(value['status'])
